@@ -49,6 +49,9 @@
   },
   "model_assertions": [
     "fee and principal inputs are disjoint",
+    "materialised virtual channel leaves the active factory set",
+    "principal amount equals the touched virtual channel principal",
+    "fee amount equals the consumed factory fee reserve",
     "principal plus fee conservation holds",
     "untouched virtual channel vc-2 is unchanged",
     "wrong factory id is rejected",

@@ -5,7 +5,7 @@ Kurrent Protocol is scoped to Kaspa-native latest-state state channels, local ch
 The current repository contains:
 
 - serialisable protocol objects for channel, factory, receipt, swap, evidence, and acceptance reporting;
-- local model checks for state monotonicity, stale settlement rejection, materialisation uniqueness, fee/principal separation, conservation, preimage validation, refund maturity, and evidence hash verification;
+- local model checks for state monotonicity, previous-commitment continuity, config/funding/signer binding, stale settlement rejection, materialisation uniqueness, active-set removal, fee/principal separation, conservation, preimage validation, swap receipt scope binding, scoped refund/settlement exclusivity, refund maturity, and evidence hash verification;
 - scripts that detect the real external tooling needed for production acceptance;
 - real Kaspa simnet startup probing;
 - real Toccata txscript covenant VM evidence;
@@ -15,6 +15,7 @@ The current repository contains:
 - live factory materialisation evidence;
 - live Kaspa hash/preimage settlement evidence in both directions;
 - live early-refund rejection and matured refund evidence;
+- documented interaction-safety coverage in `docs/KURRENT_INTERACTION_SAFETY_AUDIT.md`;
 - a blocker-first acceptance report path with per-flow evidence files.
 
 The current repository contains a successful full local Kurrent devnet run. Mainnet readiness, public routing, and unattended production operation remain outside this local acceptance scope.

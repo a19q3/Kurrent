@@ -11,6 +11,8 @@ pub const DOMAIN_SETTLEMENT_TEMPLATE: &str = "KURRENT_SETTLEMENT_TEMPLATE_V1";
 pub const DOMAIN_CHANNEL_RECEIPT: &str = "KURRENT_CHANNEL_RECEIPT_V1";
 pub const DOMAIN_FACTORY_MATERIALISATION: &str = "KURRENT_FACTORY_MATERIALISATION_V1";
 pub const DOMAIN_LN_INTEROP: &str = "KURRENT_LN_INTEROP_V1";
+pub const DOMAIN_PARTICIPANT_SET: &str = "KURRENT_PARTICIPANT_SET_V1";
+pub const DOMAIN_CLAIM_SCOPE: &str = "KURRENT_CLAIM_SCOPE_V1";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KurrentError {
@@ -21,6 +23,31 @@ pub enum KurrentError {
     SameNumberConflict {
         state_number: u64,
     },
+    WrongDomainSeparator {
+        expected: String,
+        actual: String,
+    },
+    WrongProtocolVersion {
+        expected: u16,
+        actual: u16,
+    },
+    WrongNetworkProfile {
+        expected: String,
+        actual: String,
+    },
+    WrongGenesisOrDevnetId,
+    WrongChannelId {
+        expected: String,
+        actual: String,
+    },
+    WrongFundingOutpoint {
+        expected: String,
+        actual: String,
+    },
+    PreviousStateMismatch {
+        expected: String,
+        actual: String,
+    },
     UnknownChannel(String),
     StaleState {
         latest: u64,
@@ -29,19 +56,40 @@ pub enum KurrentError {
     SettlementTemplateMismatch,
     DuplicateSettlement(String),
     DuplicateReceipt(String),
+    ReceiptHashMismatch,
     WrongFactoryId {
         expected: String,
         actual: String,
     },
     WrongVirtualChannelId(String),
     DoubleMaterialisation(String),
+    MaterialisedChannelStillActive(String),
+    MaterialisationAmountMismatch {
+        expected: u64,
+        actual: u64,
+    },
     MutatedUntouchedVirtualChannel(String),
     FeePrincipalNotSeparated,
     ConservationFailure {
         expected: u64,
         actual: u64,
     },
+    ParticipantSetMismatch,
+    UnauthorizedParticipant(String),
+    InsufficientSignatures {
+        required: u16,
+        actual: u16,
+    },
     WrongPreimage,
+    WrongSettlementOutpoint {
+        expected: String,
+        actual: String,
+    },
+    WrongScriptHash {
+        expected: String,
+        actual: String,
+    },
+    InvalidSwapEvidence(String),
     ReceiptReplay,
     RefundNotMature {
         current_daa: u64,
@@ -183,6 +231,18 @@ impl ChannelReceipt {
         hash_json(DOMAIN_CHANNEL_RECEIPT, &self.scope())
     }
 
+    pub fn refresh_hash(&mut self) {
+        self.receipt_hash = self.scope_key();
+    }
+
+    pub fn validate_hash(&self) -> Result<()> {
+        if self.receipt_hash == self.scope_key() {
+            Ok(())
+        } else {
+            Err(KurrentError::ReceiptHashMismatch)
+        }
+    }
+
     fn scope(&self) -> ChannelReceiptScope<'_> {
         ChannelReceiptScope {
             protocol_version: self.protocol_version,
@@ -310,6 +370,20 @@ pub struct AcceptanceReport {
     pub evidence_bundle: EvidenceBundle,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ClaimScope {
+    pub network_profile: String,
+    pub funding_outpoint: String,
+    pub output_id: String,
+    pub claim_subject: String,
+}
+
+impl ClaimScope {
+    pub fn exclusive_key(&self) -> String {
+        hash_json(DOMAIN_CLAIM_SCOPE, self)
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct SettlementRegistry {
     latest_by_channel: BTreeMap<String, LatestStateHeader>,
@@ -321,6 +395,12 @@ pub struct SettlementRegistry {
 
 impl SettlementRegistry {
     pub fn accept_update(&mut self, update: StateUpdate) -> Result<()> {
+        if update.header.domain_separator != DOMAIN_STATE {
+            return Err(KurrentError::WrongDomainSeparator {
+                expected: DOMAIN_STATE.to_string(),
+                actual: update.header.domain_separator,
+            });
+        }
         let channel_id = update.header.channel_id.clone();
         let state_number = update.header.state_number;
 
@@ -338,6 +418,12 @@ impl SettlementRegistry {
                 return Err(KurrentError::NonMonotonicState {
                     current: current.state_number,
                     attempted: state_number,
+                });
+            }
+            if update.header.previous_state_commitment != current.new_state_commitment {
+                return Err(KurrentError::PreviousStateMismatch {
+                    expected: current.new_state_commitment.clone(),
+                    actual: update.header.previous_state_commitment,
                 });
             }
         } else if state_number != 0 {
@@ -401,6 +487,7 @@ impl SettlementRegistry {
     }
 
     pub fn register_receipt(&mut self, receipt: &ChannelReceipt) -> Result<()> {
+        receipt.validate_hash()?;
         let key = receipt.scope_key();
         if self.receipts.insert(key.clone()) {
             Ok(())
@@ -418,6 +505,10 @@ impl SettlementRegistry {
         }
     }
 
+    pub fn settle_scoped_claim(&mut self, scope: &ClaimScope) -> Result<()> {
+        self.settle_claim(scope.exclusive_key())
+    }
+
     pub fn refund_claim(
         &mut self,
         claim_id: impl Into<String>,
@@ -432,6 +523,136 @@ impl SettlementRegistry {
         }
         self.settle_claim(claim_id)
     }
+
+    pub fn refund_scoped_claim(
+        &mut self,
+        scope: &ClaimScope,
+        current_daa: u64,
+        required_daa: u64,
+    ) -> Result<()> {
+        self.refund_claim(scope.exclusive_key(), current_daa, required_daa)
+    }
+}
+
+pub fn participant_set_hash(participants: &[String]) -> String {
+    let mut sorted: Vec<&str> = participants.iter().map(String::as_str).collect();
+    sorted.sort_unstable();
+    hash_json(DOMAIN_PARTICIPANT_SET, &sorted)
+}
+
+pub fn validate_channel_update(
+    config: &KurrentChannelConfig,
+    funding: &FundingState,
+    update: &StateUpdate,
+    template: &SettlementTemplate,
+) -> Result<()> {
+    if update.header.domain_separator != DOMAIN_STATE {
+        return Err(KurrentError::WrongDomainSeparator {
+            expected: DOMAIN_STATE.to_string(),
+            actual: update.header.domain_separator.clone(),
+        });
+    }
+    if update.header.protocol_version != config.protocol_version {
+        return Err(KurrentError::WrongProtocolVersion {
+            expected: config.protocol_version,
+            actual: update.header.protocol_version,
+        });
+    }
+    if update.header.network_profile != config.network_profile {
+        return Err(KurrentError::WrongNetworkProfile {
+            expected: config.network_profile.clone(),
+            actual: update.header.network_profile.clone(),
+        });
+    }
+    if update.header.genesis_or_devnet_id != config.genesis_or_devnet_id {
+        return Err(KurrentError::WrongGenesisOrDevnetId);
+    }
+    if update.header.channel_id != config.channel_id {
+        return Err(KurrentError::WrongChannelId {
+            expected: config.channel_id.clone(),
+            actual: update.header.channel_id.clone(),
+        });
+    }
+    if update.header.funding_outpoint != funding.funding_outpoint {
+        return Err(KurrentError::WrongFundingOutpoint {
+            expected: funding.funding_outpoint.clone(),
+            actual: update.header.funding_outpoint.clone(),
+        });
+    }
+    if update.header.settlement_template_hash != template.hash() {
+        return Err(KurrentError::SettlementTemplateMismatch);
+    }
+    if update.header.script_covenant_hash != funding.script_covenant_hash
+        || template.script_covenant_hash != funding.script_covenant_hash
+    {
+        return Err(KurrentError::WrongScriptHash {
+            expected: funding.script_covenant_hash.clone(),
+            actual: update.header.script_covenant_hash.clone(),
+        });
+    }
+    if update.header.participant_set_hash != participant_set_hash(&config.participants) {
+        return Err(KurrentError::ParticipantSetMismatch);
+    }
+
+    let participants: BTreeSet<_> = config.participants.iter().cloned().collect();
+    let authorised: BTreeSet<_> = config
+        .access_manifest
+        .authorised_participants
+        .iter()
+        .cloned()
+        .collect();
+    if participants != authorised {
+        return Err(KurrentError::ParticipantSetMismatch);
+    }
+
+    for participant in update.balances.keys() {
+        if !participants.contains(participant) {
+            return Err(KurrentError::UnauthorizedParticipant(participant.clone()));
+        }
+    }
+    for participant in &participants {
+        if !update.balances.contains_key(participant) {
+            return Err(KurrentError::ParticipantSetMismatch);
+        }
+    }
+    let funding_sum = funding.principal_by_participant.values().sum::<u64>();
+    if funding_sum != funding.total_principal {
+        return Err(KurrentError::ConservationFailure {
+            expected: funding.total_principal,
+            actual: funding_sum,
+        });
+    }
+    let balance_sum = update.balances.values().sum::<u64>();
+    if balance_sum != funding.total_principal {
+        return Err(KurrentError::ConservationFailure {
+            expected: funding.total_principal,
+            actual: balance_sum,
+        });
+    }
+    if template.output_sum() != funding.total_principal {
+        return Err(KurrentError::ConservationFailure {
+            expected: funding.total_principal,
+            actual: template.output_sum(),
+        });
+    }
+
+    let mut valid_signatures = BTreeSet::new();
+    for (participant, signature) in &update.participant_signatures {
+        if !authorised.contains(participant) {
+            return Err(KurrentError::UnauthorizedParticipant(participant.clone()));
+        }
+        if !signature.is_empty() {
+            valid_signatures.insert(participant.clone());
+        }
+    }
+    let actual = valid_signatures.len() as u16;
+    if actual < config.access_manifest.required_signatures {
+        return Err(KurrentError::InsufficientSignatures {
+            required: config.access_manifest.required_signatures,
+            actual,
+        });
+    }
+    Ok(())
 }
 
 pub fn validate_materialisation(
@@ -476,6 +697,59 @@ pub fn validate_materialisation(
             plan.virtual_channel_id.clone(),
         ));
     }
+    let before_channel = &before.virtual_channels[&plan.virtual_channel_id];
+    if after
+        .virtual_channels
+        .contains_key(&plan.virtual_channel_id)
+    {
+        return Err(KurrentError::MaterialisedChannelStillActive(
+            plan.virtual_channel_id.clone(),
+        ));
+    }
+    if plan.principal_amount != before_channel.principal() {
+        return Err(KurrentError::MaterialisationAmountMismatch {
+            expected: before_channel.principal(),
+            actual: plan.principal_amount,
+        });
+    }
+    if plan.fee_amount != before.fee_reserve {
+        return Err(KurrentError::MaterialisationAmountMismatch {
+            expected: before.fee_reserve,
+            actual: plan.fee_amount,
+        });
+    }
+    let planned_output_sum = plan.output_amounts.values().sum::<u64>();
+    if planned_output_sum != plan.principal_amount + plan.fee_amount {
+        return Err(KurrentError::ConservationFailure {
+            expected: plan.principal_amount + plan.fee_amount,
+            actual: planned_output_sum,
+        });
+    }
+    let expected_after_principal = before
+        .total_principal
+        .checked_sub(plan.principal_amount)
+        .ok_or(KurrentError::ConservationFailure {
+            expected: before.total_principal,
+            actual: plan.principal_amount,
+        })?;
+    let expected_after_fee = before.fee_reserve.checked_sub(plan.fee_amount).ok_or(
+        KurrentError::ConservationFailure {
+            expected: before.fee_reserve,
+            actual: plan.fee_amount,
+        },
+    )?;
+    if after.total_principal != expected_after_principal {
+        return Err(KurrentError::ConservationFailure {
+            expected: expected_after_principal,
+            actual: after.total_principal,
+        });
+    }
+    if after.fee_reserve != expected_after_fee {
+        return Err(KurrentError::ConservationFailure {
+            expected: expected_after_fee,
+            actual: after.fee_reserve,
+        });
+    }
     if !plan.principal_input_ids.is_disjoint(&plan.fee_input_ids) {
         return Err(KurrentError::FeePrincipalNotSeparated);
     }
@@ -504,7 +778,7 @@ pub fn validate_materialisation(
         plan.virtual_channel_id.clone(),
         before.factory_id.clone(),
         plan.materialisation_id.clone(),
-        before.virtual_channels[&plan.virtual_channel_id].state_number,
+        before_channel.state_number,
         hash_json(DOMAIN_FACTORY_MATERIALISATION, plan),
     );
     receipt.factory_id = Some(before.factory_id.clone());
@@ -536,12 +810,53 @@ fn decode_preimage(preimage: &str) -> Result<Vec<u8>> {
 }
 
 pub fn validate_ln_swap(evidence: &LnSwapEvidence, receipt: &ChannelReceipt) -> Result<()> {
+    receipt.validate_hash()?;
+    if evidence.amount == 0 || evidence.recipient.is_empty() || evidence.script_hash.is_empty() {
+        return Err(KurrentError::InvalidSwapEvidence(
+            "amount, recipient, and script hash are required".to_string(),
+        ));
+    }
+    if !matches!(evidence.direction.as_str(), "ln-to-kaspa" | "kaspa-to-ln") {
+        return Err(KurrentError::InvalidSwapEvidence(format!(
+            "invalid swap direction: {}",
+            evidence.direction
+        )));
+    }
     validate_preimage(&evidence.preimage, &evidence.ln_payment_hash)?;
     if evidence.preimage_hash != evidence.ln_payment_hash {
         return Err(KurrentError::WrongPreimage);
     }
-    if receipt.network_profile != evidence.network_profile
-        || receipt.swap_id.as_deref() != Some(evidence.swap_id.as_str())
+    if receipt.protocol_version != evidence.protocol_version {
+        return Err(KurrentError::WrongProtocolVersion {
+            expected: evidence.protocol_version,
+            actual: receipt.protocol_version,
+        });
+    }
+    if receipt.network_profile != evidence.network_profile {
+        return Err(KurrentError::WrongNetworkProfile {
+            expected: evidence.network_profile.clone(),
+            actual: receipt.network_profile.clone(),
+        });
+    }
+    if receipt.funding_outpoint != evidence.kaspa_funding_outpoint {
+        return Err(KurrentError::WrongFundingOutpoint {
+            expected: evidence.kaspa_funding_outpoint.clone(),
+            actual: receipt.funding_outpoint.clone(),
+        });
+    }
+    if receipt.output_id != evidence.kaspa_settlement_outpoint {
+        return Err(KurrentError::WrongSettlementOutpoint {
+            expected: evidence.kaspa_settlement_outpoint.clone(),
+            actual: receipt.output_id.clone(),
+        });
+    }
+    if receipt.settlement_template_hash != evidence.script_hash {
+        return Err(KurrentError::WrongScriptHash {
+            expected: evidence.script_hash.clone(),
+            actual: receipt.settlement_template_hash.clone(),
+        });
+    }
+    if receipt.swap_id.as_deref() != Some(evidence.swap_id.as_str())
         || receipt.direction.as_deref() != Some(evidence.direction.as_str())
     {
         return Err(KurrentError::ReceiptReplay);

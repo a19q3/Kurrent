@@ -1702,6 +1702,15 @@ fn run_state_channel_flow() -> Result<u8, String> {
         "flow": "kaspa_state_channel_flow",
         "status": flow_status,
         "capability_status": capability_status,
+        "interaction_safety_assertions": [
+            "state update domain separator is KURRENT_STATE_V1",
+            "state numbers must advance exactly one step",
+            "previous_state_commitment must match the current latest commitment",
+            "same-number conflicting commitments are rejected",
+            "settlement must use the latest accepted state",
+            "settlement template hash must match the accepted state header",
+            "channel receipt hash binds network, channel, funding, output, and state number"
+        ],
         "commands": commands,
         "source_files": source_files,
         "live_evidence": live_evidence,
@@ -1812,6 +1821,9 @@ fn write_factory_protocol_files() -> Result<Vec<FileEvidence>, String> {
         "plan_hash": hash_json(DOMAIN_FACTORY_MATERIALISATION, &plan),
         "model_assertions": [
             "fee and principal inputs are disjoint",
+            "materialised virtual channel leaves the active factory set",
+            "principal amount equals the touched virtual channel principal",
+            "fee amount equals the consumed factory fee reserve",
             "principal plus fee conservation holds",
             "untouched virtual channel vc-2 is unchanged",
             "wrong factory id is rejected",
@@ -1984,6 +1996,13 @@ fn run_ln_swap_flow(
         "preimage_status": if payment_hash.is_some() && preimage_hash.is_some() { "passed" } else { "failed" },
         "ln_evidence": ln_file,
         "live_evidence": live_evidence,
+        "interaction_safety_assertions": [
+            "LN preimage hashes to the invoice payment hash",
+            "swap direction must be either ln-to-kaspa or kaspa-to-ln",
+            "receipt hash must be fresh after swap scope mutation",
+            "receipt protocol version, network profile, swap id, direction, funding outpoint, settlement outpoint, and script hash are bound to evidence",
+            "zero-amount or empty-recipient swap evidence is rejected by the model"
+        ],
         "swap_receipt_hash": hash_json(DOMAIN_LN_INTEROP, &receipt_scope),
         "receipt_scope": receipt_scope,
         "blockers": blockers,
@@ -2007,7 +2026,9 @@ fn run_refund_flow() -> Result<u8, String> {
         "model_assertions": [
             "refund before DAA 120 is rejected",
             "refund at DAA 120 succeeds",
-            "settlement plus refund double claim is rejected"
+            "settlement plus refund double claim is rejected",
+            "scoped settlement and refund claims bind network, funding outpoint, output id, and claim subject",
+            "claim scopes do not collide across different funding outputs"
         ],
         "refund_claim_hash": hash_json(DOMAIN_CHANNEL_RECEIPT, &json!("refund-swap-1:daa-120"))
     });

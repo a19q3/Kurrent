@@ -6,24 +6,24 @@
    Compiling tungstenite v0.23.0
    Compiling tonic v0.14.6
    Compiling hyper-rustls v0.27.9
-   Compiling reqwest v0.12.28
    Compiling tokio-tungstenite v0.23.1
+   Compiling reqwest v0.12.28
    Compiling workflow-websocket v0.18.0
    Compiling tonic-prost v0.14.6
    Compiling kaspa-p2p-lib v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/protocol/p2p)
    Compiling kaspa-grpc-core v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/grpc/core)
-   Compiling kaspa-connectionmanager v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/components/connectionmanager)
-   Compiling kaspa-p2p-mining v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/protocol/mining)
    Compiling workflow-http v0.18.0
-   Compiling kaspa-p2p-flows v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/protocol/flows)
    Compiling workflow-rpc v0.18.0
+   Compiling kaspa-p2p-mining v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/protocol/mining)
+   Compiling kaspa-connectionmanager v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/components/connectionmanager)
    Compiling kaspa-grpc-client v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/grpc/client)
-   Compiling kaspa-rpc-service v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/service)
+   Compiling kaspa-p2p-flows v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/protocol/flows)
    Compiling kaspa-wrpc-client v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/wrpc/client)
+   Compiling kaspa-rpc-service v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/service)
    Compiling kaspa-grpc-server v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/grpc/server)
    Compiling kaspa-wrpc-server v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/rpc/wrpc/server)
    Compiling kaspad v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/kaspad)
    Compiling kaspa-testing-integration v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/testing/integration)
    Compiling kurrent-kaspa-devnet-driver v0.1.0 (/Users/arthur/Documents/Kurrent/drivers/kaspa-devnet)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.71s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.63s
      Running `drivers/kaspa-devnet/target/debug/kurrent-kaspa-devnet-driver evidence`

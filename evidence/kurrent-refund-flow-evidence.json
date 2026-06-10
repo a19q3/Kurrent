@@ -3,13 +3,13 @@
   "flow": "refund_timeout_flow",
   "live_evidence": {
     "path": "evidence/kurrent-live-refund-evidence.json",
-    "sha256": "b6540755083992b0e82dba09a86b3f85564b0c7c1133d3aa13f315238bfbcc6a"
+    "sha256": "ea23350b03d07780f93d3f446e0accc6ecb85b2063fa1329c260789e332138a7"
   },
   "model_status": "passed",
   "protocol_files": [
     {
       "path": "evidence/kurrent-refund-model.json",
-      "sha256": "1db430c1f3e886484b261d1d61994c2dc6650bb70d8ce553a5524875c14e37a6"
+      "sha256": "405738e0d2357305db95680545db3e6bce18c175a4052c8d75402ff6086c1c51"
     }
   ],
   "status": "passed"

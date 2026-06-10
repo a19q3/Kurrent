@@ -1,8 +1,8 @@
-2026-06-10 23:20:29.531+08:00 [INFO ] kaspad v1.2.2-toc.4-0ae28f9
-2026-06-10 23:20:29.531+08:00 [INFO ] Application directory: /Users/arthur/Documents/Kurrent/.kurrent-devnet/kaspa-simnet
-2026-06-10 23:20:29.531+08:00 [INFO ] Data directory: /Users/arthur/Documents/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir
-2026-06-10 23:20:29.531+08:00 [INFO ] Logs to console only
-2026-06-10 23:20:29.531+08:00 [INFO ] Deleting databases
-2026-06-10 23:20:29.534+08:00 [INFO ] Utxoindex Data directory /Users/arthur/Documents/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir/utxoindex
-2026-06-10 23:20:29.556+08:00 [INFO ] Resyncing the utxoindex...
-2026-06-10 23:20:29.559+08:00 [INFO ] [UPnP] Attempting to register upnp... (to disable run the node with --disable-upnp)
+2026-06-10 23:47:47.469+08:00 [INFO ] kaspad v1.2.2-toc.4-0ae28f9
+2026-06-10 23:47:47.470+08:00 [INFO ] Application directory: /Users/arthur/Documents/Kurrent/.kurrent-devnet/kaspa-simnet
+2026-06-10 23:47:47.470+08:00 [INFO ] Data directory: /Users/arthur/Documents/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir
+2026-06-10 23:47:47.470+08:00 [INFO ] Logs to console only
+2026-06-10 23:47:47.470+08:00 [INFO ] Deleting databases
+2026-06-10 23:47:47.472+08:00 [INFO ] Utxoindex Data directory /Users/arthur/Documents/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir/utxoindex
+2026-06-10 23:47:47.493+08:00 [INFO ] Resyncing the utxoindex...
+2026-06-10 23:47:47.495+08:00 [INFO ] [UPnP] Attempting to register upnp... (to disable run the node with --disable-upnp)

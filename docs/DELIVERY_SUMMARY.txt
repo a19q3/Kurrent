@@ -17,7 +17,7 @@ Commands run or encoded in kurrentctl:
 git remote add origin https://github.com/a19q3/Kurrent.git
 git pull --ff-only in /Users/arthur/Documents/rusty-kaspa-toccata
 cargo build --release -p kaspad -p kaspa-cli -p kaspa-wallet in /Users/arthur/Documents/rusty-kaspa-toccata
-cargo test -> passed, 25 tests.
+cargo test -> passed, 41 tests.
 cargo fmt --all --check -> passed.
 cargo clippy --all-targets -- -D warnings -> passed.
 cargo clippy --manifest-path drivers/kaspa-devnet/Cargo.toml --all-targets -- -D warnings -> passed.
@@ -53,6 +53,7 @@ evidence/kurrent-kaspa-to-ln-flow-evidence.json
 evidence/kurrent-live-kaspa-to-ln-evidence.json
 evidence/kurrent-refund-flow-evidence.json
 evidence/kurrent-live-refund-evidence.json
+docs/KURRENT_INTERACTION_SAFETY_AUDIT.md
 
 Kaspa transaction/script/witness evidence:
 Kaspa capability evidence is produced, including Toccata VM and live daemon relay/mining transcripts. Kurrent now produces live simnet funding, state-update, stale-rejection, state-2 settlement, factory materialisation, hashlock settlement, and refund raw transactions, txids, scripts, and witness evidence.
@@ -62,6 +63,9 @@ Produced in evidence/ln-devnet-evidence.json.
 
 Refund evidence:
 Model evidence is produced in evidence/kurrent-refund-flow-evidence.json. Live early-refund rejection and matured refund transaction evidence are produced in evidence/kurrent-live-refund-evidence.json.
+
+Interaction-safety audit:
+The Rust model now checks channel config/funding/signer binding, previous-commitment continuity, factory active-set removal, exact materialisation principal/fee accounting, LN swap receipt freshness and outpoint/script binding, and scoped settlement/refund exclusivity. The detailed audit is in docs/KURRENT_INTERACTION_SAFETY_AUDIT.md.
 
 Next smallest step:
 Extend the passed local devnet scenarios into longer-running soak tests, adversarial mempool cases, and mainnet-readiness review.

@@ -20,6 +20,39 @@ fn template() -> SettlementTemplate {
     }
 }
 
+fn participants() -> Vec<String> {
+    vec!["alice".to_string(), "bob".to_string()]
+}
+
+fn channel_config() -> KurrentChannelConfig {
+    KurrentChannelConfig {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        genesis_or_devnet_id: Some("devnet-1".to_string()),
+        channel_id: "channel-a".to_string(),
+        participants: participants(),
+        challenge_policy: ChallengePolicy {
+            mode: "latest-state".to_string(),
+            challenge_window_daa: 120,
+            same_number_conflict_rule: "reject-conflict".to_string(),
+        },
+        access_manifest: AccessManifest {
+            authorised_participants: participants(),
+            required_signatures: 2,
+        },
+    }
+}
+
+fn funding() -> FundingState {
+    FundingState {
+        funding_outpoint: "funding:0".to_string(),
+        total_principal: 1_000,
+        principal_by_participant: map(&[("alice", 600), ("bob", 400)]),
+        fee_reserve: 10,
+        script_covenant_hash: "script-hash".to_string(),
+    }
+}
+
 fn update(number: u64, commitment: &str, template_hash: String) -> StateUpdate {
     StateUpdate {
         header: LatestStateHeader {
@@ -34,7 +67,7 @@ fn update(number: u64, commitment: &str, template_hash: String) -> StateUpdate {
             new_state_commitment: commitment.to_string(),
             settlement_template_hash: template_hash,
             challenge_policy_hash: "challenge-hash".to_string(),
-            participant_set_hash: "participants-hash".to_string(),
+            participant_set_hash: participant_set_hash(&participants()),
             script_covenant_hash: "script-hash".to_string(),
             protocol_version: 1,
             domain_separator: DOMAIN_STATE.to_string(),
@@ -159,6 +192,69 @@ fn wrong_channel_id_fails() {
     ));
 }
 
+#[test]
+fn state_update_wrong_previous_commitment_fails() {
+    let t = template();
+    let mut registry = SettlementRegistry::default();
+    registry
+        .accept_update(update(0, "state-0", t.hash()))
+        .unwrap();
+    let mut s1 = update(1, "state-1", t.hash());
+    s1.header.previous_state_commitment = "foreign-state".to_string();
+    assert!(matches!(
+        registry.accept_update(s1),
+        Err(KurrentError::PreviousStateMismatch { .. })
+    ));
+}
+
+#[test]
+fn channel_update_config_funding_and_signature_scope_passes() {
+    let t = template();
+    validate_channel_update(
+        &channel_config(),
+        &funding(),
+        &update(0, "state-0", t.hash()),
+        &t,
+    )
+    .unwrap();
+}
+
+#[test]
+fn channel_update_rejects_under_signed_state() {
+    let t = template();
+    let mut state = update(0, "state-0", t.hash());
+    state.participant_signatures.remove("bob");
+    assert!(matches!(
+        validate_channel_update(&channel_config(), &funding(), &state, &t),
+        Err(KurrentError::InsufficientSignatures {
+            required: 2,
+            actual: 1
+        })
+    ));
+}
+
+#[test]
+fn channel_update_rejects_foreign_balance_participant() {
+    let t = template();
+    let mut state = update(0, "state-0", t.hash());
+    state.balances.insert("mallory".to_string(), 1);
+    assert!(matches!(
+        validate_channel_update(&channel_config(), &funding(), &state, &t),
+        Err(KurrentError::UnauthorizedParticipant(participant)) if participant == "mallory"
+    ));
+}
+
+#[test]
+fn channel_update_rejects_wrong_funding_outpoint() {
+    let t = template();
+    let mut state = update(0, "state-0", t.hash());
+    state.header.funding_outpoint = "foreign-funding:0".to_string();
+    assert!(matches!(
+        validate_channel_update(&channel_config(), &funding(), &state, &t),
+        Err(KurrentError::WrongFundingOutpoint { .. })
+    ));
+}
+
 fn factory() -> FactoryState {
     let vc1 = VirtualChannelState {
         virtual_channel_id: "vc-1".to_string(),
@@ -203,14 +299,18 @@ fn materialisation_plan() -> MaterialisationPlan {
     }
 }
 
+fn after_factory_materialisation(before: &FactoryState) -> FactoryState {
+    let mut after = before.clone();
+    after.total_principal = 500;
+    after.fee_reserve = 0;
+    after.virtual_channels.remove("vc-1");
+    after
+}
+
 #[test]
 fn wrong_factory_id_fails() {
     let before = factory();
-    let after = FactoryState {
-        total_principal: 500,
-        fee_reserve: 0,
-        ..before.clone()
-    };
+    let after = after_factory_materialisation(&before);
     let mut plan = materialisation_plan();
     plan.factory_id = "wrong-factory".to_string();
     assert!(matches!(
@@ -222,11 +322,7 @@ fn wrong_factory_id_fails() {
 #[test]
 fn wrong_virtual_channel_id_fails() {
     let before = factory();
-    let after = FactoryState {
-        total_principal: 500,
-        fee_reserve: 0,
-        ..before.clone()
-    };
+    let after = after_factory_materialisation(&before);
     let mut plan = materialisation_plan();
     plan.virtual_channel_id = "missing-vc".to_string();
     assert!(matches!(
@@ -239,11 +335,7 @@ fn wrong_virtual_channel_id_fails() {
 fn double_materialisation_fails() {
     let mut before = factory();
     before.materialised_receipts.insert("mat-1".to_string());
-    let after = FactoryState {
-        total_principal: 500,
-        fee_reserve: 0,
-        ..before.clone()
-    };
+    let after = after_factory_materialisation(&before);
     assert!(matches!(
         validate_materialisation(&before, &after, &materialisation_plan()),
         Err(KurrentError::DoubleMaterialisation(_))
@@ -253,11 +345,7 @@ fn double_materialisation_fails() {
 #[test]
 fn factory_materialisation_cannot_mutate_untouched_virtual_channels() {
     let before = factory();
-    let mut after = FactoryState {
-        total_principal: 500,
-        fee_reserve: 0,
-        ..before.clone()
-    };
+    let mut after = after_factory_materialisation(&before);
     after
         .virtual_channels
         .get_mut("vc-2")
@@ -272,11 +360,7 @@ fn factory_materialisation_cannot_mutate_untouched_virtual_channels() {
 #[test]
 fn fee_principal_accounting_stays_separate() {
     let before = factory();
-    let after = FactoryState {
-        total_principal: 500,
-        fee_reserve: 0,
-        ..before.clone()
-    };
+    let after = after_factory_materialisation(&before);
     let mut plan = materialisation_plan();
     plan.fee_input_ids.insert("principal-in".to_string());
     assert!(matches!(
@@ -288,12 +372,51 @@ fn fee_principal_accounting_stays_separate() {
 #[test]
 fn conservation_holds_for_valid_factory_materialisation() {
     let before = factory();
-    let after = FactoryState {
-        total_principal: 500,
-        fee_reserve: 0,
-        ..before.clone()
-    };
+    let after = after_factory_materialisation(&before);
     validate_materialisation(&before, &after, &materialisation_plan()).unwrap();
+}
+
+#[test]
+fn factory_materialisation_removes_touched_virtual_channel() {
+    let before = factory();
+    let mut after = after_factory_materialisation(&before);
+    after
+        .virtual_channels
+        .insert("vc-1".to_string(), before.virtual_channels["vc-1"].clone());
+    assert!(matches!(
+        validate_materialisation(&before, &after, &materialisation_plan()),
+        Err(KurrentError::MaterialisedChannelStillActive(id)) if id == "vc-1"
+    ));
+}
+
+#[test]
+fn factory_materialisation_rejects_wrong_principal_amount() {
+    let before = factory();
+    let after = after_factory_materialisation(&before);
+    let mut plan = materialisation_plan();
+    plan.principal_amount = 499;
+    assert!(matches!(
+        validate_materialisation(&before, &after, &plan),
+        Err(KurrentError::MaterialisationAmountMismatch {
+            expected: 500,
+            actual: 499
+        })
+    ));
+}
+
+#[test]
+fn factory_materialisation_rejects_wrong_fee_reserve_consumption() {
+    let before = factory();
+    let after = after_factory_materialisation(&before);
+    let mut plan = materialisation_plan();
+    plan.fee_amount = 9;
+    assert!(matches!(
+        validate_materialisation(&before, &after, &plan),
+        Err(KurrentError::MaterialisationAmountMismatch {
+            expected: 10,
+            actual: 9
+        })
+    ));
 }
 
 #[test]
@@ -337,12 +460,13 @@ fn ln_swap_accepts_hex_preimage_from_lnd_evidence() {
         "local-toccata-devnet",
         "channel-a",
         "funding:0",
-        "settlement",
+        "settlement:0",
         2,
-        "template",
+        "script-hash",
     );
     receipt.swap_id = Some("swap-hex".to_string());
     receipt.direction = Some("ln-to-kaspa".to_string());
+    receipt.refresh_hash();
     validate_ln_swap(&evidence, &receipt).unwrap();
 }
 
@@ -369,12 +493,13 @@ fn ln_to_kaspa_receipt_replay_fails() {
         "local-toccata-devnet",
         "channel-a",
         "funding:0",
-        "settlement",
+        "settlement:0",
         2,
-        "template",
+        "script-hash",
     );
     receipt.swap_id = Some("swap-1".to_string());
     receipt.direction = Some("kaspa-to-ln".to_string());
+    receipt.refresh_hash();
     assert!(matches!(
         validate_ln_swap(&evidence, &receipt),
         Err(KurrentError::ReceiptReplay)
@@ -404,15 +529,234 @@ fn kaspa_to_ln_receipt_replay_fails() {
         "wrong-network",
         "channel-a",
         "funding:0",
-        "settlement",
+        "settlement:0",
         2,
-        "template",
+        "script-hash",
     );
     receipt.swap_id = Some("swap-2".to_string());
     receipt.direction = Some("kaspa-to-ln".to_string());
+    receipt.refresh_hash();
     assert!(matches!(
         validate_ln_swap(&evidence, &receipt),
-        Err(KurrentError::ReceiptReplay)
+        Err(KurrentError::WrongNetworkProfile { .. })
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_stale_receipt_hash_after_scope_mutation() {
+    let hash = sha256_hex(b"preimage");
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: "swap-stale-hash".to_string(),
+        direction: "ln-to-kaspa".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: "preimage".to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        amount: 100,
+        recipient: "alice".to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "funding:0",
+        "settlement:0",
+        2,
+        "script-hash",
+    );
+    receipt.swap_id = Some("swap-stale-hash".to_string());
+    receipt.direction = Some("ln-to-kaspa".to_string());
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::ReceiptHashMismatch)
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_wrong_kaspa_funding_outpoint() {
+    let hash = sha256_hex(b"preimage");
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: "swap-funding".to_string(),
+        direction: "ln-to-kaspa".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: "preimage".to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        amount: 100,
+        recipient: "alice".to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "foreign-funding:0",
+        "settlement:0",
+        2,
+        "script-hash",
+    );
+    receipt.swap_id = Some("swap-funding".to_string());
+    receipt.direction = Some("ln-to-kaspa".to_string());
+    receipt.refresh_hash();
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::WrongFundingOutpoint { .. })
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_wrong_kaspa_settlement_outpoint() {
+    let hash = sha256_hex(b"preimage");
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: "swap-settlement".to_string(),
+        direction: "kaspa-to-ln".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: "preimage".to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        amount: 100,
+        recipient: "bob".to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "funding:0",
+        "foreign-settlement:0",
+        2,
+        "script-hash",
+    );
+    receipt.swap_id = Some("swap-settlement".to_string());
+    receipt.direction = Some("kaspa-to-ln".to_string());
+    receipt.refresh_hash();
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::WrongSettlementOutpoint { .. })
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_wrong_script_hash() {
+    let hash = sha256_hex(b"preimage");
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: "swap-script".to_string(),
+        direction: "ln-to-kaspa".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: "preimage".to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        amount: 100,
+        recipient: "alice".to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "funding:0",
+        "settlement:0",
+        2,
+        "foreign-script-hash",
+    );
+    receipt.swap_id = Some("swap-script".to_string());
+    receipt.direction = Some("ln-to-kaspa".to_string());
+    receipt.refresh_hash();
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::WrongScriptHash { .. })
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_wrong_protocol_version() {
+    let hash = sha256_hex(b"preimage");
+    let evidence = LnSwapEvidence {
+        protocol_version: 2,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: "swap-protocol".to_string(),
+        direction: "ln-to-kaspa".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: "preimage".to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        amount: 100,
+        recipient: "alice".to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "funding:0",
+        "settlement:0",
+        2,
+        "script-hash",
+    );
+    receipt.swap_id = Some("swap-protocol".to_string());
+    receipt.direction = Some("ln-to-kaspa".to_string());
+    receipt.refresh_hash();
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::WrongProtocolVersion {
+            expected: 2,
+            actual: 1
+        })
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_zero_amount_evidence() {
+    let hash = sha256_hex(b"preimage");
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: "swap-zero".to_string(),
+        direction: "ln-to-kaspa".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: "preimage".to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        amount: 0,
+        recipient: "alice".to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "funding:0",
+        "settlement:0",
+        2,
+        "script-hash",
+    );
+    receipt.swap_id = Some("swap-zero".to_string());
+    receipt.direction = Some("ln-to-kaspa".to_string());
+    receipt.refresh_hash();
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::InvalidSwapEvidence(_))
     ));
 }
 
@@ -441,6 +785,35 @@ fn settlement_plus_refund_double_claim_fails() {
     assert!(
         matches!(registry.refund_claim("swap-1", 120, 120), Err(KurrentError::DoubleClaim(id)) if id == "swap-1")
     );
+}
+
+fn claim_scope(funding_outpoint: &str) -> ClaimScope {
+    ClaimScope {
+        network_profile: "local-toccata-devnet".to_string(),
+        funding_outpoint: funding_outpoint.to_string(),
+        output_id: "settlement:0".to_string(),
+        claim_subject: "swap-1".to_string(),
+    }
+}
+
+#[test]
+fn scoped_settlement_and_refund_are_mutually_exclusive() {
+    let mut registry = SettlementRegistry::default();
+    let scope = claim_scope("funding:0");
+    registry.settle_scoped_claim(&scope).unwrap();
+    assert!(matches!(
+        registry.refund_scoped_claim(&scope, 120, 120),
+        Err(KurrentError::DoubleClaim(id)) if id == scope.exclusive_key()
+    ));
+}
+
+#[test]
+fn scoped_claims_do_not_collide_across_funding_outputs() {
+    let mut registry = SettlementRegistry::default();
+    let first = claim_scope("funding:0");
+    let second = claim_scope("funding:1");
+    registry.settle_scoped_claim(&first).unwrap();
+    registry.refund_scoped_claim(&second, 120, 120).unwrap();
 }
 
 #[test]

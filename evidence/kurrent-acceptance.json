@@ -2,7 +2,7 @@
   "blocker_code": "passed",
   "blockers": [],
   "channel_receipt_hashes": [
-    "82a72741b7a35c8e85e7b83399c6cc603e51c1c622be18c25820528acad53ea6"
+    "90b589656d6e48b6330f04a4393081fe46c1f113f4ce276498ab98390a6e9c3a"
   ],
   "command_transcript_paths": [
     "evidence/kaspa-simnet-probe.log",
@@ -30,27 +30,27 @@
     {
       "flow": "kaspa_state_channel_flow",
       "path": "evidence/kurrent-state-channel-flow-evidence.json",
-      "sha256": "686edd6121a24dadad2c8249a599a29512345f10c34456fbabeb0124a061762f"
+      "sha256": "ac39019afd6a26fca862335d28b689156dec15157786a3d86a32284f7c4e6c97"
     },
     {
       "flow": "kaspa_factory_flow",
       "path": "evidence/kurrent-factory-flow-evidence.json",
-      "sha256": "232709300317f06088031a228c74bc64acefa8a423b5bf8aebc357f72cdac97e"
+      "sha256": "a6547ca747d35a07bf93eb33475ee895d7c5b33c33d1e0b6a873e8dbf4eb3a66"
     },
     {
       "flow": "ln_to_kaspa_atomic_settlement",
       "path": "evidence/kurrent-ln-to-kaspa-flow-evidence.json",
-      "sha256": "46bd09f84e0acc3dbfb87da5371eff3286a98032f5d2d906303fd7cdd34f0741"
+      "sha256": "a57c6295ea06149c11c44827edf89559fd8548f31b1178233c4aca06457a2cf6"
     },
     {
       "flow": "kaspa_to_ln_atomic_settlement",
       "path": "evidence/kurrent-kaspa-to-ln-flow-evidence.json",
-      "sha256": "4058edef54298f717b39a6cbb89abcde4f868082b31dca850008e32f1b13aa87"
+      "sha256": "40bc976611627260121d8a9bd60b70f724854831210b867c1d5102caf2cd63d6"
     },
     {
       "flow": "refund_timeout_flow",
       "path": "evidence/kurrent-refund-flow-evidence.json",
-      "sha256": "2e558fe3d599d573cb6e99c5de75435ba91a29cbfececcf8b2340982dc0c7793"
+      "sha256": "9f9c4bb6120f0703e9c460f485620abafb6a60f2f3c2e8be54fdf1adebe60a0e"
     }
   ],
   "flows": {
@@ -61,113 +61,113 @@
     "ln_to_kaspa_atomic_settlement": "passed",
     "refund_timeout_flow": "passed"
   },
-  "git_commit": null,
+  "git_commit": "c02addcf9f5eec49572cf18dc3f08b781450c100",
   "kaspa_branch_profile": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
-  "latest_state_settlement_txid_outpoint": "5a92a55531a99fc3565b482656c3b798d2f0ca61e79c249104bf9bed3d4d27c2:0,5a92a55531a99fc3565b482656c3b798d2f0ca61e79c249104bf9bed3d4d27c2:1",
+  "latest_state_settlement_txid_outpoint": "098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c:0,098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c:1",
   "ln_invoice_payment_preimage_evidence": [
     {
       "path": "evidence/ln-devnet-evidence.json",
-      "sha256": "b6fcaa48e35eedc5099ff348411f2512a36dc22f8889ff0f95e9bbfe4461416d"
+      "sha256": "76d00fb2f3127fbfabf510957f1bcdfedd6e8c0dd35a9f29256f276f8bf8221c"
     }
   ],
-  "materialisation_txid_outpoint": "1014d6548c2688f74bca850220a1650441f2b1d3912b7e8b46e3e6e9fa3dfb42:0,1014d6548c2688f74bca850220a1650441f2b1d3912b7e8b46e3e6e9fa3dfb42:1",
+  "materialisation_txid_outpoint": "6a70f8737b2a4d9d2c31dcdb215c2af8d1e5de675adf3fbee36dcc64dc6dc94e:0,6a70f8737b2a4d9d2c31dcdb215c2af8d1e5de675adf3fbee36dcc64dc6dc94e:1",
   "network_devnet_id": "local-kaspa-simnet-toccata+bitcoin-regtest-lnd",
   "raw_transaction_paths_and_hashes": [
     {
       "path": "evidence/kurrent-live-funding-tx.hex",
-      "sha256": "318ebf8ed19073a7cbb8e577d64d935229f1f58efc1e24b9f2ed45e01c2e911c"
+      "sha256": "3879559ac6ac6a7d7c1653d113547850e754d648d84fced04c61b005c3cb4422"
     },
     {
       "path": "evidence/kurrent-live-state-update-tx.hex",
-      "sha256": "323d7d440893481b7a1fa25cc532347088e3a6bcb417eed698310b46cf115684"
+      "sha256": "0446b88e823d2f9f60fedd6e2924b42785396e22f5984838f9fb5f07935bfdf8"
     },
     {
       "path": "evidence/kurrent-live-stale-rejected-tx.hex",
-      "sha256": "243d62224293627eafc9d5c32a655d63ae48c80cf8dbf354b5f78ff91424ea86"
+      "sha256": "5006745d4dc198be0e0cd21587718e123d3811884d86d61e9bc321626ebbff0b"
     },
     {
       "path": "evidence/kurrent-live-settlement-tx.hex",
-      "sha256": "59651a29d21b6442c247a649be91189633eebf4849ead518413f307eb281253a"
+      "sha256": "5010c3aa739d50c41e35f256d5df124dacfdc57244d6b83d34d024879d0a28c9"
     },
     {
       "path": "evidence/kurrent-live-factory-funding-tx.hex",
-      "sha256": "b529ec7094565c9ca47054e556c7f1fd22ed7f14f58a2c96b46b8288d2d48f24"
+      "sha256": "e259193d51acf56884597bb5389ef816223e1638a2c7840d07156487bc8fc187"
     },
     {
       "path": "evidence/kurrent-live-factory-materialisation-tx.hex",
-      "sha256": "0687e4558a615e4498ba4151fd604c881e8560a0d9cc923baa1bff1e987eda0a"
+      "sha256": "e9a491f4c7c21e5557d9a205caf84e1c6a92e92f585a06d27a9506e09e20bd61"
     },
     {
       "path": "evidence/kurrent-live-ln_to_kaspa-funding-tx.hex",
-      "sha256": "48b63f0623fadb71d61ef60857e8f1e438ad1711d702fe7bbe3a2c02cbc11a74"
+      "sha256": "a836497f04dbcea3bb6c7232b221308f516851b6278e2c6d2493aa9b166952aa"
     },
     {
       "path": "evidence/kurrent-live-ln_to_kaspa-settlement-tx.hex",
-      "sha256": "d432a18f276fd2924ee3a6ece395fba1ff199d5aeb72e9040ddf52a79cdbe8d4"
+      "sha256": "6b373156824c3f6891559f3b70d6a2e7c1a71c6f15077a57df10f5a39de65fcf"
     },
     {
       "path": "evidence/kurrent-live-kaspa_to_ln-funding-tx.hex",
-      "sha256": "49c9e16dfe0f5046c6c3efe96049def24aa12aaf43aa6316caa50d63b99b4431"
+      "sha256": "af96f578dcf8f117a0ffee8bde4bf3258324822ffff50a71df01c2c224ad023c"
     },
     {
       "path": "evidence/kurrent-live-kaspa_to_ln-settlement-tx.hex",
-      "sha256": "0739d3cb08fec0726a8b73908a75efb1100df100176299d7cef43c21c7d48255"
+      "sha256": "cbeb209d9c45122ba3051b4f3aca32aac07fde1edf8d6c0326c9055f0415a9f4"
     },
     {
       "path": "evidence/kurrent-live-refund-funding-tx.hex",
-      "sha256": "18b6787a145b813dc20896353432b2283e80be0d236bfe93d3e465fc9696df2f"
+      "sha256": "3d048cdfdf7a9f1beef81dcf76a444ee467a4818d6aece4da2d932564d9cdd50"
     },
     {
       "path": "evidence/kurrent-live-early-refund-rejected-tx.hex",
-      "sha256": "cbdbf38c1cfbf6c4642f94572ccc54b1dc9603a3a0f5f5feba3fb878f752e06e"
+      "sha256": "439d9a40d7ef53d959927e74241b34e45df62bd0879660545bd27fbe69d5d1ed"
     },
     {
       "path": "evidence/kurrent-live-refund-tx.hex",
-      "sha256": "6d3c42c603591c74b6ae0af1bdcf4e8a9361140a5bee19419cea39aea0474c3e"
+      "sha256": "3850af909b81cbea59dbebbefe73fdbc88e21efd2a5b51dcbdedccd69c8a1cb8"
     }
   ],
-  "refund_txid_outpoint": "9052932f37edd12c7772fdd61e6013b7e772f4460c39b60537c38af78046ac2b:0",
+  "refund_txid_outpoint": "18ee0fdb8b21500ef7350be4e9d4bf9779317eb4f1c997f8d71ba5f1aead9364:0",
   "script_paths_and_hashes": [
     {
       "path": "evidence/kurrent-live-state-1-redeem-script.hex",
-      "sha256": "3415bf8d1435b272cb7062f380d46fb134a66f1764d7a894c289fe4fa6cd1327"
+      "sha256": "9e43df8afd610dc9ec73b96f0f571684d4242b820bcf1ccee63b6e986b296dda"
     },
     {
       "path": "evidence/kurrent-live-state-2-redeem-script.hex",
-      "sha256": "a08f2f15b0399f422244988e093f7da246854d8db9329e35c91ef8e6b41587c9"
+      "sha256": "fad562f64cf47a12f6011db25b3f8c5c8fe26f83ed09a57704f08a039eb6f617"
     },
     {
       "path": "evidence/kurrent-live-factory-redeem-script.hex",
-      "sha256": "3fc9f8162cd426dd49810b75ababe01ea10d29ea40f7961f53bc4ab96d2e7183"
+      "sha256": "81ab601f1ae577803eb4b9510c32c7138e170d12039e93e59aa6cb6e29734a8d"
     },
     {
       "path": "evidence/kurrent-live-ln_to_kaspa-redeem-script.hex",
-      "sha256": "64e05b03769bbbc435fd1d49bf415f7d068357edd41d6d498ae5c82ca0196652"
+      "sha256": "e250f055c312aa3367068f82b675c1209a95298d50f03b6c8e3f5d06a3982934"
     },
     {
       "path": "evidence/kurrent-live-kaspa_to_ln-redeem-script.hex",
-      "sha256": "b1af100f837ac72108d45c3a016745170d40821d76bf7d726b3635f8ea18a985"
+      "sha256": "ae27c82531d6179c383d78a73327ad4c39dac4f5702463e7d6f43fe615721323"
     },
     {
       "path": "evidence/kurrent-live-refund-redeem-script.hex",
-      "sha256": "d1625cc14ba51bfb06dfb6cb45b28edde9a2e9ad5f560a74cad40a5c327791a8"
+      "sha256": "0c986cb2703a68b6b14b97d8a9f9bbe66d51aee03898a6c6e2566042775b5873"
     }
   ],
   "settlement_template_hashes": [
-    "599f4f53d7a4e413b8d9f8551c990e34b5a672f44ba578dcb34a4dc1bb5120d8"
+    "28b56c67dea00210a1192fecbd87af059e4856eda87320dbe2e4aec3c2dc1bd8"
   ],
-  "state_channel_funding_txid_outpoint": "aa9bded2d345f72d909841e030f58d5a24e5a2f4ea5d204b352e0b25aad04d4a:0",
+  "state_channel_funding_txid_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
   "state_txids_or_transition_ids": [
-    "aa9bded2d345f72d909841e030f58d5a24e5a2f4ea5d204b352e0b25aad04d4a",
-    "6c6da5336a9dfe34118ee72d7e7bb795457d3c80f1d3ee4853adbea724c6fe9f",
-    "5a92a55531a99fc3565b482656c3b798d2f0ca61e79c249104bf9bed3d4d27c2",
-    "6c6da5336a9dfe34118ee72d7e7bb795457d3c80f1d3ee4853adbea724c6fe9f:0",
-    "570dcd19d11a5594f74fd72ad48f93155ab8138e6692c2fb92c7e60eaafb09d9",
-    "fd500f09a728d063e16d01c1edf21dd505cd28b58f1175e351d6ea132fe66367",
-    "56ff5419d49a81a442f091b3f4798eeb42109a61997fc8deee9d82065788f48e"
+    "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213",
+    "47e10b368818fbdee256134f97b2bff411c5e70a0a0d8ed5b6554cd829e84c2a",
+    "098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c",
+    "47e10b368818fbdee256134f97b2bff411c5e70a0a0d8ed5b6554cd829e84c2a:0",
+    "99f2df5ae33afb8ce691aff6f34f42f8fb1adb80d5d10c1b8bca3dbe76aab5c9",
+    "84b7c7b1e3035076b0bcfbf2d0fd0e682701a4ab5c0726f688db19798c85f515",
+    "741e43ad64fdf8024daedfa5902b3865134f6422960c6fd5a8eaf3fe3138ca51"
   ],
   "status": "passed",
-  "timestamp": "1781104887",
+  "timestamp": "1781106518",
   "tool_versions": [
     {
       "name": "kaspad",
@@ -247,35 +247,35 @@
   "witness_paths_and_hashes": [
     {
       "path": "evidence/kurrent-live-state-update-witness.hex",
-      "sha256": "5632cbdcc30f7ada54dbe9d4a2a5911e525834ff3e82f97a576cc2d4f760c566"
+      "sha256": "3289ba5236669a8a912a154d2c84d397ae93b9d062be718dc62dc28128f30249"
     },
     {
       "path": "evidence/kurrent-live-stale-rejected-witness.hex",
-      "sha256": "eec16599963a1581ad3212ee9db57421c705c46b17820e6d410911096fd512fb"
+      "sha256": "8ff5f8d3b3123df1e269769c9ab155906e11a57bffc4455120bf7262b9183371"
     },
     {
       "path": "evidence/kurrent-live-settlement-witness.hex",
-      "sha256": "4173525ba2d0d4e0f159202beb1f010ba1d541ab2f65ae2ca726f13a7224cc10"
+      "sha256": "50255c9de41cc44a6e6fba31b2dc64cce7c5bf5b9993f015fb2d0f621edd288b"
     },
     {
       "path": "evidence/kurrent-live-factory-materialisation-witness.hex",
-      "sha256": "b944eeabab5c1a5a525f21072cc4c836d9bd8e39ac1318c776d6258e7248c4ee"
+      "sha256": "f01ed8858b080d26f09641f536fb0bdf06cc8f85bd7838b455e23fbecd7f9473"
     },
     {
       "path": "evidence/kurrent-live-ln_to_kaspa-settlement-witness.hex",
-      "sha256": "1a6a18ce7088afff6f1561fbcc8c8c6ae805c7c7ccbc42b9017a5920671b47f6"
+      "sha256": "cb13efa3284e68c809b9d3d53e227b70e11d6be3b7a3fbdebbcc01c19592caa7"
     },
     {
       "path": "evidence/kurrent-live-kaspa_to_ln-settlement-witness.hex",
-      "sha256": "376316b0bb428c1453e760a0a8536c43e44640fba7e0b79bc4f16c3bda46b352"
+      "sha256": "e5692cf3ba75d6276e1b603bbbb547295f48912558116d8398d9502d655dbd1a"
     },
     {
       "path": "evidence/kurrent-live-early-refund-rejected-witness.hex",
-      "sha256": "8507850538e21c418ef77f8d96c316bbaf9b28dd7b6d1b99693d56ae065b4eae"
+      "sha256": "bd249969e39cc6f8e9f511157fa4530f2cc8846b318159cc3750b361b7d3630e"
     },
     {
       "path": "evidence/kurrent-live-refund-witness.hex",
-      "sha256": "8507850538e21c418ef77f8d96c316bbaf9b28dd7b6d1b99693d56ae065b4eae"
+      "sha256": "bd249969e39cc6f8e9f511157fa4530f2cc8846b318159cc3750b361b7d3630e"
     }
   ]
 }

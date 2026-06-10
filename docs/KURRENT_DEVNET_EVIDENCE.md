@@ -29,6 +29,7 @@ The repository contains successful local capability evidence and passed live Kur
 - `evidence/kurrent-refund-flow-evidence.json`: Kurrent refund maturity and double-claim model evidence.
 - `evidence/kurrent-live-refund-evidence.json`: live early-refund rejection and matured refund evidence.
 - `evidence/kurrent-acceptance.json`: aggregate verdict.
+- `docs/KURRENT_INTERACTION_SAFETY_AUDIT.md`: model-level interaction-safety coverage for every accepted business flow.
 
 ## Evidence Still Missing
 

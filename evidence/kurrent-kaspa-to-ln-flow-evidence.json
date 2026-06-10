@@ -1,21 +1,28 @@
 {
   "blockers": [],
   "flow": "kaspa_to_ln_atomic_settlement",
+  "interaction_safety_assertions": [
+    "LN preimage hashes to the invoice payment hash",
+    "swap direction must be either ln-to-kaspa or kaspa-to-ln",
+    "receipt hash must be fresh after swap scope mutation",
+    "receipt protocol version, network profile, swap id, direction, funding outpoint, settlement outpoint, and script hash are bound to evidence",
+    "zero-amount or empty-recipient swap evidence is rejected by the model"
+  ],
   "live_evidence": {
     "path": "evidence/kurrent-live-kaspa-to-ln-evidence.json",
-    "sha256": "399b1adf86e6b4cc801425b74cc765b1fb2afd9265cd699a9364debcc39e95fe"
+    "sha256": "5e6914be95f48fa98039fc97e5718a4c2cf7f50f9c6508ec0cdf2a76c18cd9ac"
   },
   "ln_evidence": {
     "path": "evidence/ln-devnet-evidence.json",
-    "sha256": "b6fcaa48e35eedc5099ff348411f2512a36dc22f8889ff0f95e9bbfe4461416d"
+    "sha256": "76d00fb2f3127fbfabf510957f1bcdfedd6e8c0dd35a9f29256f276f8bf8221c"
   },
   "preimage_status": "passed",
   "receipt_scope": {
     "amount": 1000,
     "direction": "kaspa-to-ln",
     "domain_separator": "KURRENT_LN_INTEROP_V1",
-    "kaspa_funding_outpoint": "1b5e16ec46e43267b0de3a95202362e7f6a7d0d387563db61877ef13476815cf:0",
-    "kaspa_settlement_outpoint": "56ff5419d49a81a442f091b3f4798eeb42109a61997fc8deee9d82065788f48e:0",
+    "kaspa_funding_outpoint": "e6e98ccca9551de78e39167883e284445c88ff91c3cca7eb813c90e9e478ef4d:0",
+    "kaspa_settlement_outpoint": "741e43ad64fdf8024daedfa5902b3865134f6422960c6fd5a8eaf3fe3138ca51:0",
     "ln_payment_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
     "network_profile": "kaspa-simnet-toccata + bitcoin-regtest-lnd",
     "preimage_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
@@ -25,5 +32,5 @@
     "swap_id": "swap-kaspa-to-ln-001"
   },
   "status": "passed",
-  "swap_receipt_hash": "6c30c49c8256104f5193747eba823b26ebcfd4cffc2504618476497a71f44b64"
+  "swap_receipt_hash": "6902d534bc723167eb4151757dddfdbdea4ea3f75dd59b47803f7659e4c18060"
 }

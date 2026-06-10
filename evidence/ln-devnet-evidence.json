@@ -1,14 +1,14 @@
 {
   "alice": {
-    "identity_pubkey": "02cc6ad06a1a57e2dbc6ffac8f23bed83cd6ca6ccdd1fe08144dde97ea98f91906",
+    "identity_pubkey": "0310c9602a391d0e9815571a2b7103a6d6e63e9060599b1c4ecd57dcd9eb9b638b",
     "rpc": "127.0.0.1:12009"
   },
   "bitcoin_regtest": {
-    "funding_txid": "21d9b86877c87c6a654c852f48e3179bba64a1a15bc03a893506e693a2404c44",
-    "miner_address": "bcrt1qdx7fhnq4crphlkultkp762lrjfrrf5ym5aqvul"
+    "funding_txid": "13dc16d006a6e0b1a7e7d765b16371609644b9661b0b2ebc31b2c704abc1b4f0",
+    "miner_address": "bcrt1q5algp9830fyd08l0h4xj55a3du3hqz5gnp4zjp"
   },
   "bob": {
-    "identity_pubkey": "02ed716aca4a7e4bdbcec2b6e30f64dd0c15170bdcd0a5bba961af2cb698bc68df",
+    "identity_pubkey": "02dffb3b20b0cc2defd2ca9d918ee88241d05274ec044e1d605f5c1594b195e04d",
     "rpc": "127.0.0.1:12010"
   },
   "channel": {

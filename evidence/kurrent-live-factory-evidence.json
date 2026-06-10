@@ -1,12 +1,12 @@
 {
   "flow": "kaspa_factory_flow",
   "funding": {
-    "outpoint": "b7393ae030239fd656f82cb661e991333937e8fa53ce1881448fbdd78ca0787b:0",
+    "outpoint": "445ac224fde8b1a189b20375be4342d8f07a358bedb0b5d8f797780068732c95:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-factory-funding-tx.hex",
-      "sha256": "b529ec7094565c9ca47054e556c7f1fd22ed7f14f58a2c96b46b8288d2d48f24"
+      "sha256": "e259193d51acf56884597bb5389ef816223e1638a2c7840d07156487bc8fc187"
     },
-    "txid": "b7393ae030239fd656f82cb661e991333937e8fa53ce1881448fbdd78ca0787b"
+    "txid": "445ac224fde8b1a189b20375be4342d8f07a358bedb0b5d8f797780068732c95"
   },
   "materialisation": {
     "outputs": {
@@ -15,16 +15,16 @@
     },
     "raw_tx": {
       "path": "evidence/kurrent-live-factory-materialisation-tx.hex",
-      "sha256": "0687e4558a615e4498ba4151fd604c881e8560a0d9cc923baa1bff1e987eda0a"
+      "sha256": "e9a491f4c7c21e5557d9a205caf84e1c6a92e92f585a06d27a9506e09e20bd61"
     },
     "redeem_script": {
       "path": "evidence/kurrent-live-factory-redeem-script.hex",
-      "sha256": "3fc9f8162cd426dd49810b75ababe01ea10d29ea40f7961f53bc4ab96d2e7183"
+      "sha256": "81ab601f1ae577803eb4b9510c32c7138e170d12039e93e59aa6cb6e29734a8d"
     },
-    "txid": "1014d6548c2688f74bca850220a1650441f2b1d3912b7e8b46e3e6e9fa3dfb42",
+    "txid": "6a70f8737b2a4d9d2c31dcdb215c2af8d1e5de675adf3fbee36dcc64dc6dc94e",
     "witness": {
       "path": "evidence/kurrent-live-factory-materialisation-witness.hex",
-      "sha256": "b944eeabab5c1a5a525f21072cc4c836d9bd8e39ac1318c776d6258e7248c4ee"
+      "sha256": "f01ed8858b080d26f09641f536fb0bdf06cc8f85bd7838b455e23fbecd7f9473"
     }
   },
   "status": "passed"

@@ -37,6 +37,7 @@ cargo test
 - Toccata live daemon relay/mining transcript: `evidence/kaspa-daemon-compute-budget-relay.stdout.log`
 - Lightning Network invoice and preimage evidence: `evidence/ln-devnet-evidence.json`
 - Kurrent live Kaspa funding/settlement evidence: `evidence/kurrent-live-state-channel-evidence.json`
+- Interaction-safety audit: `docs/KURRENT_INTERACTION_SAFETY_AUDIT.md`
 - Blocker notes: `docs/KURRENT_BLOCKERS.md`
 - Delivery summary: `docs/DELIVERY_SUMMARY.txt`
 
