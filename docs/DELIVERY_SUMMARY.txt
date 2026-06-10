@@ -1,0 +1,67 @@
+Verdict: passed
+
+Project path:
+/Users/arthur/Documents/Kurrent
+
+Git remote:
+origin https://github.com/a19q3/Kurrent.git
+
+Kaspa source update:
+/Users/arthur/Documents/rusty-kaspa-toccata is present on branch toccata at 0ae28f939e61994a11eb8eb6dd775255e2924afb.
+/Users/arthur/Documents/lnd is present on branch master at afeb9e1211118a3c0339045f407712d4f9166cd1.
+
+Prompt audit result:
+The prompt was optimised into a blocker-gated execution brief. Local model and verification work may run, but the final verdict cannot be passed unless real Kaspa and Lightning Network devnet flows produce evidence.
+
+Commands run or encoded in kurrentctl:
+git remote add origin https://github.com/a19q3/Kurrent.git
+git pull --ff-only in /Users/arthur/Documents/rusty-kaspa-toccata
+cargo build --release -p kaspad -p kaspa-cli -p kaspa-wallet in /Users/arthur/Documents/rusty-kaspa-toccata
+cargo test -> passed, 25 tests.
+cargo fmt --all --check -> passed.
+cargo clippy --all-targets -- -D warnings -> passed.
+cargo clippy --manifest-path drivers/kaspa-devnet/Cargo.toml --all-targets -- -D warnings -> passed.
+./scripts/run-kaspa-devnet.sh -> passed, real kaspad simnet startup probe.
+./scripts/run-ln-devnet.sh -> passed, real two-node Lightning Network payment/preimage evidence.
+cargo run --release -p kaspa-txscript --example covenants -> passed, real Toccata txscript VM evidence.
+cargo test -p kaspa-testing-integration --lib daemon_integration_tests::daemon_compute_budget_relay_test -- --exact --nocapture -> passed, real Kaspa daemon relay/mining evidence.
+cargo check --manifest-path drivers/kaspa-devnet/Cargo.toml -> passed, Rust-only Kurrent Kaspa devnet driver compiles.
+cargo run --quiet --bin kurrentctl -- verify-evidence -> passed, including path/hash verification for raw transactions, scripts, witnesses, flow JSON evidence, LN preimage evidence, and command transcript existence.
+./scripts/check.sh -> passed with exit code 0.
+
+Evidence paths:
+evidence/kurrent-acceptance.json
+evidence/tool-detection.json
+evidence/kaspa-simnet-probe.log
+evidence/ln-devnet-evidence.json
+evidence/kaspa-txscript-covenants.stdout.log
+evidence/kaspa-daemon-compute-budget-relay.stdout.log
+evidence/kurrent-state-channel-flow-evidence.json
+evidence/kurrent-live-state-channel-evidence.json
+evidence/kurrent-live-funding-tx.hex
+evidence/kurrent-live-state-update-tx.hex
+evidence/kurrent-live-stale-rejected-tx.hex
+evidence/kurrent-live-settlement-tx.hex
+evidence/kurrent-live-state-update-witness.hex
+evidence/kurrent-live-stale-rejected-witness.hex
+evidence/kurrent-live-settlement-witness.hex
+evidence/kurrent-factory-flow-evidence.json
+evidence/kurrent-live-factory-evidence.json
+evidence/kurrent-ln-to-kaspa-flow-evidence.json
+evidence/kurrent-live-ln-to-kaspa-evidence.json
+evidence/kurrent-kaspa-to-ln-flow-evidence.json
+evidence/kurrent-live-kaspa-to-ln-evidence.json
+evidence/kurrent-refund-flow-evidence.json
+evidence/kurrent-live-refund-evidence.json
+
+Kaspa transaction/script/witness evidence:
+Kaspa capability evidence is produced, including Toccata VM and live daemon relay/mining transcripts. Kurrent now produces live simnet funding, state-update, stale-rejection, state-2 settlement, factory materialisation, hashlock settlement, and refund raw transactions, txids, scripts, and witness evidence.
+
+Lightning Network invoice/preimage/payment evidence:
+Produced in evidence/ln-devnet-evidence.json.
+
+Refund evidence:
+Model evidence is produced in evidence/kurrent-refund-flow-evidence.json. Live early-refund rejection and matured refund transaction evidence are produced in evidence/kurrent-live-refund-evidence.json.
+
+Next smallest step:
+Extend the passed local devnet scenarios into longer-running soak tests, adversarial mempool cases, and mainnet-readiness review.

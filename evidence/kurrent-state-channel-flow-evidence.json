@@ -1,0 +1,99 @@
+{
+  "blockers": [],
+  "capability_status": "passed",
+  "commands": [
+    {
+      "command": [
+        "cargo",
+        "run",
+        "--release",
+        "-p",
+        "kaspa-txscript",
+        "--example",
+        "covenants"
+      ],
+      "cwd": "/Users/arthur/Documents/rusty-kaspa-toccata",
+      "label": "kaspa-txscript-covenants",
+      "status_code": 0,
+      "stderr": {
+        "path": "evidence/kaspa-txscript-covenants.stderr.log",
+        "sha256": "a7d615703a9f6f3fde590ebbc25eab66b0f63fb83c454abbd467f8b956a66e11"
+      },
+      "stdout": {
+        "path": "evidence/kaspa-txscript-covenants.stdout.log",
+        "sha256": "fd8869dff4ea69d0347d8c7f3831e11be3d0b3e94208083baf1f9b0d2247f618"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "kaspa-testing-integration",
+        "--lib",
+        "daemon_integration_tests::daemon_compute_budget_relay_test",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/Users/arthur/Documents/rusty-kaspa-toccata",
+      "label": "kaspa-daemon-compute-budget-relay",
+      "status_code": 0,
+      "stderr": {
+        "path": "evidence/kaspa-daemon-compute-budget-relay.stderr.log",
+        "sha256": "0adf4e463b7618f716e29576c6e88702c1346fb15a151032e9bd122ea7c54e11"
+      },
+      "stdout": {
+        "path": "evidence/kaspa-daemon-compute-budget-relay.stdout.log",
+        "sha256": "02d9c4215f3404425f2643177913486a1060a82c0cf89781bf007d9aa823a70e"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "run",
+        "--manifest-path",
+        "/Users/arthur/Documents/Kurrent/drivers/kaspa-devnet/Cargo.toml",
+        "--",
+        "evidence"
+      ],
+      "cwd": "/Users/arthur/Documents/Kurrent",
+      "label": "kurrent-live-state-channel-driver",
+      "status_code": 0,
+      "stderr": {
+        "path": "evidence/kurrent-live-state-channel-driver.stderr.log",
+        "sha256": "67a89bfd8f8f9ba8b5c6e0473eb886803b7879e4774a4b8b79af4fb2851c3db3"
+      },
+      "stdout": {
+        "path": "evidence/kurrent-live-state-channel-driver.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "flow": "kaspa_state_channel_flow",
+  "live_evidence": {
+    "path": "evidence/kurrent-live-state-channel-evidence.json",
+    "sha256": "d24ff6e8cca0276e8b507e5249973a97b84fdb0eb63d043b7886e227e79da5db"
+  },
+  "protocol_files": [
+    {
+      "path": "evidence/kurrent-state-channel-settlement-template.json",
+      "sha256": "d7a4da0c1dff0b568ca9eddae6aa9e94836bfb19ab8efe89555633ab07d290ad"
+    },
+    {
+      "path": "evidence/kurrent-state-channel-headers.json",
+      "sha256": "cd1698d88efb313002d396101664ac7ddfc876b0808989fa22a1c98b2c874323"
+    },
+    {
+      "path": "evidence/kurrent-state-channel-receipt.json",
+      "sha256": "acac300f62ed87d0000d157193832d3f2c5bddfcad171167369898ee2334fb65"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/crypto/txscript/examples/covenants.rs",
+      "sha256": "3ec90ea5376314ea4b9cfef3a51655a0472ccd8c02b22a73bbbc3d8dbb9e95a1"
+    }
+  ],
+  "status": "passed"
+}

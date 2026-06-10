@@ -1,0 +1,40 @@
+{
+  "early_refund_rejection": {
+    "attempted_tx": {
+      "path": "evidence/kurrent-live-early-refund-rejected-tx.hex",
+      "sha256": "cbdbf38c1cfbf6c4642f94572ccc54b1dc9603a3a0f5f5feba3fb878f752e06e"
+    },
+    "attempted_txid": "21f4fef118fda33ccbd973813b97e741a4bbeab8be9d219afc5db0b41ad0be53",
+    "node_error": "Rejected transaction 21f4fef118fda33ccbd973813b97e741a4bbeab8be9d219afc5db0b41ad0be53: one of the transaction sequence locks conditions was not met",
+    "status": "rejected",
+    "witness": {
+      "path": "evidence/kurrent-live-early-refund-rejected-witness.hex",
+      "sha256": "8507850538e21c418ef77f8d96c316bbaf9b28dd7b6d1b99693d56ae065b4eae"
+    }
+  },
+  "flow": "refund_timeout_flow",
+  "funding": {
+    "outpoint": "237741fb947f905fd6e2094842a02f62315149c30390397ffee81ed7cf35beb6:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-refund-funding-tx.hex",
+      "sha256": "18b6787a145b813dc20896353432b2283e80be0d236bfe93d3e465fc9696df2f"
+    },
+    "txid": "237741fb947f905fd6e2094842a02f62315149c30390397ffee81ed7cf35beb6"
+  },
+  "refund": {
+    "raw_tx": {
+      "path": "evidence/kurrent-live-refund-tx.hex",
+      "sha256": "6d3c42c603591c74b6ae0af1bdcf4e8a9361140a5bee19419cea39aea0474c3e"
+    },
+    "redeem_script": {
+      "path": "evidence/kurrent-live-refund-redeem-script.hex",
+      "sha256": "d1625cc14ba51bfb06dfb6cb45b28edde9a2e9ad5f560a74cad40a5c327791a8"
+    },
+    "txid": "9052932f37edd12c7772fdd61e6013b7e772f4460c39b60537c38af78046ac2b",
+    "witness": {
+      "path": "evidence/kurrent-live-refund-witness.hex",
+      "sha256": "8507850538e21c418ef77f8d96c316bbaf9b28dd7b6d1b99693d56ae065b4eae"
+    }
+  },
+  "status": "passed"
+}

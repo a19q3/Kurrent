@@ -1,0 +1,11 @@
+{
+  "claim_id": "refund-swap-1",
+  "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
+  "model_assertions": [
+    "refund before DAA 120 is rejected",
+    "refund at DAA 120 succeeds",
+    "settlement plus refund double claim is rejected"
+  ],
+  "refund_claim_hash": "705d476bbf6508910b1c47b144a1316dc0d0502de92caf91a965e34e893fdbc0",
+  "required_daa": 120
+}

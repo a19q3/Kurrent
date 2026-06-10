@@ -1,0 +1,5 @@
+/target/
+/.cap/
+/.kurrent-devnet/
+/drivers/*/target/
+.DS_Store

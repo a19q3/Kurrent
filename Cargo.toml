@@ -1,0 +1,20 @@
+[package]
+name = "kurrent"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Local development artefacts for Kurrent Protocol acceptance gating"
+
+[lib]
+name = "kurrent"
+path = "src/lib.rs"
+
+[[bin]]
+name = "kurrentctl"
+path = "src/bin/kurrentctl.rs"
+
+[dependencies]
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"

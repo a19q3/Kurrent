@@ -1,0 +1,29 @@
+{
+  "alice": {
+    "identity_pubkey": "02cc6ad06a1a57e2dbc6ffac8f23bed83cd6ca6ccdd1fe08144dde97ea98f91906",
+    "rpc": "127.0.0.1:12009"
+  },
+  "bitcoin_regtest": {
+    "funding_txid": "21d9b86877c87c6a654c852f48e3179bba64a1a15bc03a893506e693a2404c44",
+    "miner_address": "bcrt1qdx7fhnq4crphlkultkp762lrjfrrf5ym5aqvul"
+  },
+  "bob": {
+    "identity_pubkey": "02ed716aca4a7e4bdbcec2b6e30f64dd0c15170bdcd0a5bba961af2cb698bc68df",
+    "rpc": "127.0.0.1:12010"
+  },
+  "channel": {
+    "alice_channels_path": "evidence/ln-alice-listchannels.json",
+    "bob_channels_path": "evidence/ln-bob-listchannels.json"
+  },
+  "invoice": {
+    "lookup_path": "evidence/ln-bob-lookupinvoice.json",
+    "payment_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
+    "payment_path": "evidence/ln-alice-payinvoice.json",
+    "preimage": "0001020304050607080900010203040506070809000102030405060708090001"
+  },
+  "logs": [
+    "evidence/ln-alice.log",
+    "evidence/ln-bob.log"
+  ],
+  "status": "passed"
+}

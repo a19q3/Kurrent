@@ -1,0 +1,11 @@
+[COVENANT] Counter payload covenant
+[COVENANT] Spending to counter 1
+[COVENANT] Spending to counter 2
+[COVENANT] Spending to counter 3
+[COVENANT] Attempting invalid spend (no increment)
+[COVENANT] Expected failure: VerifyError
+[COVENANT] Attempting invalid spend (no increment and reuse previous state)
+[COVENANT] Expected failure: VerifyError
+[COVENANT] Attempting invalid spend (increase by 2)
+[COVENANT] Expected failure: VerifyError
+[COVENANT] Example complete

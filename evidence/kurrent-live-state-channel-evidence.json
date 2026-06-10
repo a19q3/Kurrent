@@ -1,0 +1,119 @@
+{
+  "channel_receipt": {
+    "hash": "82a72741b7a35c8e85e7b83399c6cc603e51c1c622be18c25820528acad53ea6",
+    "scope": {
+      "channel_id": "channel-a",
+      "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
+      "funding_outpoint": "aa9bded2d345f72d909841e030f58d5a24e5a2f4ea5d204b352e0b25aad04d4a:0",
+      "network_profile": "kaspa-simnet-toccata",
+      "output_id": "5a92a55531a99fc3565b482656c3b798d2f0ca61e79c249104bf9bed3d4d27c2:0,5a92a55531a99fc3565b482656c3b798d2f0ca61e79c249104bf9bed3d4d27c2:1",
+      "protocol_version": 1,
+      "settlement_template_hash": "599f4f53d7a4e413b8d9f8551c990e34b5a672f44ba578dcb34a4dc1bb5120d8",
+      "state_number": 2
+    }
+  },
+  "driver": "kurrent-kaspa-devnet-driver",
+  "funding": {
+    "covenant_id": "cdfa0cb41244c6321b260a532682adcc9323a7f75537e1a27c4dc13151f017d6",
+    "input_outpoint": "32ce93680e0b41d4e90479b4350be40d9c93b330a319a5f32a66052a80ef1b12:0",
+    "outpoint": "aa9bded2d345f72d909841e030f58d5a24e5a2f4ea5d204b352e0b25aad04d4a:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-funding-tx.hex",
+      "sha256": "318ebf8ed19073a7cbb8e577d64d935229f1f58efc1e24b9f2ed45e01c2e911c"
+    },
+    "txid": "aa9bded2d345f72d909841e030f58d5a24e5a2f4ea5d204b352e0b25aad04d4a",
+    "value": 4998000000
+  },
+  "miner_address": "kaspasim:qqfkhyczwx8q7sjyhkeulq3070d2y60vx29t3rwpmqgg70wj0ls9wuru37syc",
+  "network_profile": "kaspa-simnet-toccata",
+  "participants": {
+    "alice_address": "kaspasim:qzjfy6dwwf90r3gy4cfzaqu23mr2j2xgft0ywmh9eypzl9zhezj5g60xms33s",
+    "bob_address": "kaspasim:qpzxuyuszq6tzvlsav5gvm7zx34khk95rn6ed67j6uxnr7u6l0wg7wjguueuh"
+  },
+  "settlement": {
+    "outputs": {
+      "alice": 2968800000,
+      "bob": 1979200000
+    },
+    "raw_tx": {
+      "path": "evidence/kurrent-live-settlement-tx.hex",
+      "sha256": "59651a29d21b6442c247a649be91189633eebf4849ead518413f307eb281253a"
+    },
+    "state_1_redeem_script": {
+      "path": "evidence/kurrent-live-state-1-redeem-script.hex",
+      "sha256": "3415bf8d1435b272cb7062f380d46fb134a66f1764d7a894c289fe4fa6cd1327"
+    },
+    "state_2_redeem_script": {
+      "path": "evidence/kurrent-live-state-2-redeem-script.hex",
+      "sha256": "a08f2f15b0399f422244988e093f7da246854d8db9329e35c91ef8e6b41587c9"
+    },
+    "state_number": 2,
+    "txid": "5a92a55531a99fc3565b482656c3b798d2f0ca61e79c249104bf9bed3d4d27c2",
+    "witness": {
+      "path": "evidence/kurrent-live-settlement-witness.hex",
+      "sha256": "4173525ba2d0d4e0f159202beb1f010ba1d541ab2f65ae2ca726f13a7224cc10"
+    }
+  },
+  "settlement_template": {
+    "hash": "599f4f53d7a4e413b8d9f8551c990e34b5a672f44ba578dcb34a4dc1bb5120d8",
+    "template": {
+      "domain_separator": "KURRENT_SETTLEMENT_TEMPLATE_V1",
+      "outputs": {
+        "alice": 2968800000,
+        "bob": 1979200000
+      },
+      "refund_after_daa": 120,
+      "script_covenant_hash": "a08f2f15b0399f422244988e093f7da246854d8db9329e35c91ef8e6b41587c9",
+      "template_id": "live-state-2-settlement"
+    }
+  },
+  "stale_state_rejection": {
+    "attempted_tx": {
+      "path": "evidence/kurrent-live-stale-rejected-tx.hex",
+      "sha256": "243d62224293627eafc9d5c32a655d63ae48c80cf8dbf354b5f78ff91424ea86"
+    },
+    "attempted_txid": "570dcd19d11a5594f74fd72ad48f93155ab8138e6692c2fb92c7e60eaafb09d9",
+    "node_error": "Rejected transaction 570dcd19d11a5594f74fd72ad48f93155ab8138e6692c2fb92c7e60eaafb09d9: failed to verify the signature script: stack contains 1 unexpected items",
+    "status": "rejected",
+    "witness": {
+      "path": "evidence/kurrent-live-stale-rejected-witness.hex",
+      "sha256": "eec16599963a1581ad3212ee9db57421c705c46b17820e6d410911096fd512fb"
+    }
+  },
+  "state_header": {
+    "hash": "c5337568695b769a6a847e959dadb5b407d883d719308bd761afeb04a603a7ef",
+    "header": {
+      "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
+      "channel_id": "channel-a",
+      "domain_separator": "KURRENT_STATE_V1",
+      "factory_id": null,
+      "funding_outpoint": "aa9bded2d345f72d909841e030f58d5a24e5a2f4ea5d204b352e0b25aad04d4a:0",
+      "genesis_or_devnet_id": "in-process-simnet",
+      "network_profile": "kaspa-simnet-toccata",
+      "new_state_commitment": "7287db807fad621ce901aea46e7f5cd7e2d525e9cb5da837a91cee6aa10637ed",
+      "participant_set_hash": "4653498cadd1f924ee9946bdfa5133386b49e6624922a45d22ab228ae36554a7",
+      "previous_state_commitment": "7dbbbbd8d5360afd09b5838e35641283c0d253c324327c3f388c9ba88974218d",
+      "protocol_version": 1,
+      "script_covenant_hash": "a08f2f15b0399f422244988e093f7da246854d8db9329e35c91ef8e6b41587c9",
+      "settlement_template_hash": "599f4f53d7a4e413b8d9f8551c990e34b5a672f44ba578dcb34a4dc1bb5120d8",
+      "state_number": 2,
+      "virtual_channel_id": null
+    }
+  },
+  "state_update": {
+    "from_state": 1,
+    "outpoint": "6c6da5336a9dfe34118ee72d7e7bb795457d3c80f1d3ee4853adbea724c6fe9f:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-state-update-tx.hex",
+      "sha256": "323d7d440893481b7a1fa25cc532347088e3a6bcb417eed698310b46cf115684"
+    },
+    "to_state": 2,
+    "txid": "6c6da5336a9dfe34118ee72d7e7bb795457d3c80f1d3ee4853adbea724c6fe9f",
+    "value": 4973000000,
+    "witness": {
+      "path": "evidence/kurrent-live-state-update-witness.hex",
+      "sha256": "5632cbdcc30f7ada54dbe9d4a2a5911e525834ff3e82f97a576cc2d4f760c566"
+    }
+  },
+  "status": "passed"
+}

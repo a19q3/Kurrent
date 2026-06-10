@@ -1,0 +1,10 @@
+{
+  "domain_separator": "KURRENT_SETTLEMENT_TEMPLATE_V1",
+  "outputs": {
+    "alice": 600000,
+    "bob": 400000
+  },
+  "refund_after_daa": 120,
+  "script_covenant_hash": "6c6fdfbd299b9c8e0f7632fff2854eda493ed0334144d0d765195dec4aa7c9fc",
+  "template_id": "kurrent-state-settle-v1"
+}

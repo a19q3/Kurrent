@@ -1,0 +1,13 @@
+{
+  "account_balance": {
+    "default": {
+      "confirmed_balance": "200000000",
+      "unconfirmed_balance": "0"
+    }
+  },
+  "confirmed_balance": "200000000",
+  "locked_balance": "0",
+  "reserved_balance_anchor_chan": "0",
+  "total_balance": "200000000",
+  "unconfirmed_balance": "0"
+}

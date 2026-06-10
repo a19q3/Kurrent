@@ -1,0 +1,28 @@
+{
+  "flow": "ln-to-kaspa",
+  "funding": {
+    "outpoint": "355758daa99e110ec2940d9398484c1bfeec6ab938e09eb5f3457b54ffecede1:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-ln_to_kaspa-funding-tx.hex",
+      "sha256": "48b63f0623fadb71d61ef60857e8f1e438ad1711d702fe7bbe3a2c02cbc11a74"
+    },
+    "txid": "355758daa99e110ec2940d9398484c1bfeec6ab938e09eb5f3457b54ffecede1"
+  },
+  "preimage_sha256": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
+  "settlement": {
+    "raw_tx": {
+      "path": "evidence/kurrent-live-ln_to_kaspa-settlement-tx.hex",
+      "sha256": "d432a18f276fd2924ee3a6ece395fba1ff199d5aeb72e9040ddf52a79cdbe8d4"
+    },
+    "redeem_script": {
+      "path": "evidence/kurrent-live-ln_to_kaspa-redeem-script.hex",
+      "sha256": "64e05b03769bbbc435fd1d49bf415f7d068357edd41d6d498ae5c82ca0196652"
+    },
+    "txid": "fd500f09a728d063e16d01c1edf21dd505cd28b58f1175e351d6ea132fe66367",
+    "witness": {
+      "path": "evidence/kurrent-live-ln_to_kaspa-settlement-witness.hex",
+      "sha256": "1a6a18ce7088afff6f1561fbcc8c8c6ae805c7c7ccbc42b9017a5920671b47f6"
+    }
+  },
+  "status": "passed"
+}

@@ -1,0 +1,59 @@
+{
+  "channels": [
+    {
+      "active": true,
+      "alias_scids": [],
+      "capacity": "1000000",
+      "chan_id": "6ca49ef5b61f7f6315685baf04a76f4d557e0e16a2cac55be37db5ae1efad90f",
+      "chan_status_flags": "ChanStatusDefault",
+      "channel_point": "0fd9fa1eaeb57de35bc5caa2160e7e554d6fa704af5b6815637f1fb6f59ea46c:0",
+      "close_address": "",
+      "commit_fee": "2810",
+      "commit_weight": "1116",
+      "commitment_type": "ANCHORS",
+      "csv_delay": 144,
+      "custom_channel_data": "",
+      "fee_per_kw": "2500",
+      "initiator": false,
+      "lifetime": "5",
+      "local_balance": "100000",
+      "local_chan_reserve_sat": "10000",
+      "local_constraints": {
+        "chan_reserve_sat": "10000",
+        "csv_delay": 144,
+        "dust_limit_sat": "354",
+        "max_accepted_htlcs": 483,
+        "max_pending_amt_msat": "990000000",
+        "min_htlc_msat": "1"
+      },
+      "memo": "",
+      "num_updates": "0",
+      "peer_alias": "unable to lookup peer alias: alias for node not found",
+      "peer_scid_alias": "0",
+      "pending_htlcs": [],
+      "private": false,
+      "push_amount_sat": "100000",
+      "remote_balance": "896530",
+      "remote_chan_reserve_sat": "10000",
+      "remote_constraints": {
+        "chan_reserve_sat": "10000",
+        "csv_delay": 144,
+        "dust_limit_sat": "354",
+        "max_accepted_htlcs": 483,
+        "max_pending_amt_msat": "990000000",
+        "min_htlc_msat": "1"
+      },
+      "remote_pubkey": "02cc6ad06a1a57e2dbc6ffac8f23bed83cd6ca6ccdd1fe08144dde97ea98f91906",
+      "scid": "118747255865344",
+      "scid_str": "108x1x0",
+      "static_remote_key": false,
+      "thaw_height": 0,
+      "total_satoshis_received": "0",
+      "total_satoshis_sent": "0",
+      "unsettled_balance": "0",
+      "uptime": "5",
+      "zero_conf": false,
+      "zero_conf_confirmed_scid": "0"
+    }
+  ]
+}
