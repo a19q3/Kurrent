@@ -1,0 +1,154 @@
+{
+  "generated_at": "1781188013",
+  "git_commit": "a6445bd7bbdb1eea49e6886d8c46097becd3a015",
+  "kaspa_source_profile": {
+    "current_branch": "toccata",
+    "head": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
+    "origin_master": null,
+    "origin_toccata": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
+    "path": "/Users/arthur/Documents/rusty-kaspa-toccata",
+    "status_short": "## toccata...origin/toccata"
+  },
+  "local_acceptance": {
+    "acceptance_report": {
+      "path": "evidence/kurrent-acceptance.json",
+      "sha256": "79caf71ec75fda63ae48ed60637cafccb79163ff8313a961bf287148928fc643"
+    },
+    "flows": {
+      "evidence_verifier_flow": "passed",
+      "kaspa_factory_flow": "passed",
+      "kaspa_state_channel_flow": "passed",
+      "kaspa_to_ln_atomic_settlement": "passed",
+      "ln_to_kaspa_atomic_settlement": "passed",
+      "refund_timeout_flow": "passed"
+    },
+    "network_devnet_id": "local-kaspa-simnet-toccata+bitcoin-regtest-lnd",
+    "status": "passed"
+  },
+  "lockfiles": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "7981280d62206971ffe3eaeadf1c0718f360102f962fb3d28efc6f3ddbadbcf8"
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "6938d66b45d47a4fc653261d75c83ac696bdde7ccc30f7d0e4ffb362442d557d"
+    },
+    {
+      "path": "drivers/kaspa-devnet/Cargo.lock",
+      "sha256": "18ad740cb740367bfd56cf433b7135c8e4778532d5373ddfdb792b790b5241e3"
+    }
+  ],
+  "not_yet_supported_for_production_gate": [
+    "mainnet deployment",
+    "public Lightning routing",
+    "native Lightning route-hop integration",
+    "unattended production operation",
+    "independent external security review"
+  ],
+  "protocol_domains": [
+    "KURRENT_STATE_V1",
+    "KURRENT_STATE_SIGNATURE_V1",
+    "KURRENT_SETTLEMENT_TEMPLATE_V1",
+    "KURRENT_CHANNEL_RECEIPT_V1",
+    "KURRENT_FACTORY_MATERIALISATION_V1",
+    "KURRENT_LN_INTEROP_V1",
+    "KURRENT_PARTICIPANT_SET_V1",
+    "KURRENT_CLAIM_SCOPE_V1"
+  ],
+  "repository": "https://github.com/a19q3/Kurrent.git",
+  "required_production_gates": [
+    "local devnet acceptance must pass",
+    "production target profile must be pinned",
+    "semantic transaction verifier must pass",
+    "adversarial soak evidence must pass",
+    "production key-management runbook must be present",
+    "production monitoring runbook must be present",
+    "incident recovery runbook must be present",
+    "rollout and rollback runbook must be present",
+    "external security review evidence must pass"
+  ],
+  "scope": "production target profile for Kurrent local-devnet-to-production hardening",
+  "status": "passed",
+  "supported_for_production_gate": [
+    "latest-state state-channel model with Schnorr participant signatures",
+    "local factory materialisation accounting model",
+    "atomic hash/preimage settlement evidence in both LN/Kaspa directions",
+    "refund timeout evidence",
+    "typed local acceptance report",
+    "semantic transaction decoding verifier",
+    "deterministic adversarial mempool, alternate-history, refund-race, swap-replay, and evidence-tamper soak"
+  ],
+  "tool_versions": [
+    {
+      "name": "kaspad",
+      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/target/release/kaspad",
+      "version": null
+    },
+    {
+      "name": "kaspa-node",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "kaspa-cli",
+      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/target/release/kaspa-cli",
+      "version": "Kaspa Cli Wallet v1.2.2-toc.4 (type 'help' for list of commands)"
+    },
+    {
+      "name": "kaspa-wallet",
+      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/target/release/kaspa-wallet",
+      "version": "Kaspa Cli Wallet v1.2.2-toc.4 (type 'help' for list of commands)"
+    },
+    {
+      "name": "rusty-kaspa",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "lnd",
+      "path": "/Users/arthur/go/bin/lnd",
+      "version": "lnd version 0.20.1-beta commit=v0.20.1-beta"
+    },
+    {
+      "name": "lncli",
+      "path": "/Users/arthur/go/bin/lncli",
+      "version": "lncli version 0.20.1-beta commit=v0.20.1-beta"
+    },
+    {
+      "name": "lightningd",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "lightning-cli",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "bitcoind",
+      "path": "/opt/homebrew/bin/bitcoind",
+      "version": "Bitcoin Core daemon version v31.0.0 bitcoind"
+    },
+    {
+      "name": "bitcoin-cli",
+      "path": "/opt/homebrew/bin/bitcoin-cli",
+      "version": "Bitcoin Core RPC client version v31.0.0"
+    },
+    {
+      "name": "cargo",
+      "path": "/Users/arthur/.cargo/bin/cargo",
+      "version": "cargo 1.92.0-nightly (344c4567c 2025-10-21)"
+    },
+    {
+      "name": "rustc",
+      "path": "/Users/arthur/.cargo/bin/rustc",
+      "version": "rustc 1.92.0-nightly (6501e64fc 2025-10-23)"
+    },
+    {
+      "name": "go",
+      "path": "/opt/homebrew/bin/go",
+      "version": "go version go1.26.3 darwin/arm64"
+    }
+  ]
+}

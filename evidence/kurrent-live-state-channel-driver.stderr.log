@@ -1,5 +1,4 @@
    Compiling ring v0.17.14
-   Compiling kurrent v0.1.0 (/Users/arthur/Documents/Kurrent)
    Compiling rustls-webpki v0.103.13
    Compiling rustls v0.23.40
    Compiling tokio-rustls v0.26.4
@@ -25,5 +24,5 @@
    Compiling kaspad v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/kaspad)
    Compiling kaspa-testing-integration v1.2.2-toc.4 (/Users/arthur/Documents/rusty-kaspa-toccata/testing/integration)
    Compiling kurrent-kaspa-devnet-driver v0.1.0 (/Users/arthur/Documents/Kurrent/drivers/kaspa-devnet)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.63s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.98s
      Running `drivers/kaspa-devnet/target/debug/kurrent-kaspa-devnet-driver evidence`

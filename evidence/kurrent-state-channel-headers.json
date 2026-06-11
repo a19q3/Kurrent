@@ -1,12 +1,12 @@
 [
   {
-    "hash": "34550bffd57c5e9a8b6039a576bc33057bcef2623395568d29b251e25ec6bb2b",
+    "hash": "703eb8add94c78fe7bd2e6b1e91bfc96c8494be482ff033c62907485686a5c1d",
     "header": {
       "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
       "channel_id": "channel-a",
       "domain_separator": "KURRENT_STATE_V1",
       "factory_id": null,
-      "funding_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+      "funding_outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
       "genesis_or_devnet_id": "local-toccata-simnet",
       "network_profile": "kaspa-simnet-toccata",
       "new_state_commitment": "16d2a6265ad6245f61fc9c648b24c1e397a9b489e316975771cfd80e79eaac56",
@@ -20,13 +20,13 @@
     }
   },
   {
-    "hash": "ccbb672d4329388e33dfe870f7b5fe67c2750d95ce8de90d5e4546c53bb85f68",
+    "hash": "5bc54d6bb79c4408c03ac44acfb6c5f20b732838897440c5add2a9ea3446812f",
     "header": {
       "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
       "channel_id": "channel-a",
       "domain_separator": "KURRENT_STATE_V1",
       "factory_id": null,
-      "funding_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+      "funding_outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
       "genesis_or_devnet_id": "local-toccata-simnet",
       "network_profile": "kaspa-simnet-toccata",
       "new_state_commitment": "7dbbbbd8d5360afd09b5838e35641283c0d253c324327c3f388c9ba88974218d",
@@ -40,13 +40,13 @@
     }
   },
   {
-    "hash": "9e0320e14be2b82143977cf466275c0d5e341a5bf1352d2e8b159574a848e3f7",
+    "hash": "a3ad64a84f9447556ce583b667a96d7cddf94f9a59d3a4f6ac1494fe529b4d7b",
     "header": {
       "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
       "channel_id": "channel-a",
       "domain_separator": "KURRENT_STATE_V1",
       "factory_id": null,
-      "funding_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+      "funding_outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
       "genesis_or_devnet_id": "local-toccata-simnet",
       "network_profile": "kaspa-simnet-toccata",
       "new_state_commitment": "7287db807fad621ce901aea46e7f5cd7e2d525e9cb5da837a91cee6aa10637ed",

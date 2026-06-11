@@ -1,0 +1,273 @@
+{
+  "acceptance_criteria": [
+    "reviewer identity and contact must be supplied",
+    "reviewer must attest independent external status",
+    "all required scope ids must be covered",
+    "methodology must contain at least three non-empty review methods",
+    "critical, high, medium, and low open finding counts must be zero",
+    "unresolved_blocking_findings must be empty",
+    "report and signed attestation file hashes must match",
+    "reviewed artefact paths and SHA-256 hashes must match this request package"
+  ],
+  "boundaries": [
+    "This request package does not satisfy production readiness by itself.",
+    "Only a completed independent external security review at evidence/production/security-review.json can satisfy the final gate.",
+    "Any source, evidence, or runbook change after this package is generated requires regenerating the package and re-reviewing changed artefacts."
+  ],
+  "generated_at": "1781188022",
+  "git_commit": "a6445bd7bbdb1eea49e6886d8c46097becd3a015",
+  "passing_evidence_template": {
+    "completed_at": "YYYY-MM-DD",
+    "finding_summary": {
+      "accepted_risk_count": 0,
+      "critical_open": 0,
+      "fixed_count": 0,
+      "high_open": 0,
+      "low_open": 0,
+      "medium_open": 0
+    },
+    "methodology": [
+      "manual protocol-design review",
+      "manual script/covenant constraint review",
+      "evidence and production-gate replay"
+    ],
+    "report": {
+      "path": "evidence/production/security-review-report.pdf",
+      "sha256": "<sha256 of report file bytes>"
+    },
+    "review_type": "independent_external_security_review",
+    "reviewed_artifacts": [
+      {
+        "id": "cargo_manifest",
+        "path": "Cargo.toml",
+        "sha256": "6938d66b45d47a4fc653261d75c83ac696bdde7ccc30f7d0e4ffb362442d557d"
+      },
+      {
+        "id": "cargo_lock",
+        "path": "Cargo.lock",
+        "sha256": "7981280d62206971ffe3eaeadf1c0718f360102f962fb3d28efc6f3ddbadbcf8"
+      },
+      {
+        "id": "protocol_library",
+        "path": "src/lib.rs",
+        "sha256": "faf6562c79bba8bcf51ca1f53f04216e2c9bde4ddcacac2507192ec90145c21d"
+      },
+      {
+        "id": "control_binary",
+        "path": "src/bin/kurrentctl.rs",
+        "sha256": "3af080f9e928db9ce362565058dbcec347b57f36a5253ba326bdbcaccffc26bc"
+      },
+      {
+        "id": "protocol_tests",
+        "path": "tests/protocol_model.rs",
+        "sha256": "8d601c49d29c51d5b1c375b4a325518bddc683dcffb1c3f915018256d43d6f01"
+      },
+      {
+        "id": "kaspa_devnet_driver",
+        "path": "drivers/kaspa-devnet/src/main.rs",
+        "sha256": "e02f5b376184dee839b4f40a6d67fc4fec1fd902d6029356985eaf851a27ebe6"
+      },
+      {
+        "id": "driver_lock",
+        "path": "drivers/kaspa-devnet/Cargo.lock",
+        "sha256": "18ad740cb740367bfd56cf433b7135c8e4778532d5373ddfdb792b790b5241e3"
+      },
+      {
+        "id": "security_assumptions",
+        "path": "docs/KURRENT_SECURITY_ASSUMPTIONS.md",
+        "sha256": "7fe4170f433c9dff7cf7f3a8a084005842fa6e6ce677b8cf427bad8bdec4de6a"
+      },
+      {
+        "id": "interaction_safety_audit",
+        "path": "docs/KURRENT_INTERACTION_SAFETY_AUDIT.md",
+        "sha256": "f2157f4c1fa20db7598a790d2c04e752ac3dd878bcec21aabe52cf654f80bc0e"
+      },
+      {
+        "id": "production_acceptance",
+        "path": "docs/KURRENT_PRODUCTION_ACCEPTANCE.md",
+        "sha256": "478e77d6e427b368990c31c2b238213db5377c7522bc2a8b1c634e19ff2d56ae"
+      },
+      {
+        "id": "production_security_review_brief",
+        "path": "docs/PRODUCTION_SECURITY_REVIEW.md",
+        "sha256": "469f5271c1396ad80031ed053a20d7310610c924bf49d236de9270695ac5e589"
+      },
+      {
+        "id": "key_management_runbook",
+        "path": "docs/PRODUCTION_KEY_MANAGEMENT.md",
+        "sha256": "1ad6b818bc60c1e74b66cd74511a6530bc448a0007f4de785655fde62a2a01b1"
+      },
+      {
+        "id": "monitoring_runbook",
+        "path": "docs/PRODUCTION_MONITORING.md",
+        "sha256": "fcdead9764b45e75eee3d44f087f8d6395c96ac850769b27e6aabb288c8f6931"
+      },
+      {
+        "id": "recovery_runbook",
+        "path": "docs/PRODUCTION_RECOVERY.md",
+        "sha256": "634bd424a398ff09c4be9b73a0e0f1d95cbd82fc4dfd253986b28e21ff5dd5f9"
+      },
+      {
+        "id": "rollout_runbook",
+        "path": "docs/PRODUCTION_ROLLOUT.md",
+        "sha256": "88318a0ddde318f867d4cc6b1a2735930eb19e785cc4061c30dc8013db14f9a1"
+      },
+      {
+        "id": "local_acceptance",
+        "path": "evidence/kurrent-acceptance.json",
+        "sha256": "79caf71ec75fda63ae48ed60637cafccb79163ff8313a961bf287148928fc643"
+      },
+      {
+        "id": "target_profile",
+        "path": "evidence/production/target-profile.json",
+        "sha256": "17d714252e5d969198edab38b466cff3eaded40fdd0f14af4e6d048dafc048c8"
+      },
+      {
+        "id": "semantic_transaction_verifier",
+        "path": "evidence/production/semantic-transaction-verifier.json",
+        "sha256": "6842f6a4727c4d130c7e09b09adc1c3364f7dbc852bbb8d80f71f7b870e21ab1"
+      },
+      {
+        "id": "adversarial_soak",
+        "path": "evidence/production/adversarial-mempool-soak.json",
+        "sha256": "33a23ef5bacfcc355a0e49f3e54d2a6e7409e7d97d71f67a6c49680b551e4a11"
+      }
+    ],
+    "reviewed_git_commit": "a6445bd7bbdb1eea49e6886d8c46097becd3a015",
+    "reviewer_contact": "<external reviewer contact>",
+    "reviewer_independence_attestation": "<statement of independence, conflicts, and review authority>",
+    "reviewer_name": "<external reviewer name>",
+    "reviewer_organisation": "<external reviewer organisation>",
+    "schema_version": "kurrent-security-review-v1",
+    "scope": [
+      "protocol_design",
+      "state_channel_latest_state_safety",
+      "kaspa_script_and_covenant_constraints",
+      "participant_signer_model",
+      "ln_kaspa_atomic_swap_interop",
+      "refund_timeout_and_double_claim_safety",
+      "evidence_verification_and_production_gates",
+      "operational_controls_and_runbooks"
+    ],
+    "signed_attestation": {
+      "path": "evidence/production/security-review-attestation.txt",
+      "sha256": "<sha256 of signed attestation file bytes>"
+    },
+    "status": "passed",
+    "unresolved_blocking_findings": []
+  },
+  "repository": "https://github.com/a19q3/Kurrent.git",
+  "required_output_path": "evidence/production/security-review.json",
+  "required_report_path": "evidence/production/security-review-report.pdf",
+  "required_scope": [
+    "protocol_design",
+    "state_channel_latest_state_safety",
+    "kaspa_script_and_covenant_constraints",
+    "participant_signer_model",
+    "ln_kaspa_atomic_swap_interop",
+    "refund_timeout_and_double_claim_safety",
+    "evidence_verification_and_production_gates",
+    "operational_controls_and_runbooks"
+  ],
+  "required_signed_attestation_path": "evidence/production/security-review-attestation.txt",
+  "review_type_required": "independent_external_security_review",
+  "reviewed_artifacts": [
+    {
+      "id": "cargo_manifest",
+      "path": "Cargo.toml",
+      "sha256": "6938d66b45d47a4fc653261d75c83ac696bdde7ccc30f7d0e4ffb362442d557d"
+    },
+    {
+      "id": "cargo_lock",
+      "path": "Cargo.lock",
+      "sha256": "7981280d62206971ffe3eaeadf1c0718f360102f962fb3d28efc6f3ddbadbcf8"
+    },
+    {
+      "id": "protocol_library",
+      "path": "src/lib.rs",
+      "sha256": "faf6562c79bba8bcf51ca1f53f04216e2c9bde4ddcacac2507192ec90145c21d"
+    },
+    {
+      "id": "control_binary",
+      "path": "src/bin/kurrentctl.rs",
+      "sha256": "3af080f9e928db9ce362565058dbcec347b57f36a5253ba326bdbcaccffc26bc"
+    },
+    {
+      "id": "protocol_tests",
+      "path": "tests/protocol_model.rs",
+      "sha256": "8d601c49d29c51d5b1c375b4a325518bddc683dcffb1c3f915018256d43d6f01"
+    },
+    {
+      "id": "kaspa_devnet_driver",
+      "path": "drivers/kaspa-devnet/src/main.rs",
+      "sha256": "e02f5b376184dee839b4f40a6d67fc4fec1fd902d6029356985eaf851a27ebe6"
+    },
+    {
+      "id": "driver_lock",
+      "path": "drivers/kaspa-devnet/Cargo.lock",
+      "sha256": "18ad740cb740367bfd56cf433b7135c8e4778532d5373ddfdb792b790b5241e3"
+    },
+    {
+      "id": "security_assumptions",
+      "path": "docs/KURRENT_SECURITY_ASSUMPTIONS.md",
+      "sha256": "7fe4170f433c9dff7cf7f3a8a084005842fa6e6ce677b8cf427bad8bdec4de6a"
+    },
+    {
+      "id": "interaction_safety_audit",
+      "path": "docs/KURRENT_INTERACTION_SAFETY_AUDIT.md",
+      "sha256": "f2157f4c1fa20db7598a790d2c04e752ac3dd878bcec21aabe52cf654f80bc0e"
+    },
+    {
+      "id": "production_acceptance",
+      "path": "docs/KURRENT_PRODUCTION_ACCEPTANCE.md",
+      "sha256": "478e77d6e427b368990c31c2b238213db5377c7522bc2a8b1c634e19ff2d56ae"
+    },
+    {
+      "id": "production_security_review_brief",
+      "path": "docs/PRODUCTION_SECURITY_REVIEW.md",
+      "sha256": "469f5271c1396ad80031ed053a20d7310610c924bf49d236de9270695ac5e589"
+    },
+    {
+      "id": "key_management_runbook",
+      "path": "docs/PRODUCTION_KEY_MANAGEMENT.md",
+      "sha256": "1ad6b818bc60c1e74b66cd74511a6530bc448a0007f4de785655fde62a2a01b1"
+    },
+    {
+      "id": "monitoring_runbook",
+      "path": "docs/PRODUCTION_MONITORING.md",
+      "sha256": "fcdead9764b45e75eee3d44f087f8d6395c96ac850769b27e6aabb288c8f6931"
+    },
+    {
+      "id": "recovery_runbook",
+      "path": "docs/PRODUCTION_RECOVERY.md",
+      "sha256": "634bd424a398ff09c4be9b73a0e0f1d95cbd82fc4dfd253986b28e21ff5dd5f9"
+    },
+    {
+      "id": "rollout_runbook",
+      "path": "docs/PRODUCTION_ROLLOUT.md",
+      "sha256": "88318a0ddde318f867d4cc6b1a2735930eb19e785cc4061c30dc8013db14f9a1"
+    },
+    {
+      "id": "local_acceptance",
+      "path": "evidence/kurrent-acceptance.json",
+      "sha256": "79caf71ec75fda63ae48ed60637cafccb79163ff8313a961bf287148928fc643"
+    },
+    {
+      "id": "target_profile",
+      "path": "evidence/production/target-profile.json",
+      "sha256": "17d714252e5d969198edab38b466cff3eaded40fdd0f14af4e6d048dafc048c8"
+    },
+    {
+      "id": "semantic_transaction_verifier",
+      "path": "evidence/production/semantic-transaction-verifier.json",
+      "sha256": "6842f6a4727c4d130c7e09b09adc1c3364f7dbc852bbb8d80f71f7b870e21ab1"
+    },
+    {
+      "id": "adversarial_soak",
+      "path": "evidence/production/adversarial-mempool-soak.json",
+      "sha256": "33a23ef5bacfcc355a0e49f3e54d2a6e7409e7d97d71f67a6c49680b551e4a11"
+    }
+  ],
+  "schema_version": "kurrent-security-review-request-v1",
+  "status": "ready_for_external_review"
+}

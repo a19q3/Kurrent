@@ -1,13 +1,13 @@
 {
-  "receipt_hash": "27dae7a0ded91e7bb3ea7165c7356982ce6d55385a846221c1590120966b3f92",
+  "receipt_hash": "0672425e962ada2b1b59141f076490d193b5d10fe3e8be9b3ab5b2700bac6236",
   "scope": {
     "channel_id": "channel-a",
     "direction": null,
     "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
     "factory_id": null,
-    "funding_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+    "funding_outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
     "network_profile": "kaspa-simnet-toccata",
-    "output_id": "098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c:0,098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c:1",
+    "output_id": "f9d45e4c17f73ac5d2c32ec4e2154eb6690156d8a6cf657df53591fa3079921f:0,f9d45e4c17f73ac5d2c32ec4e2154eb6690156d8a6cf657df53591fa3079921f:1",
     "protocol_version": 1,
     "settlement_template_hash": "f5f1c78041f422e722b3c9e46b9b142e35aa758a907707164f7df4fb9cd79ff9",
     "state_number": 2,

@@ -29,7 +29,7 @@ use serde_json::{json, Value};
 use std::{
     env, fs,
     path::{Path, PathBuf},
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 const FUNDING_FEE: u64 = 2_000_000;
@@ -47,11 +47,21 @@ struct LiveKaspaContext<'a> {
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() {
-    let output_dir = env::args()
-        .nth(1)
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("evidence"));
-    if let Err(err) = run(&output_dir).await {
+    let mut args = env::args().skip(1);
+    let first = args.next();
+    let result = if first.as_deref() == Some("verify-semantic-evidence") {
+        let output_dir = args
+            .next()
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("evidence"));
+        run_semantic_evidence_verifier(&output_dir).map(|_| ())
+    } else {
+        let output_dir = first
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("evidence"));
+        run(&output_dir).await
+    };
+    if let Err(err) = result {
         eprintln!("{err}");
         std::process::exit(1);
     }
@@ -932,6 +942,578 @@ async fn mine_block(client: &GrpcClient, miner_address: &Address) -> Result<(), 
         .map_err(|e| format!("failed to submit Kaspa block template: {e}"))?;
     tokio::time::sleep(Duration::from_millis(20)).await;
     Ok(())
+}
+
+fn run_semantic_evidence_verifier(output_dir: &Path) -> Result<(), String> {
+    fs::create_dir_all(output_dir.join("production")).map_err(|e| {
+        format!(
+            "failed to create production evidence directory under {}: {e}",
+            output_dir.display()
+        )
+    })?;
+
+    let mut checks = Vec::new();
+    let mut decoded_transactions = 0_u64;
+    let mut verified_hex_records = 0_u64;
+
+    verify_state_channel_semantics(
+        output_dir,
+        &mut checks,
+        &mut decoded_transactions,
+        &mut verified_hex_records,
+    )?;
+    verify_factory_semantics(
+        output_dir,
+        &mut checks,
+        &mut decoded_transactions,
+        &mut verified_hex_records,
+    )?;
+    verify_hashlock_semantics(
+        output_dir,
+        &mut checks,
+        &mut decoded_transactions,
+        &mut verified_hex_records,
+    )?;
+    verify_refund_semantics(
+        output_dir,
+        &mut checks,
+        &mut decoded_transactions,
+        &mut verified_hex_records,
+    )?;
+
+    let report = json!({
+        "status": "passed",
+        "checked_at_unix": unix_now(),
+        "decoded_transactions": decoded_transactions,
+        "verified_hex_records": verified_hex_records,
+        "checks": checks,
+    });
+    write_json(
+        &output_dir.join("production"),
+        "semantic-transaction-verifier.json",
+        &report,
+    )
+}
+
+fn verify_state_channel_semantics(
+    output_dir: &Path,
+    checks: &mut Vec<Value>,
+    decoded_transactions: &mut u64,
+    verified_hex_records: &mut u64,
+) -> Result<(), String> {
+    let report = read_json(&output_dir.join("kurrent-live-state-channel-evidence.json"))?;
+    require_status(&report, "state channel live evidence")?;
+
+    let funding_tx = transaction_from_record(&report, "/funding/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &funding_tx,
+        &required_str(&report, "/funding/txid")?,
+        "state funding",
+    )?;
+    require_outpoint(
+        &required_str(&report, "/funding/outpoint")?,
+        &funding_tx,
+        0,
+        "state funding outpoint",
+    )?;
+    require_output_value(
+        &funding_tx,
+        0,
+        required_u64(&report, "/funding/value")?,
+        "state funding value",
+    )?;
+
+    let state_update_tx =
+        transaction_from_record(&report, "/state_update/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &state_update_tx,
+        &required_str(&report, "/state_update/txid")?,
+        "state update",
+    )?;
+    require_input_outpoint(
+        &state_update_tx,
+        0,
+        &required_str(&report, "/funding/outpoint")?,
+        "state update spends funding",
+    )?;
+    require_outpoint(
+        &required_str(&report, "/state_update/outpoint")?,
+        &state_update_tx,
+        0,
+        "state update outpoint",
+    )?;
+    require_output_value(
+        &state_update_tx,
+        0,
+        required_u64(&report, "/state_update/value")?,
+        "state update value",
+    )?;
+
+    let stale_tx = transaction_from_record(
+        &report,
+        "/stale_state_rejection/attempted_tx",
+        verified_hex_records,
+    )?;
+    *decoded_transactions += 1;
+    require_txid(
+        &stale_tx,
+        &required_str(&report, "/stale_state_rejection/attempted_txid")?,
+        "stale state attempt",
+    )?;
+    require_input_outpoint(
+        &stale_tx,
+        0,
+        &required_str(&report, "/state_update/outpoint")?,
+        "stale state attempt spends latest state output",
+    )?;
+    require_eq(
+        required_str(&report, "/stale_state_rejection/status")?,
+        "rejected",
+        "stale state rejection status",
+    )?;
+
+    let settlement_tx =
+        transaction_from_record(&report, "/settlement/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &settlement_tx,
+        &required_str(&report, "/settlement/txid")?,
+        "state settlement",
+    )?;
+    require_input_outpoint(
+        &settlement_tx,
+        0,
+        &required_str(&report, "/state_update/outpoint")?,
+        "settlement spends latest state output",
+    )?;
+    require_output_value(
+        &settlement_tx,
+        0,
+        required_u64(&report, "/settlement/outputs/alice")?,
+        "settlement Alice output",
+    )?;
+    require_output_value(
+        &settlement_tx,
+        1,
+        required_u64(&report, "/settlement/outputs/bob")?,
+        "settlement Bob output",
+    )?;
+
+    for pointer in [
+        "/state_update/witness",
+        "/stale_state_rejection/witness",
+        "/settlement/witness",
+        "/settlement/state_1_redeem_script",
+        "/settlement/state_2_redeem_script",
+    ] {
+        verify_hex_record_hash(&required_value(&report, pointer)?, verified_hex_records)?;
+    }
+    checks.push(json!({
+        "id": "state_channel_transactions",
+        "status": "passed",
+        "details": "funding, update, stale rejection, and settlement transactions decode and match recorded txids, outpoints, values, and rejection status"
+    }));
+    Ok(())
+}
+
+fn verify_factory_semantics(
+    output_dir: &Path,
+    checks: &mut Vec<Value>,
+    decoded_transactions: &mut u64,
+    verified_hex_records: &mut u64,
+) -> Result<(), String> {
+    let report = read_json(&output_dir.join("kurrent-live-factory-evidence.json"))?;
+    require_status(&report, "factory live evidence")?;
+    let funding_tx = transaction_from_record(&report, "/funding/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &funding_tx,
+        &required_str(&report, "/funding/txid")?,
+        "factory funding",
+    )?;
+    require_outpoint(
+        &required_str(&report, "/funding/outpoint")?,
+        &funding_tx,
+        0,
+        "factory funding outpoint",
+    )?;
+
+    let materialisation_tx =
+        transaction_from_record(&report, "/materialisation/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &materialisation_tx,
+        &required_str(&report, "/materialisation/txid")?,
+        "factory materialisation",
+    )?;
+    require_input_outpoint(
+        &materialisation_tx,
+        0,
+        &required_str(&report, "/funding/outpoint")?,
+        "materialisation spends factory funding",
+    )?;
+    require_output_value(
+        &materialisation_tx,
+        0,
+        required_u64(&report, "/materialisation/outputs/alice")?,
+        "factory materialisation Alice output",
+    )?;
+    require_output_value(
+        &materialisation_tx,
+        1,
+        required_u64(&report, "/materialisation/outputs/bob")?,
+        "factory materialisation Bob output",
+    )?;
+    for pointer in ["/materialisation/witness", "/materialisation/redeem_script"] {
+        verify_hex_record_hash(&required_value(&report, pointer)?, verified_hex_records)?;
+    }
+    checks.push(json!({
+        "id": "factory_transactions",
+        "status": "passed",
+        "details": "factory funding and materialisation transactions decode and preserve recorded txid, spend, and output semantics"
+    }));
+    Ok(())
+}
+
+fn verify_hashlock_semantics(
+    output_dir: &Path,
+    checks: &mut Vec<Value>,
+    decoded_transactions: &mut u64,
+    verified_hex_records: &mut u64,
+) -> Result<(), String> {
+    let ln = read_json(&output_dir.join("ln-devnet-evidence.json"))?;
+    require_status(&ln, "LN devnet evidence")?;
+    let preimage = hex::decode(required_str(&ln, "/invoice/preimage")?)
+        .map_err(|e| format!("LN invoice preimage is not valid hex: {e}"))?;
+    let payment_hash = required_str(&ln, "/invoice/payment_hash")?;
+    require_eq(
+        sha256_hex(&preimage),
+        payment_hash.as_str(),
+        "LN preimage hashes to payment hash",
+    )?;
+
+    for (label, file_name) in [
+        ("ln-to-kaspa", "kurrent-live-ln-to-kaspa-evidence.json"),
+        ("kaspa-to-ln", "kurrent-live-kaspa-to-ln-evidence.json"),
+    ] {
+        let report = read_json(&output_dir.join(file_name))?;
+        require_status(&report, label)?;
+        require_eq(
+            required_str(&report, "/preimage_sha256")?,
+            payment_hash.as_str(),
+            &format!("{label} preimage binding"),
+        )?;
+        let funding_tx = transaction_from_record(&report, "/funding/raw_tx", verified_hex_records)?;
+        *decoded_transactions += 1;
+        require_txid(
+            &funding_tx,
+            &required_str(&report, "/funding/txid")?,
+            &format!("{label} funding"),
+        )?;
+        require_outpoint(
+            &required_str(&report, "/funding/outpoint")?,
+            &funding_tx,
+            0,
+            &format!("{label} funding outpoint"),
+        )?;
+
+        let settlement_tx =
+            transaction_from_record(&report, "/settlement/raw_tx", verified_hex_records)?;
+        *decoded_transactions += 1;
+        require_txid(
+            &settlement_tx,
+            &required_str(&report, "/settlement/txid")?,
+            &format!("{label} settlement"),
+        )?;
+        require_input_outpoint(
+            &settlement_tx,
+            0,
+            &required_str(&report, "/funding/outpoint")?,
+            &format!("{label} settlement spends hashlock funding"),
+        )?;
+        require_output_count(
+            &settlement_tx,
+            1,
+            &format!("{label} settlement output count"),
+        )?;
+        for pointer in ["/settlement/witness", "/settlement/redeem_script"] {
+            verify_hex_record_hash(&required_value(&report, pointer)?, verified_hex_records)?;
+        }
+    }
+    checks.push(json!({
+        "id": "hashlock_transactions",
+        "status": "passed",
+        "details": "both hashlock directions decode, consume the LN preimage hash, and spend their recorded funding outputs"
+    }));
+    Ok(())
+}
+
+fn verify_refund_semantics(
+    output_dir: &Path,
+    checks: &mut Vec<Value>,
+    decoded_transactions: &mut u64,
+    verified_hex_records: &mut u64,
+) -> Result<(), String> {
+    const REFUND_SEQUENCE: u64 = 120;
+    let report = read_json(&output_dir.join("kurrent-live-refund-evidence.json"))?;
+    require_status(&report, "refund live evidence")?;
+    let funding_tx = transaction_from_record(&report, "/funding/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &funding_tx,
+        &required_str(&report, "/funding/txid")?,
+        "refund funding",
+    )?;
+    require_outpoint(
+        &required_str(&report, "/funding/outpoint")?,
+        &funding_tx,
+        0,
+        "refund funding outpoint",
+    )?;
+
+    let early_tx = transaction_from_record(
+        &report,
+        "/early_refund_rejection/attempted_tx",
+        verified_hex_records,
+    )?;
+    *decoded_transactions += 1;
+    require_txid(
+        &early_tx,
+        &required_str(&report, "/early_refund_rejection/attempted_txid")?,
+        "early refund attempt",
+    )?;
+    require_input_outpoint(
+        &early_tx,
+        0,
+        &required_str(&report, "/funding/outpoint")?,
+        "early refund spends refund funding",
+    )?;
+    require_input_sequence(&early_tx, 0, REFUND_SEQUENCE - 1, "early refund sequence")?;
+    require_eq(
+        required_str(&report, "/early_refund_rejection/status")?,
+        "rejected",
+        "early refund rejection status",
+    )?;
+
+    let refund_tx = transaction_from_record(&report, "/refund/raw_tx", verified_hex_records)?;
+    *decoded_transactions += 1;
+    require_txid(
+        &refund_tx,
+        &required_str(&report, "/refund/txid")?,
+        "mature refund",
+    )?;
+    require_input_outpoint(
+        &refund_tx,
+        0,
+        &required_str(&report, "/funding/outpoint")?,
+        "mature refund spends refund funding",
+    )?;
+    require_input_sequence(&refund_tx, 0, REFUND_SEQUENCE, "mature refund sequence")?;
+    require_output_count(&refund_tx, 1, "mature refund output count")?;
+    for pointer in [
+        "/early_refund_rejection/witness",
+        "/refund/witness",
+        "/refund/redeem_script",
+    ] {
+        verify_hex_record_hash(&required_value(&report, pointer)?, verified_hex_records)?;
+    }
+    checks.push(json!({
+        "id": "refund_transactions",
+        "status": "passed",
+        "details": "early and mature refund transactions decode, spend the recorded funding output, and use the expected sequence-lock values"
+    }));
+    Ok(())
+}
+
+fn transaction_from_record(
+    report: &Value,
+    pointer: &str,
+    verified_hex_records: &mut u64,
+) -> Result<Transaction, String> {
+    let record = required_value(report, pointer)?;
+    let bytes = verify_hex_record_hash(&record, verified_hex_records)?;
+    borsh::from_slice(&bytes).map_err(|e| format!("failed to decode transaction at {pointer}: {e}"))
+}
+
+fn verify_hex_record_hash(
+    record: &Value,
+    verified_hex_records: &mut u64,
+) -> Result<Vec<u8>, String> {
+    let path = required_str(record, "/path")?;
+    let expected_hash = required_str(record, "/sha256")?;
+    let bytes = read_hex_file(&resolve_record_path(&path))?;
+    let actual_hash = sha256_hex(&bytes);
+    if actual_hash != expected_hash {
+        return Err(format!(
+            "hex evidence hash mismatch for {path}: expected {expected_hash}, actual {actual_hash}"
+        ));
+    }
+    *verified_hex_records += 1;
+    Ok(bytes)
+}
+
+fn read_hex_file(path: &Path) -> Result<Vec<u8>, String> {
+    let text = fs::read_to_string(path)
+        .map_err(|e| format!("failed to read hex evidence {}: {e}", path.display()))?;
+    hex::decode(text.trim())
+        .map_err(|e| format!("hex evidence {} is not valid hex: {e}", path.display()))
+}
+
+fn read_json(path: &Path) -> Result<Value, String> {
+    let bytes = fs::read(path).map_err(|e| format!("failed to read {}: {e}", path.display()))?;
+    serde_json::from_slice(&bytes).map_err(|e| format!("failed to parse {}: {e}", path.display()))
+}
+
+fn resolve_record_path(path: &str) -> PathBuf {
+    let path = PathBuf::from(path);
+    if path.is_absolute() {
+        path
+    } else {
+        env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join(path)
+    }
+}
+
+fn required_value(value: &Value, pointer: &str) -> Result<Value, String> {
+    value
+        .pointer(pointer)
+        .cloned()
+        .ok_or_else(|| format!("missing required JSON pointer {pointer} in {value}"))
+}
+
+fn required_str(value: &Value, pointer: &str) -> Result<String, String> {
+    value
+        .pointer(pointer)
+        .and_then(Value::as_str)
+        .map(str::to_string)
+        .ok_or_else(|| format!("missing required string pointer {pointer} in {value}"))
+}
+
+fn required_u64(value: &Value, pointer: &str) -> Result<u64, String> {
+    value
+        .pointer(pointer)
+        .and_then(Value::as_u64)
+        .ok_or_else(|| format!("missing required integer pointer {pointer} in {value}"))
+}
+
+fn require_status(value: &Value, label: &str) -> Result<(), String> {
+    require_eq(
+        required_str(value, "/status")?,
+        "passed",
+        &format!("{label} status"),
+    )
+}
+
+fn require_eq(actual: impl AsRef<str>, expected: &str, label: &str) -> Result<(), String> {
+    let actual = actual.as_ref();
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(format!("{label}: expected {expected}, actual {actual}"))
+    }
+}
+
+fn require_txid(tx: &Transaction, expected: &str, label: &str) -> Result<(), String> {
+    require_eq(tx.id().to_string(), expected, label)
+}
+
+fn require_outpoint(
+    expected: &str,
+    tx: &Transaction,
+    output_index: usize,
+    label: &str,
+) -> Result<(), String> {
+    require_output_index(tx, output_index, label)?;
+    require_eq(format!("{}:{output_index}", tx.id()), expected, label)
+}
+
+fn require_input_outpoint(
+    tx: &Transaction,
+    input_index: usize,
+    expected: &str,
+    label: &str,
+) -> Result<(), String> {
+    let input = tx
+        .inputs
+        .get(input_index)
+        .ok_or_else(|| format!("{label}: missing input {input_index}"))?;
+    require_eq(
+        format!(
+            "{}:{}",
+            input.previous_outpoint.transaction_id, input.previous_outpoint.index
+        ),
+        expected,
+        label,
+    )
+}
+
+fn require_input_sequence(
+    tx: &Transaction,
+    input_index: usize,
+    expected: u64,
+    label: &str,
+) -> Result<(), String> {
+    let input = tx
+        .inputs
+        .get(input_index)
+        .ok_or_else(|| format!("{label}: missing input {input_index}"))?;
+    if input.sequence == expected {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label}: expected sequence {expected}, actual {}",
+            input.sequence
+        ))
+    }
+}
+
+fn require_output_value(
+    tx: &Transaction,
+    output_index: usize,
+    expected: u64,
+    label: &str,
+) -> Result<(), String> {
+    let output = tx
+        .outputs
+        .get(output_index)
+        .ok_or_else(|| format!("{label}: missing output {output_index}"))?;
+    if output.value == expected {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label}: expected value {expected}, actual {}",
+            output.value
+        ))
+    }
+}
+
+fn require_output_count(tx: &Transaction, expected: usize, label: &str) -> Result<(), String> {
+    let actual = tx.outputs.len();
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label}: expected {expected} outputs, actual {actual}"
+        ))
+    }
+}
+
+fn require_output_index(tx: &Transaction, output_index: usize, label: &str) -> Result<(), String> {
+    if output_index < tx.outputs.len() {
+        Ok(())
+    } else {
+        Err(format!("{label}: missing output {output_index}"))
+    }
+}
+
+fn unix_now() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_secs())
+        .unwrap_or(0)
 }
 
 fn write_raw_tx(output_dir: &Path, name: &str, tx: &Transaction) -> Result<FileRecord, String> {

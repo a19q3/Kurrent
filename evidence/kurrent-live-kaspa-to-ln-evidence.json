@@ -1,27 +1,27 @@
 {
   "flow": "kaspa-to-ln",
   "funding": {
-    "outpoint": "e6e98ccca9551de78e39167883e284445c88ff91c3cca7eb813c90e9e478ef4d:0",
+    "outpoint": "3155bacb2015e089c740462ed7bafba79301e4b1d3186296c2a56ec30f0e342a:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-kaspa_to_ln-funding-tx.hex",
-      "sha256": "af96f578dcf8f117a0ffee8bde4bf3258324822ffff50a71df01c2c224ad023c"
+      "sha256": "27ba52162418e1310daedf62cb8b078a68ca2c376abb458bd76af98a66a90354"
     },
-    "txid": "e6e98ccca9551de78e39167883e284445c88ff91c3cca7eb813c90e9e478ef4d"
+    "txid": "3155bacb2015e089c740462ed7bafba79301e4b1d3186296c2a56ec30f0e342a"
   },
   "preimage_sha256": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
   "settlement": {
     "raw_tx": {
       "path": "evidence/kurrent-live-kaspa_to_ln-settlement-tx.hex",
-      "sha256": "cbeb209d9c45122ba3051b4f3aca32aac07fde1edf8d6c0326c9055f0415a9f4"
+      "sha256": "1ce93a8f5eb36dd1bcafe56918f06b935e44dc18779e3ceb9622b1665c152a85"
     },
     "redeem_script": {
       "path": "evidence/kurrent-live-kaspa_to_ln-redeem-script.hex",
-      "sha256": "ae27c82531d6179c383d78a73327ad4c39dac4f5702463e7d6f43fe615721323"
+      "sha256": "d4f6ad50865646ad234a45a01eebd5cb38c4c5eaa004d78002b14bf012b1e8ab"
     },
-    "txid": "741e43ad64fdf8024daedfa5902b3865134f6422960c6fd5a8eaf3fe3138ca51",
+    "txid": "0704a7f00a8557bcdaab5d9884eaac00f71083ef4c5e0fd91ccf6687c2fd49c3",
     "witness": {
       "path": "evidence/kurrent-live-kaspa_to_ln-settlement-witness.hex",
-      "sha256": "e5692cf3ba75d6276e1b603bbbb547295f48912558116d8398d9502d655dbd1a"
+      "sha256": "7c51a4be009b3e420f52ec23c736466fd83e02388a05dd2e0c4effe5795d74b5"
     }
   },
   "status": "passed"

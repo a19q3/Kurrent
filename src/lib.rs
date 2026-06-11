@@ -1,3 +1,4 @@
+use secp256k1::{schnorr::Signature, Message, XOnlyPublicKey};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
@@ -13,6 +14,7 @@ pub const DOMAIN_FACTORY_MATERIALISATION: &str = "KURRENT_FACTORY_MATERIALISATIO
 pub const DOMAIN_LN_INTEROP: &str = "KURRENT_LN_INTEROP_V1";
 pub const DOMAIN_PARTICIPANT_SET: &str = "KURRENT_PARTICIPANT_SET_V1";
 pub const DOMAIN_CLAIM_SCOPE: &str = "KURRENT_CLAIM_SCOPE_V1";
+pub const DOMAIN_STATE_SIGNATURE: &str = "KURRENT_STATE_SIGNATURE_V1";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KurrentError {
@@ -76,6 +78,8 @@ pub enum KurrentError {
     },
     ParticipantSetMismatch,
     UnauthorizedParticipant(String),
+    InvalidParticipantPublicKey(String),
+    InvalidParticipantSignature(String),
     InsufficientSignatures {
         required: u16,
         actual: u16,
@@ -303,7 +307,14 @@ impl VirtualChannelState {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AccessManifest {
     pub authorised_participants: Vec<String>,
+    pub participant_public_keys: BTreeMap<String, String>,
     pub required_signatures: u16,
+}
+
+#[derive(Debug, Serialize)]
+struct StateUpdateSigningPayload<'a> {
+    header: &'a LatestStateHeader,
+    balances: &'a BTreeMap<String, u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -362,12 +373,112 @@ pub struct EvidenceBundle {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ToolEvidence {
+    pub name: String,
+    pub path: Option<String>,
+    pub version: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FlowEvidenceFile {
+    pub flow: String,
+    pub path: String,
+    pub sha256: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct OpcodeCapabilityEvidence {
+    pub source_repo: Option<String>,
+    pub op_cat: String,
+    pub introspection: String,
+    pub checksigfromstack: String,
+    pub hashlock: String,
+    pub timelock_refund: String,
+    pub covenant_output_constraints: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AcceptanceReport {
     pub timestamp: String,
     pub git_commit: Option<String>,
+    pub tool_versions: Vec<ToolEvidence>,
+    pub kaspa_branch_profile: Option<String>,
+    pub enabled_opcode_capability_evidence: OpcodeCapabilityEvidence,
+    pub network_devnet_id: String,
+    pub state_channel_funding_txid_outpoint: String,
+    pub state_txids_or_transition_ids: Vec<String>,
+    pub latest_state_settlement_txid_outpoint: String,
+    pub factory_id: String,
+    pub virtual_channel_ids: Vec<String>,
+    pub factory_state_roots_before_after: Vec<String>,
+    pub materialisation_txid_outpoint: String,
+    pub ln_invoice_payment_preimage_evidence: Vec<EvidenceFile>,
+    pub refund_txid_outpoint: String,
+    pub raw_transaction_paths_and_hashes: Vec<EvidenceFile>,
+    pub script_paths_and_hashes: Vec<EvidenceFile>,
+    pub witness_paths_and_hashes: Vec<EvidenceFile>,
+    pub flow_evidence_paths_and_hashes: Vec<FlowEvidenceFile>,
+    pub settlement_template_hashes: Vec<String>,
+    pub channel_receipt_hashes: Vec<String>,
+    pub command_transcript_paths: Vec<String>,
+    pub flows: BTreeMap<String, String>,
     pub status: String,
+    pub blocker_code: String,
     pub blockers: Vec<String>,
-    pub evidence_bundle: EvidenceBundle,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProductionEvidenceRequirement {
+    pub id: String,
+    pub description: String,
+    pub evidence_path: String,
+    pub present: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProductionReadinessReport {
+    pub timestamp: String,
+    pub status: String,
+    pub acceptance_status: String,
+    pub requirements: Vec<ProductionEvidenceRequirement>,
+    pub blockers: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SecurityReviewArtifact {
+    pub id: String,
+    pub path: String,
+    pub sha256: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SecurityReviewFindingSummary {
+    pub critical_open: u64,
+    pub high_open: u64,
+    pub medium_open: u64,
+    pub low_open: u64,
+    pub accepted_risk_count: u64,
+    pub fixed_count: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SecurityReviewEvidence {
+    pub schema_version: String,
+    pub status: String,
+    pub review_type: String,
+    pub completed_at: String,
+    pub reviewer_name: String,
+    pub reviewer_organisation: String,
+    pub reviewer_contact: String,
+    pub reviewer_independence_attestation: String,
+    pub reviewed_git_commit: String,
+    pub scope: Vec<String>,
+    pub methodology: Vec<String>,
+    pub reviewed_artifacts: Vec<SecurityReviewArtifact>,
+    pub finding_summary: SecurityReviewFindingSummary,
+    pub unresolved_blocking_findings: Vec<String>,
+    pub report: EvidenceFile,
+    pub signed_attestation: EvidenceFile,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -540,6 +651,24 @@ pub fn participant_set_hash(participants: &[String]) -> String {
     hash_json(DOMAIN_PARTICIPANT_SET, &sorted)
 }
 
+pub fn state_update_signing_hash(update: &StateUpdate) -> String {
+    hash_json(
+        DOMAIN_STATE_SIGNATURE,
+        &StateUpdateSigningPayload {
+            header: &update.header,
+            balances: &update.balances,
+        },
+    )
+}
+
+pub fn state_update_signing_digest(update: &StateUpdate) -> [u8; 32] {
+    let hash = state_update_signing_hash(update);
+    let bytes = hex::decode(hash).expect("state update signing hash must be valid hex");
+    bytes
+        .try_into()
+        .expect("state update signing hash must be 32 bytes")
+}
+
 pub fn validate_channel_update(
     config: &KurrentChannelConfig,
     funding: &FundingState,
@@ -604,6 +733,15 @@ pub fn validate_channel_update(
     if participants != authorised {
         return Err(KurrentError::ParticipantSetMismatch);
     }
+    let public_key_participants: BTreeSet<_> = config
+        .access_manifest
+        .participant_public_keys
+        .keys()
+        .cloned()
+        .collect();
+    if public_key_participants != participants {
+        return Err(KurrentError::ParticipantSetMismatch);
+    }
 
     for participant in update.balances.keys() {
         if !participants.contains(participant) {
@@ -637,13 +775,14 @@ pub fn validate_channel_update(
     }
 
     let mut valid_signatures = BTreeSet::new();
+    let digest = state_update_signing_digest(update);
     for (participant, signature) in &update.participant_signatures {
         if !authorised.contains(participant) {
             return Err(KurrentError::UnauthorizedParticipant(participant.clone()));
         }
-        if !signature.is_empty() {
-            valid_signatures.insert(participant.clone());
-        }
+        let public_key = &config.access_manifest.participant_public_keys[participant];
+        verify_participant_signature(participant, public_key, signature, digest)?;
+        valid_signatures.insert(participant.clone());
     }
     let actual = valid_signatures.len() as u16;
     if actual < config.access_manifest.required_signatures {
@@ -653,6 +792,35 @@ pub fn validate_channel_update(
         });
     }
     Ok(())
+}
+
+fn verify_participant_signature(
+    participant: &str,
+    public_key: &str,
+    signature: &str,
+    digest: [u8; 32],
+) -> Result<()> {
+    let public_key_bytes = decode_fixed_hex::<32>(public_key)
+        .map_err(|_| KurrentError::InvalidParticipantPublicKey(participant.to_string()))?;
+    let signature_bytes = decode_fixed_hex::<64>(signature)
+        .map_err(|_| KurrentError::InvalidParticipantSignature(participant.to_string()))?;
+    let public_key = XOnlyPublicKey::from_slice(&public_key_bytes)
+        .map_err(|_| KurrentError::InvalidParticipantPublicKey(participant.to_string()))?;
+    let signature = Signature::from_slice(&signature_bytes)
+        .map_err(|_| KurrentError::InvalidParticipantSignature(participant.to_string()))?;
+    let message = Message::from_digest(digest);
+    signature
+        .verify(&message, &public_key)
+        .map_err(|_| KurrentError::InvalidParticipantSignature(participant.to_string()))
+}
+
+fn decode_fixed_hex<const N: usize>(
+    value: &str,
+) -> std::result::Result<[u8; N], hex::FromHexError> {
+    let bytes = hex::decode(value)?;
+    bytes
+        .try_into()
+        .map_err(|_| hex::FromHexError::InvalidStringLength)
 }
 
 pub fn validate_materialisation(

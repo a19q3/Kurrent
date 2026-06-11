@@ -1,0 +1,28 @@
+{
+  "checked_at_unix": 1781188014,
+  "checks": [
+    {
+      "details": "funding, update, stale rejection, and settlement transactions decode and match recorded txids, outpoints, values, and rejection status",
+      "id": "state_channel_transactions",
+      "status": "passed"
+    },
+    {
+      "details": "factory funding and materialisation transactions decode and preserve recorded txid, spend, and output semantics",
+      "id": "factory_transactions",
+      "status": "passed"
+    },
+    {
+      "details": "both hashlock directions decode, consume the LN preimage hash, and spend their recorded funding outputs",
+      "id": "hashlock_transactions",
+      "status": "passed"
+    },
+    {
+      "details": "early and mature refund transactions decode, spend the recorded funding output, and use the expected sequence-lock values",
+      "id": "refund_transactions",
+      "status": "passed"
+    }
+  ],
+  "decoded_transactions": 13,
+  "status": "passed",
+  "verified_hex_records": 27
+}

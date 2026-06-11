@@ -1,5 +1,6 @@
 use kurrent::client::*;
 use kurrent::*;
+use secp256k1::{Keypair, Message, Secp256k1, SecretKey};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -24,6 +25,35 @@ fn participants() -> Vec<String> {
     vec!["alice".to_string(), "bob".to_string()]
 }
 
+fn keypair_for(participant: &str) -> Keypair {
+    let byte = match participant {
+        "alice" => 1,
+        "bob" => 2,
+        _ => 42,
+    };
+    let secret = SecretKey::from_slice(&[byte; 32]).unwrap();
+    Keypair::from_secret_key(secp256k1::SECP256K1, &secret)
+}
+
+fn participant_public_keys() -> BTreeMap<String, String> {
+    participants()
+        .into_iter()
+        .map(|participant| {
+            let keypair = keypair_for(&participant);
+            let (public_key, _) = keypair.x_only_public_key();
+            (participant, hex::encode(public_key.serialize()))
+        })
+        .collect()
+}
+
+fn sign_update_for(participant: &str, update: &StateUpdate) -> String {
+    let keypair = keypair_for(participant);
+    let message = Message::from_digest(state_update_signing_digest(update));
+    let secp = Secp256k1::new();
+    let signature = secp.sign_schnorr_no_aux_rand(&message, &keypair);
+    hex::encode(signature.as_ref())
+}
+
 fn channel_config() -> KurrentChannelConfig {
     KurrentChannelConfig {
         protocol_version: 1,
@@ -38,6 +68,7 @@ fn channel_config() -> KurrentChannelConfig {
         },
         access_manifest: AccessManifest {
             authorised_participants: participants(),
+            participant_public_keys: participant_public_keys(),
             required_signatures: 2,
         },
     }
@@ -54,7 +85,7 @@ fn funding() -> FundingState {
 }
 
 fn update(number: u64, commitment: &str, template_hash: String) -> StateUpdate {
-    StateUpdate {
+    let mut state = StateUpdate {
         header: LatestStateHeader {
             network_profile: "local-toccata-devnet".to_string(),
             genesis_or_devnet_id: Some("devnet-1".to_string()),
@@ -73,11 +104,13 @@ fn update(number: u64, commitment: &str, template_hash: String) -> StateUpdate {
             domain_separator: DOMAIN_STATE.to_string(),
         },
         balances: map(&[("alice", 600), ("bob", 400)]),
-        participant_signatures: BTreeMap::from([
-            ("alice".to_string(), "sig-a".to_string()),
-            ("bob".to_string(), "sig-b".to_string()),
-        ]),
+        participant_signatures: BTreeMap::new(),
+    };
+    for participant in participants() {
+        let signature = sign_update_for(&participant, &state);
+        state.participant_signatures.insert(participant, signature);
     }
+    state
 }
 
 #[test]
@@ -230,6 +263,35 @@ fn channel_update_rejects_under_signed_state() {
             required: 2,
             actual: 1
         })
+    ));
+}
+
+#[test]
+fn channel_update_rejects_forged_signature() {
+    let t = template();
+    let mut state = update(0, "state-0", t.hash());
+    let forged = sign_update_for("alice", &state);
+    state
+        .participant_signatures
+        .insert("bob".to_string(), forged);
+    assert!(matches!(
+        validate_channel_update(&channel_config(), &funding(), &state, &t),
+        Err(KurrentError::InvalidParticipantSignature(participant)) if participant == "bob"
+    ));
+}
+
+#[test]
+fn channel_update_rejects_malformed_participant_public_key() {
+    let t = template();
+    let state = update(0, "state-0", t.hash());
+    let mut config = channel_config();
+    config
+        .access_manifest
+        .participant_public_keys
+        .insert("alice".to_string(), "not-a-public-key".to_string());
+    assert!(matches!(
+        validate_channel_update(&config, &funding(), &state, &t),
+        Err(KurrentError::InvalidParticipantPublicKey(participant)) if participant == "alice"
     ));
 }
 

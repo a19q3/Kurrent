@@ -1,4 +1,5 @@
-Verdict: passed
+Local devnet verdict: passed
+Production-readiness verdict: failed/blocked
 
 Project path:
 /Users/arthur/Documents/Kurrent
@@ -17,7 +18,7 @@ Commands run or encoded in kurrentctl:
 git remote add origin https://github.com/a19q3/Kurrent.git
 git pull --ff-only in /Users/arthur/Documents/rusty-kaspa-toccata
 cargo build --release -p kaspad -p kaspa-cli -p kaspa-wallet in /Users/arthur/Documents/rusty-kaspa-toccata
-cargo test -> passed, 41 tests.
+cargo test -> passed, 45 tests.
 cargo fmt --all --check -> passed.
 cargo clippy --all-targets -- -D warnings -> passed.
 cargo clippy --manifest-path drivers/kaspa-devnet/Cargo.toml --all-targets -- -D warnings -> passed.
@@ -27,10 +28,20 @@ cargo run --release -p kaspa-txscript --example covenants -> passed, real Toccat
 cargo test -p kaspa-testing-integration --lib daemon_integration_tests::daemon_compute_budget_relay_test -- --exact --nocapture -> passed, real Kaspa daemon relay/mining evidence.
 cargo check --manifest-path drivers/kaspa-devnet/Cargo.toml -> passed, Rust-only Kurrent Kaspa devnet driver compiles.
 cargo run --quiet --bin kurrentctl -- verify-evidence -> passed, including path/hash verification for raw transactions, scripts, witnesses, flow JSON evidence, LN preimage evidence, and command transcript existence.
+./scripts/write-production-target-profile.sh -> passed, writing evidence/production/target-profile.json with pinned local acceptance, git, tool, lockfile, and protocol-domain profile.
+./scripts/run-semantic-transaction-verifier.sh -> passed, decoding 13 live Kaspa transactions and verifying 27 raw transaction/script/witness hex records semantically against their JSON evidence.
+./scripts/run-adversarial-soak.sh -> passed, running 3,587 deterministic checks across state-channel stale-state/alternate-history, factory materialisation, LN/Kaspa swap replay, refund race, and evidence-tamper scenarios.
+./scripts/prepare-security-review-package.sh -> prepares evidence/production/security-review-request.json for the required independent external review; it is not passing review evidence.
+./scripts/verify-production-readiness.sh -> failed/blocked by design, writing evidence/kurrent-production-readiness.json with one remaining production blocker: external security review evidence.
 ./scripts/check.sh -> passed with exit code 0.
 
 Evidence paths:
 evidence/kurrent-acceptance.json
+evidence/kurrent-production-readiness.json
+evidence/production/target-profile.json
+evidence/production/semantic-transaction-verifier.json
+evidence/production/adversarial-mempool-soak.json
+evidence/production/security-review-request.json
 evidence/tool-detection.json
 evidence/kaspa-simnet-probe.log
 evidence/ln-devnet-evidence.json
@@ -65,7 +76,7 @@ Refund evidence:
 Model evidence is produced in evidence/kurrent-refund-flow-evidence.json. Live early-refund rejection and matured refund transaction evidence are produced in evidence/kurrent-live-refund-evidence.json.
 
 Interaction-safety audit:
-The Rust model now checks channel config/funding/signer binding, previous-commitment continuity, factory active-set removal, exact materialisation principal/fee accounting, LN swap receipt freshness and outpoint/script binding, and scoped settlement/refund exclusivity. The detailed audit is in docs/KURRENT_INTERACTION_SAFETY_AUDIT.md.
+The Rust model now checks channel config/funding/Schnorr signer binding, previous-commitment continuity, factory active-set removal, exact materialisation principal/fee accounting, LN swap receipt freshness and outpoint/script binding, and scoped settlement/refund exclusivity. The detailed audit is in docs/KURRENT_INTERACTION_SAFETY_AUDIT.md.
 
 Next smallest step:
-Extend the passed local devnet scenarios into longer-running soak tests, adversarial mempool cases, and mainnet-readiness review.
+Complete the independent external security review evidence required by ./scripts/verify-production-readiness.sh.

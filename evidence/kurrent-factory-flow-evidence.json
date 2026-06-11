@@ -3,7 +3,7 @@
   "flow": "kaspa_factory_flow",
   "live_evidence": {
     "path": "evidence/kurrent-live-factory-evidence.json",
-    "sha256": "59387067fcbef813bbed335cb8cb8f243a63f378b51b15b3e62c60ccdd77652e"
+    "sha256": "db48a485eaeeac8bf87a5343dbe28ad1049dc9a9126342d9f2fbc8bc8e1fc96a"
   },
   "model_status": "passed",
   "protocol_files": [

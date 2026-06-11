@@ -1,14 +1,37 @@
-# Kurrent Production Acceptance
+# Kurrent Acceptance Gates
 
-There is one acceptance gate:
+There are two separate gates.
+
+## Local Devnet Acceptance
 
 ```sh
 ./scripts/check.sh
 ```
 
-The only successful verdict is `passed`. It may be reported only if every required business flow runs against real local devnet tooling and the check script exits zero.
+The only successful local-devnet verdict is `passed`. It may be reported only if every required business flow runs against real local devnet tooling and the check script exits zero.
 
-Current expected verdict: `passed` in the present local environment. The suite executes real Kaspa and Lightning Network capability probes and every required Kurrent business flow passes against local devnet tooling.
+Current expected local-devnet verdict: `passed` in the present local environment. The suite executes real Kaspa and Lightning Network capability probes and every required Kurrent business flow passes against local devnet tooling.
+
+## Production Readiness
+
+```sh
+./scripts/verify-production-readiness.sh
+```
+
+The production-readiness gate is separate and stricter. It requires the local-devnet gate to pass and also requires explicit production evidence for target profile, semantic transaction verification, adversarial soak testing, key management, monitoring, incident recovery, rollout/rollback, and independent security review.
+
+Current expected production verdict: `failed/blocked`. The target profile, semantic transaction verifier, deterministic adversarial soak, and production runbooks are present, but independent security-review evidence is not complete yet. The command writes `evidence/kurrent-production-readiness.json`.
+
+The target profile, semantic verifier, adversarial soak, and security-review request package can be refreshed with:
+
+```sh
+./scripts/write-production-target-profile.sh
+./scripts/run-semantic-transaction-verifier.sh
+./scripts/run-adversarial-soak.sh
+./scripts/prepare-security-review-package.sh
+```
+
+The security-review request package does not satisfy the final gate. The final gate requires `evidence/production/security-review.json` with a passing independent-review schema, matching report and attestation file hashes, all required scope ids, zero open findings, and exact reviewed artefact hashes.
 
 ## Required Flows
 
@@ -28,5 +51,6 @@ Current expected verdict: `passed` in the present local environment. The suite e
 - `14`: real Kaspa to Lightning Network flow failed.
 - `15`: real refund flow failed.
 - `16`: evidence verification failed.
+- `17`: production-readiness evidence missing or failed.
 
 Any non-zero code means the verdict is `failed/blocked`.

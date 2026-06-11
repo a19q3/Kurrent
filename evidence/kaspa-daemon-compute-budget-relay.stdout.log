@@ -1,46 +1,46 @@
 
 running 1 test
-2026-06-10 23:48:12.774+08:00 [INFO ] kaspad v1.2.2-toc.4-0ae28f9
-2026-06-10 23:48:12.774+08:00 [INFO ] Application directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpqmzRKP
-2026-06-10 23:48:12.774+08:00 [INFO ] Data directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpqmzRKP/kaspa-simnet/datadir
-2026-06-10 23:48:12.774+08:00 [INFO ] Logs to console only
-2026-06-10 23:48:12.775+08:00 [INFO ] Utxoindex Data directory /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpqmzRKP/kaspa-simnet/datadir/utxoindex
-2026-06-10 23:48:12.808+08:00 [INFO ] Resyncing the utxoindex...
-2026-06-10 23:48:12.828+08:00 [INFO ] kaspad v1.2.2-toc.4-0ae28f9
-2026-06-10 23:48:12.828+08:00 [INFO ] Application directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpKTLaQN
-2026-06-10 23:48:12.828+08:00 [INFO ] Data directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpKTLaQN/kaspa-simnet/datadir
-2026-06-10 23:48:12.828+08:00 [INFO ] Logs to console only
-2026-06-10 23:48:12.828+08:00 [INFO ] Utxoindex Data directory /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpKTLaQN/kaspa-simnet/datadir/utxoindex
-2026-06-10 23:48:12.843+08:00 [INFO ] Resyncing the utxoindex...
-2026-06-10 23:48:12.847+08:00 [INFO ] GRPC Server starting on: 0.0.0.0:56951
-2026-06-10 23:48:12.848+08:00 [INFO ] P2P Server starting on: 0.0.0.0:30316
-2026-06-10 23:48:12.852+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:3915
-2026-06-10 23:48:12.852+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:54226
-2026-06-10 23:48:13.873+08:00 [INFO ] GRPC, new incoming connection c0e8802d-d52f-4ac2-90ae-761fc5939c68@127.0.0.1:58387 #1
-2026-06-10 23:48:13.905+08:00 [INFO ] GRPC Server starting on: 0.0.0.0:49840
-2026-06-10 23:48:13.905+08:00 [INFO ] P2P Server starting on: 0.0.0.0:5049
-2026-06-10 23:48:13.906+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:13884
-2026-06-10 23:48:13.906+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:21255
-2026-06-10 23:48:14.908+08:00 [INFO ] GRPC, new incoming connection 93a30894-ab42-44f8-8963-139fb80be195@127.0.0.1:58637 #1
-2026-06-10 23:48:14.943+08:00 [INFO ] Registering p2p flows for peer 127.0.0.1:30316 for protocol version 10
-2026-06-10 23:48:14.945+08:00 [INFO ] P2P Connected to outgoing peer 127.0.0.1:30316 (outbound: 1)
-2026-06-10 23:48:14.959+08:00 [INFO ] Registering p2p flows for peer 127.0.0.1:58644 for protocol version 10
-2026-06-10 23:48:14.959+08:00 [INFO ] P2P Connected to incoming peer 127.0.0.1:58644 (inbound: 1)
-2026-06-10 23:48:15.543+08:00 [INFO ] GRPC, incoming stream ended by client c0e8802d-d52f-4ac2-90ae-761fc5939c68@127.0.0.1:58387
-2026-06-10 23:48:15.543+08:00 [INFO ] GRPC, end connection c0e8802d-d52f-4ac2-90ae-761fc5939c68@127.0.0.1:58387 #1
-2026-06-10 23:48:15.543+08:00 [INFO ] GRPC, incoming stream ended by client 93a30894-ab42-44f8-8963-139fb80be195@127.0.0.1:58637
-2026-06-10 23:48:15.544+08:00 [INFO ] GRPC, end connection 93a30894-ab42-44f8-8963-139fb80be195@127.0.0.1:58637 #1
-2026-06-10 23:48:15.544+08:00 [INFO ] P2P Server stopped: 0.0.0.0:30316
-2026-06-10 23:48:15.544+08:00 [INFO ] P2P, incoming stream ended from peer 127.0.0.1:30316
-2026-06-10 23:48:15.544+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:3915
-2026-06-10 23:48:15.544+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:54226
-2026-06-10 23:48:15.556+08:00 [INFO ] GRPC Server stopped on: 0.0.0.0:56951
-2026-06-10 23:48:16.032+08:00 [INFO ] Accepted 11 blocks ...e85649b075b683abf6668b5465b2dbc61f43121109f645a249dbbc482b1dd390 via submit block
-2026-06-10 23:48:16.046+08:00 [INFO ] Accepted 11 blocks ...e85649b075b683abf6668b5465b2dbc61f43121109f645a249dbbc482b1dd390 via relay
-2026-06-10 23:48:16.048+08:00 [INFO ] P2P Server stopped: 0.0.0.0:5049
-2026-06-10 23:48:16.048+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:13884
-2026-06-10 23:48:16.048+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:21255
-2026-06-10 23:48:16.048+08:00 [INFO ] GRPC Server stopped on: 0.0.0.0:49840
+2026-06-11 22:26:15.197+08:00 [INFO ] kaspad v1.2.2-toc.4-0ae28f9
+2026-06-11 22:26:15.197+08:00 [INFO ] Application directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpJok8Hs
+2026-06-11 22:26:15.197+08:00 [INFO ] Data directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpJok8Hs/kaspa-simnet/datadir
+2026-06-11 22:26:15.197+08:00 [INFO ] Logs to console only
+2026-06-11 22:26:15.197+08:00 [INFO ] Utxoindex Data directory /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpJok8Hs/kaspa-simnet/datadir/utxoindex
+2026-06-11 22:26:15.231+08:00 [INFO ] Resyncing the utxoindex...
+2026-06-11 22:26:15.248+08:00 [INFO ] kaspad v1.2.2-toc.4-0ae28f9
+2026-06-11 22:26:15.248+08:00 [INFO ] Application directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpLsng4N
+2026-06-11 22:26:15.248+08:00 [INFO ] Data directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpLsng4N/kaspa-simnet/datadir
+2026-06-11 22:26:15.248+08:00 [INFO ] Logs to console only
+2026-06-11 22:26:15.249+08:00 [INFO ] Utxoindex Data directory /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmpLsng4N/kaspa-simnet/datadir/utxoindex
+2026-06-11 22:26:15.260+08:00 [INFO ] Resyncing the utxoindex...
+2026-06-11 22:26:15.264+08:00 [INFO ] GRPC Server starting on: 0.0.0.0:51806
+2026-06-11 22:26:15.266+08:00 [INFO ] P2P Server starting on: 0.0.0.0:56559
+2026-06-11 22:26:15.270+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:30669
+2026-06-11 22:26:15.270+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:42984
+2026-06-11 22:26:16.275+08:00 [INFO ] GRPC, new incoming connection e759ef46-1fbf-4cbc-966d-f97dde64cfad@127.0.0.1:54515 #1
+2026-06-11 22:26:16.281+08:00 [INFO ] GRPC Server starting on: 0.0.0.0:31803
+2026-06-11 22:26:16.281+08:00 [INFO ] P2P Server starting on: 0.0.0.0:41959
+2026-06-11 22:26:16.281+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:58838
+2026-06-11 22:26:16.281+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:5832
+2026-06-11 22:26:17.285+08:00 [INFO ] GRPC, new incoming connection ae31602c-e1dd-47bf-a5ad-da4e480d2d07@127.0.0.1:54521 #1
+2026-06-11 22:26:17.293+08:00 [INFO ] Registering p2p flows for peer 127.0.0.1:54522 for protocol version 10
+2026-06-11 22:26:17.293+08:00 [INFO ] Registering p2p flows for peer 127.0.0.1:56559 for protocol version 10
+2026-06-11 22:26:17.294+08:00 [INFO ] P2P Connected to incoming peer 127.0.0.1:54522 (inbound: 1)
+2026-06-11 22:26:17.294+08:00 [INFO ] P2P Connected to outgoing peer 127.0.0.1:56559 (outbound: 1)
+2026-06-11 22:26:17.605+08:00 [INFO ] GRPC, incoming stream ended by client e759ef46-1fbf-4cbc-966d-f97dde64cfad@127.0.0.1:54515
+2026-06-11 22:26:17.605+08:00 [INFO ] GRPC, end connection e759ef46-1fbf-4cbc-966d-f97dde64cfad@127.0.0.1:54515 #1
+2026-06-11 22:26:17.606+08:00 [INFO ] GRPC, incoming stream ended by client ae31602c-e1dd-47bf-a5ad-da4e480d2d07@127.0.0.1:54521
+2026-06-11 22:26:17.606+08:00 [INFO ] GRPC, end connection ae31602c-e1dd-47bf-a5ad-da4e480d2d07@127.0.0.1:54521 #1
+2026-06-11 22:26:17.606+08:00 [INFO ] P2P Server stopped: 0.0.0.0:56559
+2026-06-11 22:26:17.606+08:00 [INFO ] P2P, incoming stream ended from peer 127.0.0.1:56559
+2026-06-11 22:26:17.607+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:42984
+2026-06-11 22:26:17.607+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:30669
+2026-06-11 22:26:17.618+08:00 [INFO ] GRPC Server stopped on: 0.0.0.0:51806
+2026-06-11 22:26:18.107+08:00 [INFO ] Accepted 11 blocks ...ebe1af0acda6940fc884089677184a9fdc102832fec54af735a01c4614ff024a via submit block
+2026-06-11 22:26:18.115+08:00 [INFO ] P2P Server stopped: 0.0.0.0:41959
+2026-06-11 22:26:18.115+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:58838
+2026-06-11 22:26:18.115+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:5832
+2026-06-11 22:26:18.115+08:00 [INFO ] GRPC Server stopped on: 0.0.0.0:31803
+2026-06-11 22:26:18.359+08:00 [INFO ] Accepted 11 blocks ...ebe1af0acda6940fc884089677184a9fdc102832fec54af735a01c4614ff024a via relay
 test daemon_integration_tests::daemon_compute_budget_relay_test ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 46 filtered out; finished in 3.83s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 46 filtered out; finished in 3.45s

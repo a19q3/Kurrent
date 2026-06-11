@@ -1,34 +1,34 @@
 {
   "channel_receipt": {
-    "hash": "90b589656d6e48b6330f04a4393081fe46c1f113f4ce276498ab98390a6e9c3a",
+    "hash": "3ee303d4a5f67a6e3eae2235d950691bd8bd646bec8af09399fe180ff4f342f0",
     "scope": {
       "channel_id": "channel-a",
       "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
-      "funding_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+      "funding_outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
       "network_profile": "kaspa-simnet-toccata",
-      "output_id": "098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c:0,098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c:1",
+      "output_id": "f9d45e4c17f73ac5d2c32ec4e2154eb6690156d8a6cf657df53591fa3079921f:0,f9d45e4c17f73ac5d2c32ec4e2154eb6690156d8a6cf657df53591fa3079921f:1",
       "protocol_version": 1,
-      "settlement_template_hash": "28b56c67dea00210a1192fecbd87af059e4856eda87320dbe2e4aec3c2dc1bd8",
+      "settlement_template_hash": "db15d50abe1dd14489103c52cc35697415b815415a52d5cc917cc57a151de558",
       "state_number": 2
     }
   },
   "driver": "kurrent-kaspa-devnet-driver",
   "funding": {
-    "covenant_id": "1b914fd1a4acedddf399fc2bf690bdeadd032000211376eca798c032b1ee7508",
-    "input_outpoint": "18f8d090a89c70ef5db859fd66787505ec31e836ca5b3a4159295c727287d77a:0",
-    "outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+    "covenant_id": "1bb0a35bdda81d27b07ce6e83c3f20f3f06ed1f5fd266535afbce3911ce35cc6",
+    "input_outpoint": "bb389fa1eb67ee39c58aad6c6b6070131abd2a15727d7043d65489bcb0ec4eb4:0",
+    "outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-funding-tx.hex",
-      "sha256": "3879559ac6ac6a7d7c1653d113547850e754d648d84fced04c61b005c3cb4422"
+      "sha256": "893910da25af22cc71ad7756e2b264ef07a3ea2f3156853039344f296e2c6e22"
     },
-    "txid": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213",
+    "txid": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f",
     "value": 4998000000
   },
-  "miner_address": "kaspasim:qr7wlypc5h8h4cf659xmhctdkqfyf8e8tan823de3v4kzrkzq0j2gc29q9nzn",
+  "miner_address": "kaspasim:qrf5pzrfu6w0w4uy8lnwf4chm4gn2jyxr76yuzqalmg07zy6m4qmv97c94hmn",
   "network_profile": "kaspa-simnet-toccata",
   "participants": {
-    "alice_address": "kaspasim:qr9jh9jummh0aajq9ghjj8d95sntpkycdrs6yngjlzmj6y33uqknv0cckagnz",
-    "bob_address": "kaspasim:qr63q33qqcy9hnzuzrnu4eytxt74qfc39wtz5keh95sswe906s35xxsxvc585"
+    "alice_address": "kaspasim:qqej868a9v6u3qkap8nh3pyyxmkp6tq2r26fcwqrmeumxv2vjrll55yddcgql",
+    "bob_address": "kaspasim:qpd6whtwafwhuxxlersex7zxhuxthzujlsgm3gn3ytrjr969pr8qzr8n0smdm"
   },
   "settlement": {
     "outputs": {
@@ -37,25 +37,25 @@
     },
     "raw_tx": {
       "path": "evidence/kurrent-live-settlement-tx.hex",
-      "sha256": "5010c3aa739d50c41e35f256d5df124dacfdc57244d6b83d34d024879d0a28c9"
+      "sha256": "a806cdde65aae75437972abc2967325b556081f88b7f9ad2e15472953fd8c453"
     },
     "state_1_redeem_script": {
       "path": "evidence/kurrent-live-state-1-redeem-script.hex",
-      "sha256": "9e43df8afd610dc9ec73b96f0f571684d4242b820bcf1ccee63b6e986b296dda"
+      "sha256": "79093aeda840d1aff724db0dae8536a13f2b6faa66ae3a56bb11331a70b81a74"
     },
     "state_2_redeem_script": {
       "path": "evidence/kurrent-live-state-2-redeem-script.hex",
-      "sha256": "fad562f64cf47a12f6011db25b3f8c5c8fe26f83ed09a57704f08a039eb6f617"
+      "sha256": "d4567efe87458b99329cd243c875562de060bc682be6b8f965eeaf4f3b64fa3a"
     },
     "state_number": 2,
-    "txid": "098af2dcd6709ded1f4c36370ca013aea33a3f0fc9f46edc105b23d37093d90c",
+    "txid": "f9d45e4c17f73ac5d2c32ec4e2154eb6690156d8a6cf657df53591fa3079921f",
     "witness": {
       "path": "evidence/kurrent-live-settlement-witness.hex",
-      "sha256": "50255c9de41cc44a6e6fba31b2dc64cce7c5bf5b9993f015fb2d0f621edd288b"
+      "sha256": "7c9e969afda3b9fde07d94be6014c04808d460a48fce676c169853b47c7b715e"
     }
   },
   "settlement_template": {
-    "hash": "28b56c67dea00210a1192fecbd87af059e4856eda87320dbe2e4aec3c2dc1bd8",
+    "hash": "db15d50abe1dd14489103c52cc35697415b815415a52d5cc917cc57a151de558",
     "template": {
       "domain_separator": "KURRENT_SETTLEMENT_TEMPLATE_V1",
       "outputs": {
@@ -63,56 +63,56 @@
         "bob": 1979200000
       },
       "refund_after_daa": 120,
-      "script_covenant_hash": "fad562f64cf47a12f6011db25b3f8c5c8fe26f83ed09a57704f08a039eb6f617",
+      "script_covenant_hash": "d4567efe87458b99329cd243c875562de060bc682be6b8f965eeaf4f3b64fa3a",
       "template_id": "live-state-2-settlement"
     }
   },
   "stale_state_rejection": {
     "attempted_tx": {
       "path": "evidence/kurrent-live-stale-rejected-tx.hex",
-      "sha256": "5006745d4dc198be0e0cd21587718e123d3811884d86d61e9bc321626ebbff0b"
+      "sha256": "8aefac284aa685a2b3e1e42d39493ed5a4749b25a7cc4a3aa346756604921956"
     },
-    "attempted_txid": "99f2df5ae33afb8ce691aff6f34f42f8fb1adb80d5d10c1b8bca3dbe76aab5c9",
-    "node_error": "Rejected transaction 99f2df5ae33afb8ce691aff6f34f42f8fb1adb80d5d10c1b8bca3dbe76aab5c9: failed to verify the signature script: stack contains 1 unexpected items",
+    "attempted_txid": "3b7e613688189b026cd957877afdd76a02e35cea77d1f03ee37155c349eb433d",
+    "node_error": "Rejected transaction 3b7e613688189b026cd957877afdd76a02e35cea77d1f03ee37155c349eb433d: failed to verify the signature script: stack contains 1 unexpected items",
     "status": "rejected",
     "witness": {
       "path": "evidence/kurrent-live-stale-rejected-witness.hex",
-      "sha256": "8ff5f8d3b3123df1e269769c9ab155906e11a57bffc4455120bf7262b9183371"
+      "sha256": "3491863621f6dec1794209684fa2f225d221dde4e72dde6d82f57002082fca97"
     }
   },
   "state_header": {
-    "hash": "cf278226c2d19a29ff0710f40ec599b284bb89907a8d62253c5e9e2044391017",
+    "hash": "c4d03b6fdf74eb452b9eda975cdac4a64ea2427280e591dfe1527183801b28c2",
     "header": {
       "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
       "channel_id": "channel-a",
       "domain_separator": "KURRENT_STATE_V1",
       "factory_id": null,
-      "funding_outpoint": "5f54d720b6fbe41c4a30bc81f6d963cbee410041b83432246f5fda0240dbd213:0",
+      "funding_outpoint": "b5ada48e1a0386f0a229b19fe1a35345f3a7a56ce5c0ad40f5a09a3025d0548f:0",
       "genesis_or_devnet_id": "in-process-simnet",
       "network_profile": "kaspa-simnet-toccata",
       "new_state_commitment": "7287db807fad621ce901aea46e7f5cd7e2d525e9cb5da837a91cee6aa10637ed",
       "participant_set_hash": "4653498cadd1f924ee9946bdfa5133386b49e6624922a45d22ab228ae36554a7",
       "previous_state_commitment": "7dbbbbd8d5360afd09b5838e35641283c0d253c324327c3f388c9ba88974218d",
       "protocol_version": 1,
-      "script_covenant_hash": "fad562f64cf47a12f6011db25b3f8c5c8fe26f83ed09a57704f08a039eb6f617",
-      "settlement_template_hash": "28b56c67dea00210a1192fecbd87af059e4856eda87320dbe2e4aec3c2dc1bd8",
+      "script_covenant_hash": "d4567efe87458b99329cd243c875562de060bc682be6b8f965eeaf4f3b64fa3a",
+      "settlement_template_hash": "db15d50abe1dd14489103c52cc35697415b815415a52d5cc917cc57a151de558",
       "state_number": 2,
       "virtual_channel_id": null
     }
   },
   "state_update": {
     "from_state": 1,
-    "outpoint": "47e10b368818fbdee256134f97b2bff411c5e70a0a0d8ed5b6554cd829e84c2a:0",
+    "outpoint": "e9ba9da21713862ae69bb501d228f6b153ae167ee8235d48ab7082f5df1f06ae:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-state-update-tx.hex",
-      "sha256": "0446b88e823d2f9f60fedd6e2924b42785396e22f5984838f9fb5f07935bfdf8"
+      "sha256": "99b72e6f80d057cc2bc6f069a2c86209faad9944834282fdfa2a8a1e7f4b5642"
     },
     "to_state": 2,
-    "txid": "47e10b368818fbdee256134f97b2bff411c5e70a0a0d8ed5b6554cd829e84c2a",
+    "txid": "e9ba9da21713862ae69bb501d228f6b153ae167ee8235d48ab7082f5df1f06ae",
     "value": 4973000000,
     "witness": {
       "path": "evidence/kurrent-live-state-update-witness.hex",
-      "sha256": "3289ba5236669a8a912a154d2c84d397ae93b9d062be718dc62dc28128f30249"
+      "sha256": "8aae8c54d99ffcedfc3e9b195c0ec56e8e9def30a9b40e9f6528c08d7d9d6403"
     }
   },
   "status": "passed"

@@ -1,0 +1,58 @@
+{
+  "timestamp": "1781188125",
+  "status": "failed/blocked",
+  "acceptance_status": "passed",
+  "requirements": [
+    {
+      "id": "prod_target_profile",
+      "description": "Pinned production network profile, dependency profile, and supported Kaspa/Toccata activation assumptions.",
+      "evidence_path": "evidence/production/target-profile.json",
+      "present": true
+    },
+    {
+      "id": "semantic_transaction_verifier",
+      "description": "Independent decoder/verifier proving raw transaction, witness, script, txid, and receipt relationships semantically, not only by hash.",
+      "evidence_path": "evidence/production/semantic-transaction-verifier.json",
+      "present": true
+    },
+    {
+      "id": "adversarial_mempool_soak",
+      "description": "Deterministic adversarial mempool, alternate-history, stale-state, refund-race, swap-replay, and evidence-tamper soak evidence.",
+      "evidence_path": "evidence/production/adversarial-mempool-soak.json",
+      "present": true
+    },
+    {
+      "id": "key_management_recovery",
+      "description": "Production key-management, signer isolation, key rotation, backup, and recovery runbook.",
+      "evidence_path": "docs/PRODUCTION_KEY_MANAGEMENT.md",
+      "present": true
+    },
+    {
+      "id": "monitoring_alerting",
+      "description": "Production monitoring, alerting, SLO, log-retention, and evidence-retention runbook.",
+      "evidence_path": "docs/PRODUCTION_MONITORING.md",
+      "present": true
+    },
+    {
+      "id": "incident_recovery",
+      "description": "Incident response and unattended recovery procedure for stalled channels, stale submissions, LN failures, and node divergence.",
+      "evidence_path": "docs/PRODUCTION_RECOVERY.md",
+      "present": true
+    },
+    {
+      "id": "release_rollout_rollback",
+      "description": "Release, rollout, rollback, migration, and compatibility procedure for protocol and script changes.",
+      "evidence_path": "docs/PRODUCTION_ROLLOUT.md",
+      "present": true
+    },
+    {
+      "id": "external_security_review",
+      "description": "Independent security-review evidence covering protocol design, script constraints, signer model, and operational controls.",
+      "evidence_path": "evidence/production/security-review.json",
+      "present": false
+    }
+  ],
+  "blockers": [
+    "external_security_review: missing or non-passing required production evidence at evidence/production/security-review.json"
+  ]
+}

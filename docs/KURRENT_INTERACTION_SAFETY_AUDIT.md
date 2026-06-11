@@ -11,7 +11,7 @@ Implemented safety checks:
 - state headers must use `KURRENT_STATE_V1`;
 - protocol version, network profile, devnet id, channel id, funding outpoint, script hash, participant set hash, and settlement template hash must match the configured channel and funding state;
 - participant balances must cover exactly the configured participant set and conserve funding principal;
-- participant signatures must come from authorised participants and meet the required threshold;
+- participant Schnorr signatures must verify against authorised participant public keys and meet the required threshold;
 - state numbers must advance exactly one step;
 - `previous_state_commitment` must match the latest accepted commitment;
 - same-number conflicting commitments are rejected;

@@ -1,11 +1,20 @@
 use kurrent::{
-    hash_json, sha256_hex, DOMAIN_CHANNEL_RECEIPT, DOMAIN_FACTORY_MATERIALISATION,
-    DOMAIN_LN_INTEROP, DOMAIN_SETTLEMENT_TEMPLATE, DOMAIN_STATE,
+    hash_json, participant_set_hash, sha256_hex, state_update_signing_digest,
+    validate_channel_update, validate_ln_swap, validate_materialisation, verify_evidence_bundle,
+    AcceptanceReport, AccessManifest, ChallengePolicy, ChannelReceipt, ClaimScope, EvidenceBundle,
+    EvidenceFile, FactoryState, FlowEvidenceFile, FundingState, KurrentChannelConfig, KurrentError,
+    LatestStateHeader, LnSwapEvidence, MaterialisationPlan, OpcodeCapabilityEvidence,
+    ProductionEvidenceRequirement, ProductionReadinessReport, SecurityReviewArtifact,
+    SecurityReviewEvidence, SettlementRegistry, SettlementTemplate, StateUpdate, ToolEvidence,
+    TouchedLeaves, VirtualChannelState, DOMAIN_CHANNEL_RECEIPT, DOMAIN_CLAIM_SCOPE,
+    DOMAIN_FACTORY_MATERIALISATION, DOMAIN_LN_INTEROP, DOMAIN_PARTICIPANT_SET,
+    DOMAIN_SETTLEMENT_TEMPLATE, DOMAIN_STATE, DOMAIN_STATE_SIGNATURE,
 };
+use secp256k1::{Keypair, Message, Secp256k1, SecretKey};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     env, fs,
     path::{Path, PathBuf},
     process::{Command, ExitCode, Stdio},
@@ -19,6 +28,7 @@ const EXIT_LN_FLOW: u8 = 13;
 const EXIT_KASPA_TO_LN_FLOW: u8 = 14;
 const EXIT_REFUND_FLOW: u8 = 15;
 const EXIT_EVIDENCE: u8 = 16;
+const EXIT_PRODUCTION_READINESS: u8 = 17;
 
 fn main() -> ExitCode {
     match run() {
@@ -57,6 +67,7 @@ fn run() -> Result<u8, String> {
             Ok(if status == "passed" { 0 } else { 1 })
         }
         "verify-evidence" => verify_evidence(),
+        "verify-production-readiness" => verify_production_readiness(),
         "prepare-devnet-tools" => prepare_devnet_tools(),
         "run-kaspa-devnet" => run_kaspa_devnet(),
         "run-ln-devnet" => run_ln_devnet(),
@@ -65,6 +76,10 @@ fn run() -> Result<u8, String> {
         "run-ln-to-kaspa-flow" => run_ln_to_kaspa_flow(),
         "run-kaspa-to-ln-flow" => run_kaspa_to_ln_flow(),
         "run-refund-flow" => run_refund_flow(),
+        "run-semantic-transaction-verifier" => run_semantic_transaction_verifier(),
+        "run-adversarial-soak" => run_adversarial_soak(),
+        "write-production-target-profile" => write_production_target_profile(),
+        "prepare-security-review-package" => prepare_security_review_package(),
         "check" => check(),
         "help" | "--help" | "-h" => {
             print_help();
@@ -76,15 +91,8 @@ fn run() -> Result<u8, String> {
 
 fn print_help() {
     println!(
-        "kurrentctl commands: detect-tools, tool-path, write-acceptance-report, verify-evidence, prepare-devnet-tools, run-kaspa-devnet, run-ln-devnet, run-state-channel-flow, run-factory-flow, run-ln-to-kaspa-flow, run-kaspa-to-ln-flow, run-refund-flow, check"
+        "kurrentctl commands: detect-tools, tool-path, write-acceptance-report, verify-evidence, verify-production-readiness, prepare-devnet-tools, run-kaspa-devnet, run-ln-devnet, run-state-channel-flow, run-factory-flow, run-ln-to-kaspa-flow, run-kaspa-to-ln-flow, run-refund-flow, run-semantic-transaction-verifier, run-adversarial-soak, write-production-target-profile, prepare-security-review-package, check"
     );
-}
-
-#[derive(Debug, Clone, Serialize)]
-struct ToolRecord {
-    name: String,
-    path: Option<String>,
-    version: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -102,7 +110,7 @@ struct DetectionReport {
     timestamp: String,
     status: String,
     blockers: Vec<String>,
-    tools: Vec<ToolRecord>,
+    tools: Vec<ToolEvidence>,
     tool_paths: BTreeMap<String, Option<String>>,
     known_bin_dirs: Vec<String>,
     parent_kaspa_repo: Option<RepoRecord>,
@@ -111,19 +119,13 @@ struct DetectionReport {
 }
 
 #[derive(Debug, Clone, Serialize)]
-struct FileEvidence {
-    path: String,
-    sha256: String,
-}
-
-#[derive(Debug, Clone, Serialize)]
 struct CommandEvidence {
     label: String,
     cwd: String,
     command: Vec<String>,
     status_code: Option<i32>,
-    stdout: FileEvidence,
-    stderr: FileEvidence,
+    stdout: EvidenceFile,
+    stderr: EvidenceFile,
 }
 
 fn root() -> Result<PathBuf, String> {
@@ -158,18 +160,18 @@ fn relative_to_root(path: &Path) -> Result<String, String> {
         .to_string())
 }
 
-fn file_evidence(path: &Path) -> Result<FileEvidence, String> {
+fn file_evidence(path: &Path) -> Result<EvidenceFile, String> {
     let bytes = fs::read(path).map_err(|e| format!("failed to read {}: {e}", path.display()))?;
-    Ok(FileEvidence {
+    Ok(EvidenceFile {
         path: relative_to_root(path)?,
         sha256: sha256_hex(&bytes),
     })
 }
 
-fn source_file_evidence(repo: &Path, relative: &str) -> Result<FileEvidence, String> {
+fn source_file_evidence(repo: &Path, relative: &str) -> Result<EvidenceFile, String> {
     let path = repo.join(relative);
     let bytes = fs::read(&path).map_err(|e| format!("failed to read {}: {e}", path.display()))?;
-    Ok(FileEvidence {
+    Ok(EvidenceFile {
         path: path.display().to_string(),
         sha256: sha256_hex(&bytes),
     })
@@ -273,9 +275,9 @@ fn clean_command_text(text: &str) -> String {
     cleaned.trim().to_string()
 }
 
-fn tool_record(name: &str) -> ToolRecord {
+fn tool_record(name: &str) -> ToolEvidence {
     let path = resolve_command(name);
-    ToolRecord {
+    ToolEvidence {
         name: name.to_string(),
         version: path.as_deref().and_then(command_version),
         path: path.map(|p| p.display().to_string()),
@@ -450,6 +452,26 @@ fn flow_evidence_files() -> [(&'static str, &'static str); 5] {
     ]
 }
 
+fn evidence_file_from_value(record: &Value) -> Result<EvidenceFile, String> {
+    let path = record
+        .get("path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("invalid evidence record missing path: {record}"))?;
+    let sha256 = record
+        .get("sha256")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("invalid evidence record missing sha256: {record}"))?;
+    Ok(EvidenceFile {
+        path: path.to_string(),
+        sha256: sha256.to_string(),
+    })
+}
+
+fn push_evidence_file(records: &mut Vec<EvidenceFile>, record: &Value) -> Result<(), String> {
+    records.push(evidence_file_from_value(record)?);
+    Ok(())
+}
+
 fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), String> {
     let detection = detection_report();
     let evidence_root = evidence_dir()?;
@@ -469,12 +491,12 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
                 .and_then(Value::as_str)
                 .unwrap_or("unknown")
                 .to_string();
-            flows.insert(key, flow_status);
-            flow_evidence_paths_and_hashes.push(json!({
-                "flow": key,
-                "path": format!("evidence/{file_name}"),
-                "sha256": sha256_hex(&bytes)
-            }));
+            flows.insert(key.to_string(), flow_status);
+            flow_evidence_paths_and_hashes.push(FlowEvidenceFile {
+                flow: key.to_string(),
+                path: format!("evidence/{file_name}"),
+                sha256: sha256_hex(&bytes),
+            });
             if let Some(items) = value.get("blockers").and_then(Value::as_array) {
                 for item in items {
                     if let Some(blocker) = item.as_str() {
@@ -484,7 +506,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             }
         } else {
             flows.insert(
-                key,
+                key.to_string(),
                 if status == "passed" {
                     "missing"
                 } else {
@@ -495,7 +517,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
         }
     }
     flows.insert(
-        "evidence_verifier_flow",
+        "evidence_verifier_flow".to_string(),
         if status == "passed" {
             "passed"
         } else {
@@ -515,10 +537,10 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
     let ln_evidence_path = evidence_root.join("ln-devnet-evidence.json");
     let ln_invoice_payment_preimage_evidence = if ln_evidence_path.exists() {
         let bytes = fs::read(&ln_evidence_path).map_err(|e| e.to_string())?;
-        vec![json!({
-            "path": "evidence/ln-devnet-evidence.json",
-            "sha256": sha256_hex(&bytes)
-        })]
+        vec![EvidenceFile {
+            path: "evidence/ln-devnet-evidence.json".to_string(),
+            sha256: sha256_hex(&bytes),
+        }]
     } else {
         Vec::new()
     };
@@ -544,12 +566,12 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
     let mut witness_paths_and_hashes = Vec::new();
     let mut settlement_template_hashes = Vec::new();
     let mut channel_receipt_hashes = Vec::new();
-    let mut state_channel_funding_txid_outpoint = Value::Null;
-    let mut latest_state_settlement_txid_outpoint = Value::Null;
-    let mut factory_id = Value::Null;
+    let mut state_channel_funding_txid_outpoint = String::new();
+    let mut latest_state_settlement_txid_outpoint = String::new();
+    let mut factory_id = String::new();
     let mut virtual_channel_ids = Vec::new();
-    let mut materialisation_txid_outpoint = Value::Null;
-    let mut refund_txid_outpoint = Value::Null;
+    let mut materialisation_txid_outpoint = String::new();
+    let mut refund_txid_outpoint = String::new();
     let mut state_txids_or_transition_ids = Vec::new();
     let live_state_path = evidence_root.join("kurrent-live-state-channel-evidence.json");
     if live_state_path.exists() {
@@ -560,35 +582,35 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             .pointer("/funding/outpoint")
             .and_then(Value::as_str)
         {
-            state_channel_funding_txid_outpoint = json!(outpoint);
+            state_channel_funding_txid_outpoint = outpoint.to_string();
         }
         if let Some(txid) = live_state.pointer("/funding/txid").and_then(Value::as_str) {
-            state_txids_or_transition_ids.push(json!(txid));
+            state_txids_or_transition_ids.push(txid.to_string());
         }
         if let Some(txid) = live_state
             .pointer("/state_update/txid")
             .and_then(Value::as_str)
         {
-            state_txids_or_transition_ids.push(json!(txid));
+            state_txids_or_transition_ids.push(txid.to_string());
         }
         if let Some(txid) = live_state
             .pointer("/settlement/txid")
             .and_then(Value::as_str)
         {
-            latest_state_settlement_txid_outpoint = json!(format!("{txid}:0,{txid}:1"));
-            state_txids_or_transition_ids.push(json!(txid));
+            latest_state_settlement_txid_outpoint = format!("{txid}:0,{txid}:1");
+            state_txids_or_transition_ids.push(txid.to_string());
         }
         if let Some(outpoint) = live_state
             .pointer("/state_update/outpoint")
             .and_then(Value::as_str)
         {
-            state_txids_or_transition_ids.push(json!(outpoint));
+            state_txids_or_transition_ids.push(outpoint.to_string());
         }
         if let Some(txid) = live_state
             .pointer("/stale_state_rejection/attempted_txid")
             .and_then(Value::as_str)
         {
-            state_txids_or_transition_ids.push(json!(txid));
+            state_txids_or_transition_ids.push(txid.to_string());
         }
         for pointer in [
             "/funding/raw_tx",
@@ -597,7 +619,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             "/settlement/raw_tx",
         ] {
             if let Some(record) = live_state.pointer(pointer) {
-                raw_transaction_paths_and_hashes.push(record.clone());
+                push_evidence_file(&mut raw_transaction_paths_and_hashes, record)?;
             }
         }
         for pointer in [
@@ -605,7 +627,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             "/settlement/state_2_redeem_script",
         ] {
             if let Some(record) = live_state.pointer(pointer) {
-                script_paths_and_hashes.push(record.clone());
+                push_evidence_file(&mut script_paths_and_hashes, record)?;
             }
         }
         for pointer in [
@@ -614,20 +636,20 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             "/settlement/witness",
         ] {
             if let Some(record) = live_state.pointer(pointer) {
-                witness_paths_and_hashes.push(record.clone());
+                push_evidence_file(&mut witness_paths_and_hashes, record)?;
             }
         }
         if let Some(hash) = live_state
             .pointer("/settlement_template/hash")
             .and_then(Value::as_str)
         {
-            settlement_template_hashes.push(json!(hash));
+            settlement_template_hashes.push(hash.to_string());
         }
         if let Some(hash) = live_state
             .pointer("/channel_receipt/hash")
             .and_then(Value::as_str)
         {
-            channel_receipt_hashes.push(json!(hash));
+            channel_receipt_hashes.push(hash.to_string());
         }
     }
     for (file_name, txid_pointer, txid_target) in [
@@ -659,14 +681,17 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
         let live: Value = serde_json::from_slice(&fs::read(&path).map_err(|e| e.to_string())?)
             .map_err(|e| e.to_string())?;
         if file_name == "kurrent-live-factory-evidence.json" {
-            factory_id = json!("factory-live-1");
-            virtual_channel_ids = vec![json!("factory-live-alice"), json!("factory-live-bob")];
+            factory_id = "factory-live-1".to_string();
+            virtual_channel_ids = vec![
+                "factory-live-alice".to_string(),
+                "factory-live-bob".to_string(),
+            ];
         }
         if let Some(txid) = live.pointer(txid_pointer).and_then(Value::as_str) {
             match txid_target {
-                "factory" => materialisation_txid_outpoint = json!(format!("{txid}:0,{txid}:1")),
-                "refund" => refund_txid_outpoint = json!(format!("{txid}:0")),
-                _ => state_txids_or_transition_ids.push(json!(txid)),
+                "factory" => materialisation_txid_outpoint = format!("{txid}:0,{txid}:1"),
+                "refund" => refund_txid_outpoint = format!("{txid}:0"),
+                _ => state_txids_or_transition_ids.push(txid.to_string()),
             }
         }
         for pointer in [
@@ -677,7 +702,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             "/refund/raw_tx",
         ] {
             if let Some(record) = live.pointer(pointer) {
-                raw_transaction_paths_and_hashes.push(record.clone());
+                push_evidence_file(&mut raw_transaction_paths_and_hashes, record)?;
             }
         }
         for pointer in [
@@ -686,7 +711,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             "/refund/redeem_script",
         ] {
             if let Some(record) = live.pointer(pointer) {
-                script_paths_and_hashes.push(record.clone());
+                push_evidence_file(&mut script_paths_and_hashes, record)?;
             }
         }
         for pointer in [
@@ -696,47 +721,54 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
             "/refund/witness",
         ] {
             if let Some(record) = live.pointer(pointer) {
-                witness_paths_and_hashes.push(record.clone());
+                push_evidence_file(&mut witness_paths_and_hashes, record)?;
             }
         }
     }
 
-    let report = json!({
-        "timestamp": timestamp(),
-        "git_commit": git_stdout(&root()?, &["rev-parse", "--verify", "HEAD"]),
-        "tool_versions": detection.tools,
-        "kaspa_branch_profile": kaspa_branch_profile,
-        "enabled_opcode_capability_evidence": {
-            "source_repo": source_repo,
-            "op_cat": "covered by Toccata source evidence and covenant VM transcript",
-            "introspection": "covered by Toccata source evidence and live daemon transaction transcript",
-            "checksigfromstack": "covered by Toccata source evidence and covenant VM transcript",
-            "hashlock": "covered by Kurrent live hashlock settlement evidence",
-            "timelock_refund": "covered by Kurrent live early-refund rejection and matured refund evidence",
-            "covenant_output_constraints": "covered by Kurrent live state update, stale-state rejection, and settlement evidence"
+    let report = AcceptanceReport {
+        timestamp: timestamp(),
+        git_commit: git_stdout(&root()?, &["rev-parse", "--verify", "HEAD"]),
+        tool_versions: detection.tools,
+        kaspa_branch_profile,
+        enabled_opcode_capability_evidence: OpcodeCapabilityEvidence {
+            source_repo,
+            op_cat: "covered by Toccata source evidence and covenant VM transcript".to_string(),
+            introspection:
+                "covered by Toccata source evidence and live daemon transaction transcript"
+                    .to_string(),
+            checksigfromstack:
+                "covered by Toccata source evidence and covenant VM transcript".to_string(),
+            hashlock: "covered by Kurrent live hashlock settlement evidence".to_string(),
+            timelock_refund:
+                "covered by Kurrent live early-refund rejection and matured refund evidence"
+                    .to_string(),
+            covenant_output_constraints:
+                "covered by Kurrent live state update, stale-state rejection, and settlement evidence"
+                    .to_string(),
         },
-        "network_devnet_id": "local-kaspa-simnet-toccata+bitcoin-regtest-lnd",
-        "state_channel_funding_txid_outpoint": state_channel_funding_txid_outpoint,
-        "state_txids_or_transition_ids": state_txids_or_transition_ids,
-        "latest_state_settlement_txid_outpoint": latest_state_settlement_txid_outpoint,
-        "factory_id": factory_id,
-        "virtual_channel_ids": virtual_channel_ids,
-        "factory_state_roots_before_after": [],
-        "materialisation_txid_outpoint": materialisation_txid_outpoint,
-        "ln_invoice_payment_preimage_evidence": ln_invoice_payment_preimage_evidence,
-        "refund_txid_outpoint": refund_txid_outpoint,
-        "raw_transaction_paths_and_hashes": raw_transaction_paths_and_hashes,
-        "script_paths_and_hashes": script_paths_and_hashes,
-        "witness_paths_and_hashes": witness_paths_and_hashes,
-        "flow_evidence_paths_and_hashes": flow_evidence_paths_and_hashes,
-        "settlement_template_hashes": settlement_template_hashes,
-        "channel_receipt_hashes": channel_receipt_hashes,
-        "command_transcript_paths": command_transcript_paths,
-        "flows": flows,
-        "status": status,
-        "blocker_code": blocker_code,
-        "blockers": blockers,
-    });
+        network_devnet_id: "local-kaspa-simnet-toccata+bitcoin-regtest-lnd".to_string(),
+        state_channel_funding_txid_outpoint,
+        state_txids_or_transition_ids,
+        latest_state_settlement_txid_outpoint,
+        factory_id,
+        virtual_channel_ids,
+        factory_state_roots_before_after: Vec::new(),
+        materialisation_txid_outpoint,
+        ln_invoice_payment_preimage_evidence,
+        refund_txid_outpoint,
+        raw_transaction_paths_and_hashes,
+        script_paths_and_hashes,
+        witness_paths_and_hashes,
+        flow_evidence_paths_and_hashes,
+        settlement_template_hashes,
+        channel_receipt_hashes,
+        command_transcript_paths,
+        flows,
+        status: status.to_string(),
+        blocker_code: blocker_code.to_string(),
+        blockers,
+    };
     write_json_file(&evidence_root.join("kurrent-acceptance.json"), &report)
 }
 
@@ -747,18 +779,14 @@ fn verify_evidence() -> Result<u8, String> {
         eprintln!("missing evidence/kurrent-acceptance.json");
         return Ok(EXIT_EVIDENCE);
     }
-    let report: Value = serde_json::from_slice(&fs::read(&path).map_err(|e| e.to_string())?)
-        .map_err(|e| e.to_string())?;
-    if report.get("status").and_then(Value::as_str) != Some("passed") {
+    let report: AcceptanceReport =
+        serde_json::from_slice(&fs::read(&path).map_err(|e| e.to_string())?)
+            .map_err(|e| e.to_string())?;
+    if report.status != "passed" {
         eprintln!("acceptance evidence is not passed");
         return Ok(EXIT_EVIDENCE);
     }
-    if report
-        .get("blockers")
-        .and_then(Value::as_array)
-        .map(|items| !items.is_empty())
-        .unwrap_or(true)
-    {
+    if !report.blockers.is_empty() {
         eprintln!("acceptance evidence contains blockers");
         return Ok(EXIT_EVIDENCE);
     }
@@ -770,39 +798,43 @@ fn verify_evidence() -> Result<u8, String> {
         "refund_timeout_flow",
         "evidence_verifier_flow",
     ];
-    let flows = report.get("flows").and_then(Value::as_object);
     for key in required {
-        if flows.and_then(|m| m.get(key)).and_then(Value::as_str) != Some("passed") {
+        if report.flows.get(key).map(String::as_str) != Some("passed") {
             eprintln!("missing passed flow: {key}");
             return Ok(EXIT_EVIDENCE);
         }
     }
 
-    for field in [
-        "network_devnet_id",
-        "state_channel_funding_txid_outpoint",
-        "latest_state_settlement_txid_outpoint",
-        "factory_id",
-        "materialisation_txid_outpoint",
-        "refund_txid_outpoint",
+    for (field, value) in [
+        ("network_devnet_id", &report.network_devnet_id),
+        (
+            "state_channel_funding_txid_outpoint",
+            &report.state_channel_funding_txid_outpoint,
+        ),
+        (
+            "latest_state_settlement_txid_outpoint",
+            &report.latest_state_settlement_txid_outpoint,
+        ),
+        ("factory_id", &report.factory_id),
+        (
+            "materialisation_txid_outpoint",
+            &report.materialisation_txid_outpoint,
+        ),
+        ("refund_txid_outpoint", &report.refund_txid_outpoint),
     ] {
-        if report
-            .get(field)
-            .and_then(Value::as_str)
-            .unwrap_or("")
-            .is_empty()
-        {
+        if value.is_empty() {
             eprintln!("missing required acceptance field: {field}");
             return Ok(EXIT_EVIDENCE);
         }
     }
-    for bucket in ["virtual_channel_ids", "state_txids_or_transition_ids"] {
-        if report
-            .get(bucket)
-            .and_then(Value::as_array)
-            .map(Vec::is_empty)
-            .unwrap_or(true)
-        {
+    for (bucket, values) in [
+        ("virtual_channel_ids", &report.virtual_channel_ids),
+        (
+            "state_txids_or_transition_ids",
+            &report.state_txids_or_transition_ids,
+        ),
+    ] {
+        if values.is_empty() {
             eprintln!("missing evidence bucket: {bucket}");
             return Ok(EXIT_EVIDENCE);
         }
@@ -818,9 +850,27 @@ fn verify_evidence() -> Result<u8, String> {
         ("flow_evidence_paths_and_hashes", HashMode::FileBytes),
         ("ln_invoice_payment_preimage_evidence", HashMode::FileBytes),
     ] {
-        let Some(records) = report.get(bucket).and_then(Value::as_array) else {
-            eprintln!("missing evidence bucket: {bucket}");
-            return Ok(EXIT_EVIDENCE);
+        let records = match bucket {
+            "raw_transaction_paths_and_hashes" => &report.raw_transaction_paths_and_hashes,
+            "script_paths_and_hashes" => &report.script_paths_and_hashes,
+            "witness_paths_and_hashes" => &report.witness_paths_and_hashes,
+            "ln_invoice_payment_preimage_evidence" => &report.ln_invoice_payment_preimage_evidence,
+            "flow_evidence_paths_and_hashes" => {
+                if report.flow_evidence_paths_and_hashes.is_empty() {
+                    eprintln!("missing evidence bucket: {bucket}");
+                    return Ok(EXIT_EVIDENCE);
+                }
+                for record in &report.flow_evidence_paths_and_hashes {
+                    if let Err(err) =
+                        verify_file_hash(&root, bucket, &record.path, &record.sha256, mode)
+                    {
+                        eprintln!("{err}");
+                        return Ok(EXIT_EVIDENCE);
+                    }
+                }
+                continue;
+            }
+            _ => unreachable!(),
         };
         if records.is_empty() {
             eprintln!("missing evidence bucket: {bucket}");
@@ -834,28 +884,346 @@ fn verify_evidence() -> Result<u8, String> {
         }
     }
 
-    let Some(transcripts) = report
-        .get("command_transcript_paths")
-        .and_then(Value::as_array)
-    else {
-        eprintln!("missing evidence bucket: command_transcript_paths");
-        return Ok(EXIT_EVIDENCE);
-    };
-    if transcripts.is_empty() {
+    if report.command_transcript_paths.is_empty() {
         eprintln!("missing evidence bucket: command_transcript_paths");
         return Ok(EXIT_EVIDENCE);
     }
-    for transcript in transcripts {
-        let Some(path) = transcript.as_str() else {
-            eprintln!("invalid transcript path record: {transcript}");
-            return Ok(EXIT_EVIDENCE);
-        };
+    for path in &report.command_transcript_paths {
         if !resolve_record_path(&root, path).is_file() {
             eprintln!("missing transcript file: {path}");
             return Ok(EXIT_EVIDENCE);
         }
     }
     Ok(0)
+}
+
+fn production_readiness_requirements() -> [(&'static str, &'static str, &'static str); 8] {
+    [
+        (
+            "prod_target_profile",
+            "Pinned production network profile, dependency profile, and supported Kaspa/Toccata activation assumptions.",
+            "evidence/production/target-profile.json",
+        ),
+        (
+            "semantic_transaction_verifier",
+            "Independent decoder/verifier proving raw transaction, witness, script, txid, and receipt relationships semantically, not only by hash.",
+            "evidence/production/semantic-transaction-verifier.json",
+        ),
+        (
+            "adversarial_mempool_soak",
+            "Deterministic adversarial mempool, alternate-history, stale-state, refund-race, swap-replay, and evidence-tamper soak evidence.",
+            "evidence/production/adversarial-mempool-soak.json",
+        ),
+        (
+            "key_management_recovery",
+            "Production key-management, signer isolation, key rotation, backup, and recovery runbook.",
+            "docs/PRODUCTION_KEY_MANAGEMENT.md",
+        ),
+        (
+            "monitoring_alerting",
+            "Production monitoring, alerting, SLO, log-retention, and evidence-retention runbook.",
+            "docs/PRODUCTION_MONITORING.md",
+        ),
+        (
+            "incident_recovery",
+            "Incident response and unattended recovery procedure for stalled channels, stale submissions, LN failures, and node divergence.",
+            "docs/PRODUCTION_RECOVERY.md",
+        ),
+        (
+            "release_rollout_rollback",
+            "Release, rollout, rollback, migration, and compatibility procedure for protocol and script changes.",
+            "docs/PRODUCTION_ROLLOUT.md",
+        ),
+        (
+            "external_security_review",
+            "Independent security-review evidence covering protocol design, script constraints, signer model, and operational controls.",
+            "evidence/production/security-review.json",
+        ),
+    ]
+}
+
+fn production_evidence_satisfies(id: &str, path: &Path) -> Result<bool, String> {
+    if !path.is_file() {
+        return Ok(false);
+    }
+    if id == "external_security_review" {
+        return security_review_evidence_satisfies(path);
+    }
+    if path.extension().and_then(|ext| ext.to_str()) == Some("json") {
+        let value: Value =
+            serde_json::from_slice(&fs::read(path).map_err(|e| {
+                format!("failed to read production evidence {}: {e}", path.display())
+            })?)
+            .map_err(|e| {
+                format!(
+                    "failed to parse production evidence {}: {e}",
+                    path.display()
+                )
+            })?;
+        Ok(value.get("status").and_then(Value::as_str) == Some("passed"))
+    } else if path.extension().and_then(|ext| ext.to_str()) == Some("md") {
+        let text = fs::read_to_string(path)
+            .map_err(|e| format!("failed to read production runbook {}: {e}", path.display()))?;
+        Ok(text
+            .lines()
+            .any(|line| line.trim().eq_ignore_ascii_case("Status: passed")))
+    } else {
+        let len = path.metadata().map_err(|e| {
+            format!(
+                "failed to inspect production evidence {}: {e}",
+                path.display()
+            )
+        })?;
+        Ok(len.len() > 0)
+    }
+}
+
+fn security_review_required_scopes() -> [&'static str; 8] {
+    [
+        "protocol_design",
+        "state_channel_latest_state_safety",
+        "kaspa_script_and_covenant_constraints",
+        "participant_signer_model",
+        "ln_kaspa_atomic_swap_interop",
+        "refund_timeout_and_double_claim_safety",
+        "evidence_verification_and_production_gates",
+        "operational_controls_and_runbooks",
+    ]
+}
+
+fn security_review_required_artifact_paths() -> [(&'static str, &'static str); 18] {
+    [
+        ("cargo_manifest", "Cargo.toml"),
+        ("cargo_lock", "Cargo.lock"),
+        ("protocol_library", "src/lib.rs"),
+        ("control_binary", "src/bin/kurrentctl.rs"),
+        ("protocol_tests", "tests/protocol_model.rs"),
+        ("kaspa_devnet_driver", "drivers/kaspa-devnet/src/main.rs"),
+        ("driver_lock", "drivers/kaspa-devnet/Cargo.lock"),
+        (
+            "security_assumptions",
+            "docs/KURRENT_SECURITY_ASSUMPTIONS.md",
+        ),
+        (
+            "interaction_safety_audit",
+            "docs/KURRENT_INTERACTION_SAFETY_AUDIT.md",
+        ),
+        (
+            "production_acceptance",
+            "docs/KURRENT_PRODUCTION_ACCEPTANCE.md",
+        ),
+        (
+            "production_security_review_brief",
+            "docs/PRODUCTION_SECURITY_REVIEW.md",
+        ),
+        (
+            "key_management_runbook",
+            "docs/PRODUCTION_KEY_MANAGEMENT.md",
+        ),
+        ("monitoring_runbook", "docs/PRODUCTION_MONITORING.md"),
+        ("recovery_runbook", "docs/PRODUCTION_RECOVERY.md"),
+        ("rollout_runbook", "docs/PRODUCTION_ROLLOUT.md"),
+        ("local_acceptance", "evidence/kurrent-acceptance.json"),
+        ("target_profile", "evidence/production/target-profile.json"),
+        (
+            "semantic_transaction_verifier",
+            "evidence/production/semantic-transaction-verifier.json",
+        ),
+    ]
+}
+
+fn security_review_required_artifacts() -> Result<Vec<SecurityReviewArtifact>, String> {
+    let root = root()?;
+    let mut artifacts = Vec::new();
+    for (id, relative) in security_review_required_artifact_paths() {
+        let evidence = file_evidence(&root.join(relative))?;
+        artifacts.push(SecurityReviewArtifact {
+            id: id.to_string(),
+            path: evidence.path,
+            sha256: evidence.sha256,
+        });
+    }
+    let adversarial =
+        file_evidence(&root.join("evidence/production/adversarial-mempool-soak.json"))?;
+    artifacts.push(SecurityReviewArtifact {
+        id: "adversarial_soak".to_string(),
+        path: adversarial.path,
+        sha256: adversarial.sha256,
+    });
+    Ok(artifacts)
+}
+
+fn security_review_evidence_satisfies(path: &Path) -> Result<bool, String> {
+    let review: SecurityReviewEvidence = serde_json::from_slice(&fs::read(path).map_err(|e| {
+        format!(
+            "failed to read security-review evidence {}: {e}",
+            path.display()
+        )
+    })?)
+    .map_err(|e| {
+        format!(
+            "failed to parse security-review evidence {}: {e}",
+            path.display()
+        )
+    })?;
+    if review.schema_version != "kurrent-security-review-v1"
+        || review.status != "passed"
+        || review.review_type != "independent_external_security_review"
+    {
+        return Ok(false);
+    }
+    if [
+        &review.completed_at,
+        &review.reviewer_name,
+        &review.reviewer_organisation,
+        &review.reviewer_contact,
+        &review.reviewer_independence_attestation,
+        &review.reviewed_git_commit,
+    ]
+    .iter()
+    .any(|value| value.trim().is_empty())
+    {
+        return Ok(false);
+    }
+    if review.reviewer_independence_attestation.len() < 40 {
+        return Ok(false);
+    }
+    if git_stdout(&root()?, &["rev-parse", "--verify", "HEAD"]).as_deref()
+        != Some(review.reviewed_git_commit.as_str())
+    {
+        return Ok(false);
+    }
+
+    let reviewed_scopes: BTreeSet<_> = review.scope.iter().map(String::as_str).collect();
+    if security_review_required_scopes()
+        .into_iter()
+        .any(|scope| !reviewed_scopes.contains(scope))
+    {
+        return Ok(false);
+    }
+    if review.methodology.len() < 3 || review.methodology.iter().any(|item| item.trim().is_empty())
+    {
+        return Ok(false);
+    }
+
+    let findings = &review.finding_summary;
+    if findings.critical_open != 0
+        || findings.high_open != 0
+        || findings.medium_open != 0
+        || findings.low_open != 0
+        || !review.unresolved_blocking_findings.is_empty()
+    {
+        return Ok(false);
+    }
+
+    let root = root()?;
+    if verify_file_hash_record(
+        &root,
+        "external_security_review_report",
+        &review.report,
+        HashMode::FileBytes,
+    )
+    .is_err()
+        || verify_file_hash_record(
+            &root,
+            "external_security_review_attestation",
+            &review.signed_attestation,
+            HashMode::FileBytes,
+        )
+        .is_err()
+    {
+        return Ok(false);
+    }
+
+    let reviewed_by_id: BTreeMap<_, _> = review
+        .reviewed_artifacts
+        .iter()
+        .map(|artifact| (artifact.id.as_str(), artifact))
+        .collect();
+    for expected in security_review_required_artifacts()? {
+        let Some(actual) = reviewed_by_id.get(expected.id.as_str()) else {
+            return Ok(false);
+        };
+        if actual.path != expected.path || actual.sha256 != expected.sha256 {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
+fn verify_production_readiness() -> Result<u8, String> {
+    let root = root()?;
+    let evidence = evidence_dir()?;
+    let acceptance_path = evidence.join("kurrent-acceptance.json");
+    let mut blockers = Vec::new();
+    let acceptance_status = if acceptance_path.is_file() {
+        let report: AcceptanceReport =
+            serde_json::from_slice(&fs::read(&acceptance_path).map_err(|e| e.to_string())?)
+                .map_err(|e| format!("failed to parse acceptance report: {e}"))?;
+        if report.status != "passed" || !report.blockers.is_empty() {
+            blockers.push(
+                "local devnet acceptance must pass before production readiness can pass"
+                    .to_string(),
+            );
+        }
+        report.status
+    } else {
+        blockers.push("missing evidence/kurrent-acceptance.json".to_string());
+        "missing".to_string()
+    };
+
+    let requirements = production_readiness_requirements()
+        .into_iter()
+        .map(|(id, description, evidence_path)| {
+            let full_path = root.join(evidence_path);
+            let present = match production_evidence_satisfies(id, &full_path) {
+                Ok(true) => true,
+                Ok(false) => {
+                    blockers.push(format!(
+                        "{id}: missing or non-passing required production evidence at {evidence_path}"
+                    ));
+                    false
+                }
+                Err(err) => {
+                    blockers.push(format!(
+                        "{id}: invalid required production evidence at {evidence_path}: {err}"
+                    ));
+                    false
+                }
+            };
+            Ok(ProductionEvidenceRequirement {
+                id: id.to_string(),
+                description: description.to_string(),
+                evidence_path: evidence_path.to_string(),
+                present,
+            })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+
+    let status = if blockers.is_empty() {
+        "passed"
+    } else {
+        "failed/blocked"
+    }
+    .to_string();
+    let report = ProductionReadinessReport {
+        timestamp: timestamp(),
+        status: status.clone(),
+        acceptance_status,
+        requirements,
+        blockers: blockers.clone(),
+    };
+    write_json_file(&evidence.join("kurrent-production-readiness.json"), &report)?;
+
+    if status == "passed" {
+        println!("production-readiness passed");
+        Ok(0)
+    } else {
+        for blocker in blockers {
+            eprintln!("blocked: {blocker}");
+        }
+        Ok(EXIT_PRODUCTION_READINESS)
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -867,17 +1235,19 @@ enum HashMode {
 fn verify_file_hash_record(
     root: &Path,
     bucket: &str,
-    record: &Value,
+    record: &EvidenceFile,
     mode: HashMode,
 ) -> Result<(), String> {
-    let path = record
-        .get("path")
-        .and_then(Value::as_str)
-        .ok_or_else(|| format!("invalid path/hash record in {bucket}: {record}"))?;
-    let expected = record
-        .get("sha256")
-        .and_then(Value::as_str)
-        .ok_or_else(|| format!("invalid path/hash record in {bucket}: {record}"))?;
+    verify_file_hash(root, bucket, &record.path, &record.sha256, mode)
+}
+
+fn verify_file_hash(
+    root: &Path,
+    bucket: &str,
+    path: &str,
+    expected: &str,
+    mode: HashMode,
+) -> Result<(), String> {
     let record_path = resolve_record_path(root, path);
     if !record_path.is_file() {
         return Err(format!("missing evidence file in {bucket}: {path}"));
@@ -1499,7 +1869,7 @@ fn wait_lnd_server_active(lncli: &str, lnddir: &Path, rpc: &str) -> Result<(), S
     Err(format!("lnd at {rpc} did not reach SERVER_ACTIVE"))
 }
 
-fn write_state_channel_protocol_files() -> Result<Vec<FileEvidence>, String> {
+fn write_state_channel_protocol_files() -> Result<Vec<EvidenceFile>, String> {
     let evidence = evidence_dir()?;
     let live_state = fs::read(evidence.join("kurrent-live-state-channel-evidence.json"))
         .ok()
@@ -1743,7 +2113,7 @@ fn live_path_display() -> Result<String, String> {
 fn passed_live_evidence(
     file_name: &str,
     blockers: &mut Vec<String>,
-) -> Result<Option<(FileEvidence, Value)>, String> {
+) -> Result<Option<(EvidenceFile, Value)>, String> {
     let path = evidence_dir()?.join(file_name);
     if !path.exists() {
         blockers.push(format!(
@@ -1759,7 +2129,7 @@ fn passed_live_evidence(
     Ok(Some((file_evidence(&path)?, value)))
 }
 
-fn write_factory_protocol_files() -> Result<Vec<FileEvidence>, String> {
+fn write_factory_protocol_files() -> Result<Vec<EvidenceFile>, String> {
     let evidence = evidence_dir()?;
     let before = json!({
         "domain_separator": DOMAIN_FACTORY_MATERIALISATION,
@@ -2063,6 +2433,1183 @@ fn run_refund_flow() -> Result<u8, String> {
     }
 }
 
+fn run_semantic_transaction_verifier() -> Result<u8, String> {
+    let driver_manifest = root()?.join("drivers/kaspa-devnet/Cargo.toml");
+    if !driver_manifest.exists() {
+        eprintln!("blocked: drivers/kaspa-devnet/Cargo.toml is missing");
+        return Ok(EXIT_PRODUCTION_READINESS);
+    }
+    run_status(
+        Command::new("cargo")
+            .arg("run")
+            .arg("--quiet")
+            .arg("--manifest-path")
+            .arg(driver_manifest)
+            .arg("--")
+            .arg("verify-semantic-evidence")
+            .arg("evidence"),
+    )?;
+    println!(
+        "semantic transaction verifier passed; evidence: {}",
+        evidence_dir()?
+            .join("production/semantic-transaction-verifier.json")
+            .display()
+    );
+    Ok(0)
+}
+
+#[derive(Debug, Clone, Serialize)]
+struct AdversarialSoakCheck {
+    scenario: String,
+    iterations: usize,
+    check_count: usize,
+    assertions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+struct AdversarialSoakReport {
+    status: String,
+    generated_at: String,
+    scope: String,
+    deterministic_seed: String,
+    iterations: usize,
+    scenario_count: usize,
+    check_count: usize,
+    checks: Vec<AdversarialSoakCheck>,
+    evidence_files: Vec<EvidenceFile>,
+    boundaries: Vec<String>,
+}
+
+#[derive(Clone)]
+struct AdversarialChannelFixture {
+    config: KurrentChannelConfig,
+    funding: FundingState,
+    template: SettlementTemplate,
+}
+
+impl AdversarialChannelFixture {
+    fn new(iteration: usize) -> Self {
+        let participants = adversarial_participants();
+        let channel_id = format!("soak-channel-{iteration}");
+        let funding_outpoint = format!("soak-funding-{iteration}:0");
+        let script_covenant_hash = format!("soak-script-{iteration}");
+        let template = SettlementTemplate {
+            template_id: format!("soak-settle-{iteration}"),
+            outputs: adversarial_balances(),
+            refund_after_daa: Some(120),
+            script_covenant_hash: script_covenant_hash.clone(),
+        };
+        let config = KurrentChannelConfig {
+            protocol_version: 1,
+            network_profile: "local-toccata-devnet".to_string(),
+            genesis_or_devnet_id: Some("adversarial-devnet-1".to_string()),
+            channel_id,
+            participants: participants.clone(),
+            challenge_policy: ChallengePolicy {
+                mode: "latest-state".to_string(),
+                challenge_window_daa: 120,
+                same_number_conflict_rule: "reject-conflict".to_string(),
+            },
+            access_manifest: AccessManifest {
+                authorised_participants: participants,
+                participant_public_keys: adversarial_participant_public_keys(),
+                required_signatures: 2,
+            },
+        };
+        let funding = FundingState {
+            funding_outpoint,
+            total_principal: 1_000,
+            principal_by_participant: adversarial_balances(),
+            fee_reserve: 10,
+            script_covenant_hash,
+        };
+        Self {
+            config,
+            funding,
+            template,
+        }
+    }
+
+    fn state_update(
+        &self,
+        number: u64,
+        commitment: impl Into<String>,
+        previous: impl Into<String>,
+    ) -> StateUpdate {
+        let mut state = StateUpdate {
+            header: LatestStateHeader {
+                network_profile: self.config.network_profile.clone(),
+                genesis_or_devnet_id: self.config.genesis_or_devnet_id.clone(),
+                funding_outpoint: self.funding.funding_outpoint.clone(),
+                channel_id: self.config.channel_id.clone(),
+                factory_id: None,
+                virtual_channel_id: None,
+                state_number: number,
+                previous_state_commitment: previous.into(),
+                new_state_commitment: commitment.into(),
+                settlement_template_hash: self.template.hash(),
+                challenge_policy_hash: hash_json(DOMAIN_STATE, &self.config.challenge_policy),
+                participant_set_hash: participant_set_hash(&self.config.participants),
+                script_covenant_hash: self.funding.script_covenant_hash.clone(),
+                protocol_version: self.config.protocol_version,
+                domain_separator: DOMAIN_STATE.to_string(),
+            },
+            balances: adversarial_balances(),
+            participant_signatures: BTreeMap::new(),
+        };
+        for participant in adversarial_participants() {
+            let signature = adversarial_sign_update_for(&participant, &state);
+            state.participant_signatures.insert(participant, signature);
+        }
+        state
+    }
+}
+
+fn run_adversarial_soak() -> Result<u8, String> {
+    let evidence = evidence_dir()?;
+    let production_dir = evidence.join("production");
+    fs::create_dir_all(&production_dir)
+        .map_err(|e| format!("failed to create {}: {e}", production_dir.display()))?;
+
+    let iterations = 64;
+    let mut checks = Vec::new();
+    let mut check_count = 0;
+    run_state_channel_adversarial_soak(iterations, &mut check_count, &mut checks)?;
+    run_factory_adversarial_soak(iterations, &mut check_count, &mut checks)?;
+    run_ln_swap_adversarial_soak(iterations, &mut check_count, &mut checks)?;
+    run_refund_adversarial_soak(iterations, &mut check_count, &mut checks)?;
+    let evidence_files =
+        run_evidence_hash_adversarial_soak(&production_dir, &mut check_count, &mut checks)?;
+
+    let report = AdversarialSoakReport {
+        status: "passed".to_string(),
+        generated_at: timestamp(),
+        scope: "deterministic local adversarial model soak for Kurrent production-readiness gating"
+            .to_string(),
+        deterministic_seed: "kurrent-adversarial-soak-v1".to_string(),
+        iterations,
+        scenario_count: checks.len(),
+        check_count,
+        checks,
+        evidence_files,
+        boundaries: vec![
+            "Runs against Kurrent protocol validators and local evidence files; it does not claim mainnet deployment readiness by itself.".to_string(),
+            "Models mempool conflict, stale-state, alternate-history, refund-race, swap-replay, and evidence-tamper cases locally.".to_string(),
+            "Independent external security review remains required before production readiness can pass.".to_string(),
+        ],
+    };
+    let path = production_dir.join("adversarial-mempool-soak.json");
+    write_json_file(&path, &report)?;
+    println!("adversarial soak passed; evidence: {}", path.display());
+    Ok(0)
+}
+
+fn run_state_channel_adversarial_soak(
+    iterations: usize,
+    check_count: &mut usize,
+    checks: &mut Vec<AdversarialSoakCheck>,
+) -> Result<(), String> {
+    let start = *check_count;
+    for iteration in 0..iterations {
+        let fixture = AdversarialChannelFixture::new(iteration);
+        let mut registry = SettlementRegistry::default();
+        let state0 = fixture.state_update(0, format!("state-{iteration}-0"), "genesis");
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "signed initial state validates",
+            validate_channel_update(
+                &fixture.config,
+                &fixture.funding,
+                &state0,
+                &fixture.template,
+            ),
+        )?;
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "initial state enters latest-state registry",
+            registry.accept_update(state0.clone()),
+        )?;
+        let state1 = fixture.state_update(
+            1,
+            format!("state-{iteration}-1"),
+            state0.header.new_state_commitment.clone(),
+        );
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "second signed state validates",
+            validate_channel_update(
+                &fixture.config,
+                &fixture.funding,
+                &state1,
+                &fixture.template,
+            ),
+        )?;
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "second state enters latest-state registry",
+            registry.accept_update(state1.clone()),
+        )?;
+        let state2 = fixture.state_update(
+            2,
+            format!("state-{iteration}-2"),
+            state1.header.new_state_commitment.clone(),
+        );
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "third signed state validates",
+            validate_channel_update(
+                &fixture.config,
+                &fixture.funding,
+                &state2,
+                &fixture.template,
+            ),
+        )?;
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "third state enters latest-state registry",
+            registry.accept_update(state2.clone()),
+        )?;
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "settlement of state 0 after state 2",
+            registry.settle(&state0, &fixture.template),
+            |err| matches!(err, KurrentError::StaleState { .. }),
+        )?;
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "settlement of state 1 after state 2",
+            registry.settle(&state1, &fixture.template),
+            |err| matches!(err, KurrentError::StaleState { .. }),
+        )?;
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "latest state settles once",
+            registry.settle(&state2, &fixture.template),
+        )?;
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "latest state cannot settle twice",
+            registry.settle(&state2, &fixture.template),
+            |err| matches!(err, KurrentError::DuplicateSettlement(_)),
+        )?;
+
+        let mut conflict_registry = SettlementRegistry::default();
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "conflict registry accepts initial state",
+            conflict_registry.accept_update(state0.clone()),
+        )?;
+        let branch_a = fixture.state_update(
+            1,
+            format!("state-{iteration}-branch-a"),
+            state0.header.new_state_commitment.clone(),
+        );
+        let branch_b = fixture.state_update(
+            1,
+            format!("state-{iteration}-branch-b"),
+            state0.header.new_state_commitment.clone(),
+        );
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "conflict registry accepts first branch",
+            conflict_registry.accept_update(branch_a),
+        )?;
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "same-number conflicting branch",
+            conflict_registry.accept_update(branch_b),
+            |err| matches!(err, KurrentError::SameNumberConflict { state_number: 1 }),
+        )?;
+
+        let mut skipped_registry = SettlementRegistry::default();
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "skip registry accepts initial state",
+            skipped_registry.accept_update(state0.clone()),
+        )?;
+        let skipped_state = fixture.state_update(
+            2,
+            format!("state-{iteration}-skipped"),
+            state0.header.new_state_commitment.clone(),
+        );
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "skipped state number",
+            skipped_registry.accept_update(skipped_state),
+            |err| matches!(err, KurrentError::NonMonotonicState { .. }),
+        )?;
+
+        let mut wrong_previous_registry = SettlementRegistry::default();
+        expect_protocol_ok(
+            check_count,
+            "state-channel",
+            "wrong-previous registry accepts initial state",
+            wrong_previous_registry.accept_update(state0.clone()),
+        )?;
+        let wrong_previous =
+            fixture.state_update(1, format!("state-{iteration}-wrong-previous"), "foreign");
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "wrong previous commitment",
+            wrong_previous_registry.accept_update(wrong_previous),
+            |err| matches!(err, KurrentError::PreviousStateMismatch { .. }),
+        )?;
+
+        let mut wrong_funding = state0.clone();
+        wrong_funding.header.funding_outpoint = format!("foreign-funding-{iteration}:0");
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "wrong funding outpoint rejected before settlement",
+            validate_channel_update(
+                &fixture.config,
+                &fixture.funding,
+                &wrong_funding,
+                &fixture.template,
+            ),
+            |err| matches!(err, KurrentError::WrongFundingOutpoint { .. }),
+        )?;
+        let mut undersigned = state0.clone();
+        undersigned.participant_signatures.remove("bob");
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "under-signed state update",
+            validate_channel_update(
+                &fixture.config,
+                &fixture.funding,
+                &undersigned,
+                &fixture.template,
+            ),
+            |err| matches!(err, KurrentError::InsufficientSignatures { .. }),
+        )?;
+        let mut forged = state0.clone();
+        let forged_signature = forged
+            .participant_signatures
+            .get("alice")
+            .cloned()
+            .ok_or_else(|| "state-channel: missing alice signature".to_string())?;
+        forged
+            .participant_signatures
+            .insert("bob".to_string(), forged_signature);
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "forged participant signature",
+            validate_channel_update(
+                &fixture.config,
+                &fixture.funding,
+                &forged,
+                &fixture.template,
+            ),
+            |err| matches!(err, KurrentError::InvalidParticipantSignature(participant) if participant == "bob"),
+        )?;
+        let mut wrong_template = fixture.template.clone();
+        wrong_template.template_id.push_str("-foreign");
+        expect_protocol_err(
+            check_count,
+            "state-channel",
+            "wrong settlement template",
+            validate_channel_update(&fixture.config, &fixture.funding, &state0, &wrong_template),
+            |err| matches!(err, KurrentError::SettlementTemplateMismatch),
+        )?;
+    }
+    push_adversarial_check(
+        checks,
+        "state-channel mempool and alternate-history resistance",
+        iterations,
+        start,
+        *check_count,
+        &[
+            "signed latest-state sequence validates and settles only at the newest state",
+            "stale state 0 and state 1 settlements are rejected after state 2",
+            "same-number conflicting branches are rejected",
+            "skipped numbers and wrong previous commitments are rejected",
+            "wrong funding, under-signed updates, forged signatures, and wrong templates are rejected",
+        ],
+    );
+    Ok(())
+}
+
+fn run_factory_adversarial_soak(
+    iterations: usize,
+    check_count: &mut usize,
+    checks: &mut Vec<AdversarialSoakCheck>,
+) -> Result<(), String> {
+    let start = *check_count;
+    for iteration in 0..iterations {
+        let before = adversarial_factory(iteration);
+        let plan = adversarial_materialisation_plan(iteration);
+        let after = adversarial_after_materialisation(&before, &plan.virtual_channel_id);
+        expect_protocol_ok(
+            check_count,
+            "factory",
+            "valid materialisation conserves principal and fee",
+            validate_materialisation(&before, &after, &plan),
+        )?;
+
+        let mut wrong_factory = plan.clone();
+        wrong_factory.factory_id = format!("foreign-factory-{iteration}");
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "wrong factory id",
+            validate_materialisation(&before, &after, &wrong_factory),
+            |err| matches!(err, KurrentError::WrongFactoryId { .. }),
+        )?;
+        let mut double_before = before.clone();
+        double_before
+            .materialised_receipts
+            .insert(plan.materialisation_id.clone());
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "double materialisation id",
+            validate_materialisation(&double_before, &after, &plan),
+            |err| matches!(err, KurrentError::DoubleMaterialisation(_)),
+        )?;
+        let mut wrong_virtual_channel = plan.clone();
+        wrong_virtual_channel.virtual_channel_id = format!("missing-vc-{iteration}");
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "wrong virtual channel id",
+            validate_materialisation(&before, &after, &wrong_virtual_channel),
+            |err| matches!(err, KurrentError::WrongVirtualChannelId(_)),
+        )?;
+        let untouched_id = format!("soak-vc-{iteration}-2");
+        let mut mutated_after = after.clone();
+        mutated_after
+            .virtual_channels
+            .get_mut(&untouched_id)
+            .ok_or_else(|| format!("factory: missing untouched channel {untouched_id}"))?
+            .state_commitment
+            .push_str("-mutated");
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "untouched virtual channel mutation",
+            validate_materialisation(&before, &mutated_after, &plan),
+            |err| matches!(err, KurrentError::MutatedUntouchedVirtualChannel(_)),
+        )?;
+        let mut overlapping_inputs = plan.clone();
+        overlapping_inputs
+            .fee_input_ids
+            .insert(format!("principal-in-{iteration}"));
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "principal and fee input overlap",
+            validate_materialisation(&before, &after, &overlapping_inputs),
+            |err| matches!(err, KurrentError::FeePrincipalNotSeparated),
+        )?;
+        let mut wrong_principal = plan.clone();
+        wrong_principal.principal_amount -= 1;
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "wrong principal amount",
+            validate_materialisation(&before, &after, &wrong_principal),
+            |err| matches!(err, KurrentError::MaterialisationAmountMismatch { .. }),
+        )?;
+        let mut wrong_outputs = plan;
+        wrong_outputs
+            .output_amounts
+            .insert("alice".to_string(), 301);
+        expect_protocol_err(
+            check_count,
+            "factory",
+            "non-conserving output amount",
+            validate_materialisation(&before, &after, &wrong_outputs),
+            |err| matches!(err, KurrentError::ConservationFailure { .. }),
+        )?;
+    }
+    push_adversarial_check(
+        checks,
+        "factory materialisation accounting resistance",
+        iterations,
+        start,
+        *check_count,
+        &[
+            "valid materialisation conserves factory principal and fee reserve",
+            "wrong factory and virtual-channel ids are rejected",
+            "duplicate materialisation ids are rejected",
+            "untouched virtual-channel leaves cannot be mutated",
+            "principal and fee input overlap is rejected",
+            "wrong principal and non-conserving output amounts are rejected",
+        ],
+    );
+    Ok(())
+}
+
+fn run_ln_swap_adversarial_soak(
+    iterations: usize,
+    check_count: &mut usize,
+    checks: &mut Vec<AdversarialSoakCheck>,
+) -> Result<(), String> {
+    let start = *check_count;
+    for iteration in 0..iterations {
+        for direction in ["ln-to-kaspa", "kaspa-to-ln"] {
+            let (evidence, receipt) = adversarial_ln_case(iteration, direction);
+            expect_protocol_ok(
+                check_count,
+                "ln-swap",
+                "valid atomic swap receipt validates",
+                validate_ln_swap(&evidence, &receipt),
+            )?;
+            let mut wrong_preimage = evidence.clone();
+            wrong_preimage.preimage = format!("wrong-preimage-{iteration}-{direction}");
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "wrong preimage",
+                validate_ln_swap(&wrong_preimage, &receipt),
+                |err| matches!(err, KurrentError::WrongPreimage),
+            )?;
+            let mut stale_receipt = receipt.clone();
+            stale_receipt.output_id = format!("mutated-settlement-{iteration}:0");
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "stale receipt hash after scope mutation",
+                validate_ln_swap(&evidence, &stale_receipt),
+                |err| matches!(err, KurrentError::ReceiptHashMismatch),
+            )?;
+            let mut invalid_direction = evidence.clone();
+            invalid_direction.direction = "sideways".to_string();
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "invalid swap direction",
+                validate_ln_swap(&invalid_direction, &receipt),
+                |err| matches!(err, KurrentError::InvalidSwapEvidence(_)),
+            )?;
+            let mut replay_receipt = receipt.clone();
+            replay_receipt.direction = Some(
+                match direction {
+                    "ln-to-kaspa" => "kaspa-to-ln",
+                    _ => "ln-to-kaspa",
+                }
+                .to_string(),
+            );
+            replay_receipt.refresh_hash();
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "opposite-direction receipt replay",
+                validate_ln_swap(&evidence, &replay_receipt),
+                |err| matches!(err, KurrentError::ReceiptReplay),
+            )?;
+            let mut wrong_funding = receipt.clone();
+            wrong_funding.funding_outpoint = format!("foreign-funding-{iteration}:0");
+            wrong_funding.refresh_hash();
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "wrong Kaspa funding outpoint",
+                validate_ln_swap(&evidence, &wrong_funding),
+                |err| matches!(err, KurrentError::WrongFundingOutpoint { .. }),
+            )?;
+            let mut wrong_settlement = receipt.clone();
+            wrong_settlement.output_id = format!("foreign-settlement-{iteration}:0");
+            wrong_settlement.refresh_hash();
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "wrong Kaspa settlement outpoint",
+                validate_ln_swap(&evidence, &wrong_settlement),
+                |err| matches!(err, KurrentError::WrongSettlementOutpoint { .. }),
+            )?;
+            let mut wrong_script = receipt.clone();
+            wrong_script.settlement_template_hash = format!("foreign-script-{iteration}");
+            wrong_script.refresh_hash();
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "wrong script hash",
+                validate_ln_swap(&evidence, &wrong_script),
+                |err| matches!(err, KurrentError::WrongScriptHash { .. }),
+            )?;
+            let mut zero_amount = evidence.clone();
+            zero_amount.amount = 0;
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "zero-amount swap evidence",
+                validate_ln_swap(&zero_amount, &receipt),
+                |err| matches!(err, KurrentError::InvalidSwapEvidence(_)),
+            )?;
+            let mut wrong_protocol = receipt.clone();
+            wrong_protocol.protocol_version = 2;
+            wrong_protocol.refresh_hash();
+            expect_protocol_err(
+                check_count,
+                "ln-swap",
+                "wrong protocol version",
+                validate_ln_swap(&evidence, &wrong_protocol),
+                |err| matches!(err, KurrentError::WrongProtocolVersion { .. }),
+            )?;
+        }
+    }
+    push_adversarial_check(
+        checks,
+        "LN and Kaspa atomic-swap replay resistance",
+        iterations,
+        start,
+        *check_count,
+        &[
+            "valid LN-to-Kaspa and Kaspa-to-LN receipts validate",
+            "wrong preimages and stale receipt hashes are rejected",
+            "invalid directions and opposite-direction receipt replay are rejected",
+            "wrong funding, settlement, script, protocol, and zero-amount evidence are rejected",
+        ],
+    );
+    Ok(())
+}
+
+fn run_refund_adversarial_soak(
+    iterations: usize,
+    check_count: &mut usize,
+    checks: &mut Vec<AdversarialSoakCheck>,
+) -> Result<(), String> {
+    let start = *check_count;
+    for iteration in 0..iterations {
+        let scope = adversarial_claim_scope(iteration, 0);
+        let mut early_registry = SettlementRegistry::default();
+        expect_protocol_err(
+            check_count,
+            "refund",
+            "refund before required DAA",
+            early_registry.refund_scoped_claim(&scope, 119, 120),
+            |err| matches!(err, KurrentError::RefundNotMature { .. }),
+        )?;
+        expect_protocol_ok(
+            check_count,
+            "refund",
+            "refund at required DAA",
+            early_registry.refund_scoped_claim(&scope, 120, 120),
+        )?;
+        let mut settlement_registry = SettlementRegistry::default();
+        expect_protocol_ok(
+            check_count,
+            "refund",
+            "settlement claim registers scoped key",
+            settlement_registry.settle_scoped_claim(&scope),
+        )?;
+        expect_protocol_err(
+            check_count,
+            "refund",
+            "settlement and refund double claim",
+            settlement_registry.refund_scoped_claim(&scope, 120, 120),
+            |err| matches!(err, KurrentError::DoubleClaim(_)),
+        )?;
+        let second_scope = adversarial_claim_scope(iteration, 1);
+        expect_protocol_ok(
+            check_count,
+            "refund",
+            "different funding outpoint has independent claim scope",
+            settlement_registry.refund_scoped_claim(&second_scope, 120, 120),
+        )?;
+        let mut duplicate_refund_registry = SettlementRegistry::default();
+        expect_protocol_ok(
+            check_count,
+            "refund",
+            "first refund claim registers scoped key",
+            duplicate_refund_registry.refund_scoped_claim(&scope, 120, 120),
+        )?;
+        expect_protocol_err(
+            check_count,
+            "refund",
+            "duplicate refund claim",
+            duplicate_refund_registry.refund_scoped_claim(&scope, 120, 120),
+            |err| matches!(err, KurrentError::DoubleClaim(_)),
+        )?;
+    }
+    push_adversarial_check(
+        checks,
+        "refund timeout and double-claim race resistance",
+        iterations,
+        start,
+        *check_count,
+        &[
+            "early refunds are rejected before the required DAA score",
+            "mature refunds succeed once",
+            "settlement and refund are mutually exclusive for the same claim scope",
+            "claim scopes do not collide across funding outputs",
+            "duplicate refund claims are rejected",
+        ],
+    );
+    Ok(())
+}
+
+fn run_evidence_hash_adversarial_soak(
+    production_dir: &Path,
+    check_count: &mut usize,
+    checks: &mut Vec<AdversarialSoakCheck>,
+) -> Result<Vec<EvidenceFile>, String> {
+    let start = *check_count;
+    let corpus_dir = production_dir.join("adversarial-soak-corpus");
+    fs::create_dir_all(&corpus_dir)
+        .map_err(|e| format!("failed to create {}: {e}", corpus_dir.display()))?;
+    let anchor = corpus_dir.join("anchor.txt");
+    fs::write(
+        &anchor,
+        b"kurrent adversarial soak evidence anchor\nstate-factory-ln-refund-evidence\n",
+    )
+    .map_err(|e| format!("failed to write {}: {e}", anchor.display()))?;
+    let record = file_evidence(&anchor)?;
+    let good_bundle = EvidenceBundle {
+        acceptance_json: "evidence/kurrent-acceptance.json".to_string(),
+        referenced_files: vec![record.clone()],
+    };
+    expect_protocol_ok(
+        check_count,
+        "evidence-hash",
+        "matching evidence hash bundle",
+        verify_evidence_bundle(&root()?, &good_bundle),
+    )?;
+    let tampered_bundle = EvidenceBundle {
+        acceptance_json: good_bundle.acceptance_json.clone(),
+        referenced_files: vec![EvidenceFile {
+            path: record.path.clone(),
+            sha256: sha256_hex(b"tampered"),
+        }],
+    };
+    expect_protocol_err(
+        check_count,
+        "evidence-hash",
+        "tampered evidence hash",
+        verify_evidence_bundle(&root()?, &tampered_bundle),
+        |err| matches!(err, KurrentError::EvidenceHashMismatch { .. }),
+    )?;
+    let missing_bundle = EvidenceBundle {
+        acceptance_json: good_bundle.acceptance_json,
+        referenced_files: vec![EvidenceFile {
+            path: "evidence/production/adversarial-soak-corpus/missing.txt".to_string(),
+            sha256: sha256_hex(b"missing"),
+        }],
+    };
+    expect_protocol_err(
+        check_count,
+        "evidence-hash",
+        "missing evidence file",
+        verify_evidence_bundle(&root()?, &missing_bundle),
+        |err| matches!(err, KurrentError::MissingEvidenceFile(_)),
+    )?;
+    push_adversarial_check(
+        checks,
+        "production evidence hash tamper resistance",
+        1,
+        start,
+        *check_count,
+        &[
+            "matching file hashes validate",
+            "tampered file hashes are rejected",
+            "missing evidence files are rejected",
+        ],
+    );
+    Ok(vec![record])
+}
+
+fn expect_protocol_ok<T>(
+    check_count: &mut usize,
+    scenario: &str,
+    action: &str,
+    result: std::result::Result<T, KurrentError>,
+) -> Result<T, String> {
+    match result {
+        Ok(value) => {
+            *check_count += 1;
+            Ok(value)
+        }
+        Err(err) => Err(format!(
+            "{scenario}: expected {action} to pass, got {err:?}"
+        )),
+    }
+}
+
+fn expect_protocol_err<T>(
+    check_count: &mut usize,
+    scenario: &str,
+    action: &str,
+    result: std::result::Result<T, KurrentError>,
+    predicate: impl FnOnce(&KurrentError) -> bool,
+) -> Result<(), String> {
+    match result {
+        Ok(_) => Err(format!("{scenario}: expected {action} to be rejected")),
+        Err(err) if predicate(&err) => {
+            *check_count += 1;
+            Ok(())
+        }
+        Err(err) => Err(format!(
+            "{scenario}: expected {action} rejection, got {err:?}"
+        )),
+    }
+}
+
+fn push_adversarial_check(
+    checks: &mut Vec<AdversarialSoakCheck>,
+    scenario: &str,
+    iterations: usize,
+    start: usize,
+    end: usize,
+    assertions: &[&str],
+) {
+    checks.push(AdversarialSoakCheck {
+        scenario: scenario.to_string(),
+        iterations,
+        check_count: end.saturating_sub(start),
+        assertions: assertions
+            .iter()
+            .map(|assertion| assertion.to_string())
+            .collect(),
+    });
+}
+
+fn adversarial_participants() -> Vec<String> {
+    vec!["alice".to_string(), "bob".to_string()]
+}
+
+fn adversarial_balances() -> BTreeMap<String, u64> {
+    BTreeMap::from([("alice".to_string(), 600), ("bob".to_string(), 400)])
+}
+
+fn adversarial_keypair_for(participant: &str) -> Keypair {
+    let byte = match participant {
+        "alice" => 11,
+        "bob" => 22,
+        _ => 33,
+    };
+    let secret = SecretKey::from_slice(&[byte; 32]).expect("static adversarial key must be valid");
+    Keypair::from_secret_key(secp256k1::SECP256K1, &secret)
+}
+
+fn adversarial_participant_public_keys() -> BTreeMap<String, String> {
+    adversarial_participants()
+        .into_iter()
+        .map(|participant| {
+            let keypair = adversarial_keypair_for(&participant);
+            let (public_key, _) = keypair.x_only_public_key();
+            (participant, hex::encode(public_key.serialize()))
+        })
+        .collect()
+}
+
+fn adversarial_sign_update_for(participant: &str, update: &StateUpdate) -> String {
+    let keypair = adversarial_keypair_for(participant);
+    let message = Message::from_digest(state_update_signing_digest(update));
+    let secp = Secp256k1::new();
+    let signature = secp.sign_schnorr_no_aux_rand(&message, &keypair);
+    hex::encode(signature.as_ref())
+}
+
+fn adversarial_factory(iteration: usize) -> FactoryState {
+    let first = VirtualChannelState {
+        virtual_channel_id: format!("soak-vc-{iteration}-1"),
+        channel_id: format!("soak-channel-vc-{iteration}-1"),
+        balance_by_participant: adversarial_balances(),
+        state_number: 2,
+        state_commitment: format!("soak-vc-{iteration}-state-2"),
+    };
+    let second = VirtualChannelState {
+        virtual_channel_id: format!("soak-vc-{iteration}-2"),
+        channel_id: format!("soak-channel-vc-{iteration}-2"),
+        balance_by_participant: BTreeMap::from([
+            ("carol".to_string(), 250),
+            ("dave".to_string(), 250),
+        ]),
+        state_number: 0,
+        state_commitment: format!("soak-vc-{iteration}-state-0"),
+    };
+    FactoryState {
+        factory_id: format!("soak-factory-{iteration}"),
+        network_profile: "local-toccata-devnet".to_string(),
+        total_principal: 1_500,
+        fee_reserve: 10,
+        virtual_channels: BTreeMap::from([
+            (first.virtual_channel_id.clone(), first),
+            (second.virtual_channel_id.clone(), second),
+        ]),
+        materialised_receipts: BTreeSet::new(),
+    }
+}
+
+fn adversarial_materialisation_plan(iteration: usize) -> MaterialisationPlan {
+    MaterialisationPlan {
+        materialisation_id: format!("soak-mat-{iteration}"),
+        factory_id: format!("soak-factory-{iteration}"),
+        virtual_channel_id: format!("soak-vc-{iteration}-1"),
+        touched_leaves: TouchedLeaves {
+            virtual_channel_ids: BTreeSet::from([format!("soak-vc-{iteration}-1")]),
+        },
+        principal_input_ids: BTreeSet::from([format!("principal-in-{iteration}")]),
+        fee_input_ids: BTreeSet::from([format!("fee-in-{iteration}")]),
+        principal_amount: 1_000,
+        fee_amount: 10,
+        output_amounts: BTreeMap::from([
+            ("alice".to_string(), 600),
+            ("bob".to_string(), 400),
+            ("fee".to_string(), 10),
+        ]),
+    }
+}
+
+fn adversarial_after_materialisation(
+    before: &FactoryState,
+    virtual_channel_id: &str,
+) -> FactoryState {
+    let mut after = before.clone();
+    after.total_principal = 500;
+    after.fee_reserve = 0;
+    after.virtual_channels.remove(virtual_channel_id);
+    after
+}
+
+fn adversarial_ln_case(iteration: usize, direction: &str) -> (LnSwapEvidence, ChannelReceipt) {
+    let preimage = format!("preimage-{iteration}-{direction}");
+    let preimage_hash = sha256_hex(preimage.as_bytes());
+    let swap_id = format!("swap-{iteration}-{direction}");
+    let funding_outpoint = format!("swap-funding-{iteration}:0");
+    let settlement_outpoint = format!("swap-settlement-{iteration}:0");
+    let script_hash = format!("swap-script-{iteration}");
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: swap_id.clone(),
+        direction: direction.to_string(),
+        ln_payment_hash: preimage_hash.clone(),
+        preimage,
+        preimage_hash,
+        kaspa_funding_outpoint: funding_outpoint.clone(),
+        kaspa_settlement_outpoint: settlement_outpoint.clone(),
+        amount: 100 + iteration as u64,
+        recipient: match direction {
+            "ln-to-kaspa" => "alice",
+            _ => "bob",
+        }
+        .to_string(),
+        script_hash: script_hash.clone(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        format!("swap-channel-{iteration}"),
+        funding_outpoint,
+        settlement_outpoint,
+        2,
+        script_hash,
+    );
+    receipt.swap_id = Some(swap_id);
+    receipt.direction = Some(direction.to_string());
+    receipt.refresh_hash();
+    (evidence, receipt)
+}
+
+fn adversarial_claim_scope(iteration: usize, funding_index: usize) -> ClaimScope {
+    ClaimScope {
+        network_profile: "local-toccata-devnet".to_string(),
+        funding_outpoint: format!("refund-funding-{iteration}-{funding_index}:0"),
+        output_id: format!("refund-settlement-{iteration}:0"),
+        claim_subject: format!("refund-swap-{iteration}"),
+    }
+}
+
+fn write_production_target_profile() -> Result<u8, String> {
+    let root = root()?;
+    let evidence = evidence_dir()?;
+    let production_dir = evidence.join("production");
+    fs::create_dir_all(&production_dir)
+        .map_err(|e| format!("failed to create {}: {e}", production_dir.display()))?;
+
+    let acceptance_path = evidence.join("kurrent-acceptance.json");
+    let acceptance: AcceptanceReport =
+        serde_json::from_slice(&fs::read(&acceptance_path).map_err(|e| {
+            format!(
+                "failed to read local acceptance report {}: {e}",
+                acceptance_path.display()
+            )
+        })?)
+        .map_err(|e| format!("failed to parse local acceptance report: {e}"))?;
+    if acceptance.status != "passed" || !acceptance.blockers.is_empty() {
+        return Err(
+            "cannot write production target profile until local devnet acceptance is passed"
+                .to_string(),
+        );
+    }
+
+    let detection = detection_report();
+    if !detection.blockers.is_empty() {
+        return Err(format!(
+            "cannot write production target profile while tooling is blocked: {}",
+            detection.blockers.join("; ")
+        ));
+    }
+
+    let mut lockfiles = vec![
+        file_evidence(&root.join("Cargo.lock"))?,
+        file_evidence(&root.join("Cargo.toml"))?,
+    ];
+    let driver_lock = root.join("drivers/kaspa-devnet/Cargo.lock");
+    if driver_lock.is_file() {
+        lockfiles.push(file_evidence(&driver_lock)?);
+    }
+
+    let profile = json!({
+        "status": "passed",
+        "generated_at": timestamp(),
+        "scope": "production target profile for Kurrent local-devnet-to-production hardening",
+        "git_commit": git_stdout(&root, &["rev-parse", "--verify", "HEAD"]),
+        "repository": git_stdout(&root, &["remote", "get-url", "origin"]),
+        "local_acceptance": {
+            "status": acceptance.status,
+            "acceptance_report": file_evidence(&acceptance_path)?,
+            "network_devnet_id": acceptance.network_devnet_id,
+            "flows": acceptance.flows,
+        },
+        "kaspa_source_profile": detection.selected_kaspa_repo,
+        "tool_versions": detection.tools,
+        "lockfiles": lockfiles,
+        "protocol_domains": [
+            DOMAIN_STATE,
+            DOMAIN_STATE_SIGNATURE,
+            DOMAIN_SETTLEMENT_TEMPLATE,
+            DOMAIN_CHANNEL_RECEIPT,
+            DOMAIN_FACTORY_MATERIALISATION,
+            DOMAIN_LN_INTEROP,
+            DOMAIN_PARTICIPANT_SET,
+            DOMAIN_CLAIM_SCOPE
+        ],
+        "supported_for_production_gate": [
+            "latest-state state-channel model with Schnorr participant signatures",
+            "local factory materialisation accounting model",
+            "atomic hash/preimage settlement evidence in both LN/Kaspa directions",
+            "refund timeout evidence",
+            "typed local acceptance report",
+            "semantic transaction decoding verifier",
+            "deterministic adversarial mempool, alternate-history, refund-race, swap-replay, and evidence-tamper soak"
+        ],
+        "not_yet_supported_for_production_gate": [
+            "mainnet deployment",
+            "public Lightning routing",
+            "native Lightning route-hop integration",
+            "unattended production operation",
+            "independent external security review"
+        ],
+        "required_production_gates": [
+            "local devnet acceptance must pass",
+            "production target profile must be pinned",
+            "semantic transaction verifier must pass",
+            "adversarial soak evidence must pass",
+            "production key-management runbook must be present",
+            "production monitoring runbook must be present",
+            "incident recovery runbook must be present",
+            "rollout and rollback runbook must be present",
+            "external security review evidence must pass"
+        ]
+    });
+    write_json_file(&production_dir.join("target-profile.json"), &profile)?;
+    println!(
+        "production target profile written: {}",
+        production_dir.join("target-profile.json").display()
+    );
+    Ok(0)
+}
+
+fn prepare_security_review_package() -> Result<u8, String> {
+    let root = root()?;
+    let evidence = evidence_dir()?;
+    let production_dir = evidence.join("production");
+    fs::create_dir_all(&production_dir)
+        .map_err(|e| format!("failed to create {}: {e}", production_dir.display()))?;
+
+    let artifacts = security_review_required_artifacts()?;
+    let required_scope = security_review_required_scopes();
+    let request = json!({
+        "status": "ready_for_external_review",
+        "schema_version": "kurrent-security-review-request-v1",
+        "generated_at": timestamp(),
+        "repository": git_stdout(&root, &["remote", "get-url", "origin"]),
+        "git_commit": git_stdout(&root, &["rev-parse", "--verify", "HEAD"]),
+        "review_type_required": "independent_external_security_review",
+        "required_output_path": "evidence/production/security-review.json",
+        "required_report_path": "evidence/production/security-review-report.pdf",
+        "required_signed_attestation_path": "evidence/production/security-review-attestation.txt",
+        "required_scope": required_scope,
+        "reviewed_artifacts": artifacts,
+        "acceptance_criteria": [
+            "reviewer identity and contact must be supplied",
+            "reviewer must attest independent external status",
+            "all required scope ids must be covered",
+            "methodology must contain at least three non-empty review methods",
+            "critical, high, medium, and low open finding counts must be zero",
+            "unresolved_blocking_findings must be empty",
+            "report and signed attestation file hashes must match",
+            "reviewed artefact paths and SHA-256 hashes must match this request package"
+        ],
+        "passing_evidence_template": {
+            "schema_version": "kurrent-security-review-v1",
+            "status": "passed",
+            "review_type": "independent_external_security_review",
+            "completed_at": "YYYY-MM-DD",
+            "reviewer_name": "<external reviewer name>",
+            "reviewer_organisation": "<external reviewer organisation>",
+            "reviewer_contact": "<external reviewer contact>",
+            "reviewer_independence_attestation": "<statement of independence, conflicts, and review authority>",
+            "reviewed_git_commit": git_stdout(&root, &["rev-parse", "--verify", "HEAD"]),
+            "scope": required_scope,
+            "methodology": [
+                "manual protocol-design review",
+                "manual script/covenant constraint review",
+                "evidence and production-gate replay"
+            ],
+            "reviewed_artifacts": security_review_required_artifacts()?,
+            "finding_summary": {
+                "critical_open": 0,
+                "high_open": 0,
+                "medium_open": 0,
+                "low_open": 0,
+                "accepted_risk_count": 0,
+                "fixed_count": 0
+            },
+            "unresolved_blocking_findings": [],
+            "report": {
+                "path": "evidence/production/security-review-report.pdf",
+                "sha256": "<sha256 of report file bytes>"
+            },
+            "signed_attestation": {
+                "path": "evidence/production/security-review-attestation.txt",
+                "sha256": "<sha256 of signed attestation file bytes>"
+            }
+        },
+        "boundaries": [
+            "This request package does not satisfy production readiness by itself.",
+            "Only a completed independent external security review at evidence/production/security-review.json can satisfy the final gate.",
+            "Any source, evidence, or runbook change after this package is generated requires regenerating the package and re-reviewing changed artefacts."
+        ]
+    });
+    let path = production_dir.join("security-review-request.json");
+    write_json_file(&path, &request)?;
+    println!("security review package prepared: {}", path.display());
+    Ok(0)
+}
+
 fn check() -> Result<u8, String> {
     run_status(Command::new("cargo").arg("fmt").arg("--all").arg("--check"))?;
     run_status(
@@ -2159,4 +3706,81 @@ fn timestamp() -> String {
         .map(|d| d.as_secs())
         .unwrap_or(0);
     format!("{seconds}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn unique_temp_path(label: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time must be after unix epoch")
+            .as_nanos();
+        env::temp_dir().join(format!("kurrentctl-{label}-{nanos}.json"))
+    }
+
+    #[test]
+    fn superficial_security_review_status_does_not_satisfy_gate() {
+        let path = unique_temp_path("superficial-security-review");
+        fs::write(&path, br#"{"status":"passed"}"#)
+            .expect("test should write superficial review fixture");
+
+        let satisfied =
+            production_evidence_satisfies("external_security_review", &path).unwrap_or(false);
+        assert!(!satisfied);
+
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn structurally_incomplete_security_review_does_not_satisfy_gate() {
+        let path = unique_temp_path("incomplete-security-review");
+        let review = json!({
+            "schema_version": "kurrent-security-review-v1",
+            "status": "passed",
+            "review_type": "independent_external_security_review",
+            "completed_at": "2026-06-11",
+            "reviewer_name": "External Reviewer",
+            "reviewer_organisation": "External Review Ltd",
+            "reviewer_contact": "reviewer@example.invalid",
+            "reviewer_independence_attestation": "External reviewer attests independence from implementation work.",
+            "reviewed_git_commit": "not-the-current-commit",
+            "scope": [],
+            "methodology": [
+                "manual protocol-design review",
+                "manual script/covenant constraint review",
+                "evidence and production-gate replay"
+            ],
+            "reviewed_artifacts": [],
+            "finding_summary": {
+                "critical_open": 0,
+                "high_open": 0,
+                "medium_open": 0,
+                "low_open": 0,
+                "accepted_risk_count": 0,
+                "fixed_count": 0
+            },
+            "unresolved_blocking_findings": [],
+            "report": {
+                "path": "evidence/production/security-review-report.pdf",
+                "sha256": sha256_hex(b"missing report")
+            },
+            "signed_attestation": {
+                "path": "evidence/production/security-review-attestation.txt",
+                "sha256": sha256_hex(b"missing attestation")
+            }
+        });
+        fs::write(
+            &path,
+            serde_json::to_vec_pretty(&review).expect("fixture should serialise"),
+        )
+        .expect("test should write incomplete review fixture");
+
+        let satisfied =
+            production_evidence_satisfies("external_security_review", &path).unwrap_or(false);
+        assert!(!satisfied);
+
+        let _ = fs::remove_file(path);
+    }
 }

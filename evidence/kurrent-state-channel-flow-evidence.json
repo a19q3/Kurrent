@@ -17,7 +17,7 @@
       "status_code": 0,
       "stderr": {
         "path": "evidence/kaspa-txscript-covenants.stderr.log",
-        "sha256": "27d0476b25d72d5ea1d6dc6c97ccb63ef6a3defd0e38f03a9b72ed430ecc1eed"
+        "sha256": "b4558b9e97d571b197ee1b3e164af4c46c0b19de11bdcd2c7687eeba4aef910d"
       },
       "stdout": {
         "path": "evidence/kaspa-txscript-covenants.stdout.log",
@@ -41,11 +41,11 @@
       "status_code": 0,
       "stderr": {
         "path": "evidence/kaspa-daemon-compute-budget-relay.stderr.log",
-        "sha256": "62bb781abac4b0b1384fd04472903acf5e85a565036e39fe09b118a715a10ab7"
+        "sha256": "82528a55675b94c4bf80b6331b9ef32530d5c1774332cb4a6e8654cc452c1f14"
       },
       "stdout": {
         "path": "evidence/kaspa-daemon-compute-budget-relay.stdout.log",
-        "sha256": "2a406653a171042eb1ef89477b2339b598155ac4ac6fbf455059ea8ba12c73cf"
+        "sha256": "ca05d71c757cd2f059d539bb9406536be8ac9bf61cbb709b6edf1d66878f5a56"
       }
     },
     {
@@ -62,7 +62,7 @@
       "status_code": 0,
       "stderr": {
         "path": "evidence/kurrent-live-state-channel-driver.stderr.log",
-        "sha256": "3fa5d8b5bfab920477035733cf99b79fea01760fb7877ba8b464589757a1c9e1"
+        "sha256": "e76ba20b045a5cf9578fe0c3c54da293d3816b28c082748bc92d49e0160f31d9"
       },
       "stdout": {
         "path": "evidence/kurrent-live-state-channel-driver.stdout.log",
@@ -82,7 +82,7 @@
   ],
   "live_evidence": {
     "path": "evidence/kurrent-live-state-channel-evidence.json",
-    "sha256": "80633224286d5290bfddaea183e2493aa424c50b26597527d5189eab70d65ad4"
+    "sha256": "ec9e1536099824a21d3816bb24bcc9329b37e9a4654ab273089ba933d68b43b6"
   },
   "protocol_files": [
     {
@@ -91,11 +91,11 @@
     },
     {
       "path": "evidence/kurrent-state-channel-headers.json",
-      "sha256": "586a1778b919a6ea3e5d35130606f65421dec2619cb62d73d1b133417165144c"
+      "sha256": "f0276cf4c0cbf5e030bed1be0216767c3b08bde386a9419efe98eb89b99fb404"
     },
     {
       "path": "evidence/kurrent-state-channel-receipt.json",
-      "sha256": "d520fd60e418151f4ba2a4aadd1fa818e27471aeba559226b4504182bf7b551c"
+      "sha256": "be9b05ef9e0ff6d0008e14b9ccfc15c406a898a61714099a4deaba5e86c3b92d"
     }
   ],
   "source_files": [
