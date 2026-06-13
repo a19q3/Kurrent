@@ -1,5 +1,6 @@
 /target/
 /.cap/
 /.kurrent-devnet/
+/evidence/acceptance-logs/
 /drivers/*/target/
 .DS_Store

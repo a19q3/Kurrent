@@ -10,6 +10,18 @@ There are two separate gates.
 
 The only successful local-devnet verdict is `passed`. It may be reported only if every required business flow runs against real local devnet tooling and the check script exits zero.
 
+The command writes a complete combined stdout/stderr transcript for the acceptance run:
+
+```sh
+evidence/acceptance-logs/latest.log
+```
+
+For a fixed log file name, run:
+
+```sh
+KURRENT_ACCEPTANCE_LOG_PATH="$PWD/evidence/acceptance-logs/manual-local-devnet.log" ./scripts/check.sh
+```
+
 Current expected local-devnet verdict: `passed` in the present local environment. The suite executes real Kaspa and Lightning Network capability probes and every required Kurrent business flow passes against local devnet tooling.
 
 ## Production Readiness

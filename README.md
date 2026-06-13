@@ -18,7 +18,13 @@ This repository does not claim mainnet readiness. The current local devnet verdi
 ./scripts/check.sh
 ```
 
-`./scripts/check.sh` checks Rust formatting, runs strict Clippy and tests, detects the required external tooling, runs the real Kaspa and Lightning Network probes, verifies evidence files by path and hash, and writes `evidence/kurrent-acceptance.json`. In the present environment it exits zero and records status `passed`.
+`./scripts/check.sh` checks Rust formatting, runs strict Clippy and tests, detects the required external tooling, runs the real Kaspa and Lightning Network probes, verifies evidence files by path and hash, and writes `evidence/kurrent-acceptance.json`. It also writes a complete combined stdout/stderr transcript to `evidence/acceptance-logs/local-devnet-acceptance-<timestamp>.log` and refreshes `evidence/acceptance-logs/latest.log`. In the present environment it exits zero and records status `passed`.
+
+To choose the full-log path explicitly:
+
+```sh
+KURRENT_ACCEPTANCE_LOG_PATH="$PWD/evidence/acceptance-logs/manual-local-devnet.log" ./scripts/check.sh
+```
 
 ## Production Readiness
 
@@ -49,6 +55,7 @@ This repository does not claim mainnet readiness. The current local devnet verdi
 cargo test
 ./scripts/detect-tools.sh
 ./scripts/check.sh
+./scripts/verify-evidence.sh
 ```
 
 ## Evidence
