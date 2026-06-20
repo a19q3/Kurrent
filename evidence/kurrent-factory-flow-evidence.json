@@ -1,0 +1,16 @@
+{
+  "blockers": [],
+  "flow": "kaspa_factory_flow",
+  "live_evidence": {
+    "path": "evidence/kurrent-live-factory-evidence.json",
+    "sha256": "7debbbdafa89b6ba47391f867b5de43c35f1b5aab06003b88f4bd8167a9902c3"
+  },
+  "model_status": "passed",
+  "protocol_files": [
+    {
+      "path": "evidence/kurrent-factory-materialisation-model.json",
+      "sha256": "8efae426594908b5889fa58cef275df87e71190a2d2ba596dd52cee11b904361"
+    }
+  ],
+  "status": "passed"
+}

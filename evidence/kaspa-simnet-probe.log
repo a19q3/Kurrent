@@ -1,0 +1,8 @@
+2026-06-16 14:05:23.542+08:00 [INFO ] kaspad v2.0.0-1fe3697b
+2026-06-16 14:05:23.542+08:00 [INFO ] Application directory: /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet
+2026-06-16 14:05:23.542+08:00 [INFO ] Data directory: /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir
+2026-06-16 14:05:23.542+08:00 [INFO ] Logs to console only
+2026-06-16 14:05:23.542+08:00 [INFO ] Deleting databases
+2026-06-16 14:05:23.544+08:00 [INFO ] Utxoindex Data directory /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir/utxoindex
+2026-06-16 14:05:23.563+08:00 [INFO ] Resyncing the utxoindex...
+2026-06-16 14:05:23.565+08:00 [INFO ] [UPnP] Attempting to register upnp... (to disable run the node with --disable-upnp)

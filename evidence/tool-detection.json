@@ -1,0 +1,126 @@
+{
+  "timestamp": "1781589922",
+  "status": "ready",
+  "blockers": [],
+  "tools": [
+    {
+      "name": "kaspad",
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspad",
+      "version": null
+    },
+    {
+      "name": "kaspa-node",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "kaspa-cli",
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-cli",
+      "version": "Kaspa Cli Wallet v2.0.0 (type 'help' for list of commands)"
+    },
+    {
+      "name": "kaspa-wallet",
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-wallet",
+      "version": "Kaspa Cli Wallet v2.0.0 (type 'help' for list of commands)"
+    },
+    {
+      "name": "rusty-kaspa",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "lnd",
+      "path": "/Users/arthur/go/bin/lnd",
+      "version": "lnd version 0.20.1-beta commit="
+    },
+    {
+      "name": "lncli",
+      "path": "/Users/arthur/go/bin/lncli",
+      "version": "lncli version 0.20.1-beta commit="
+    },
+    {
+      "name": "lightningd",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "lightning-cli",
+      "path": null,
+      "version": null
+    },
+    {
+      "name": "bitcoind",
+      "path": "/opt/homebrew/bin/bitcoind",
+      "version": "Bitcoin Core daemon version v31.0.0 bitcoind"
+    },
+    {
+      "name": "bitcoin-cli",
+      "path": "/opt/homebrew/bin/bitcoin-cli",
+      "version": "Bitcoin Core RPC client version v31.0.0"
+    },
+    {
+      "name": "cargo",
+      "path": "/Users/arthur/.cargo/bin/cargo",
+      "version": "cargo 1.92.0-nightly (344c4567c 2025-10-21)"
+    },
+    {
+      "name": "rustc",
+      "path": "/Users/arthur/.cargo/bin/rustc",
+      "version": "rustc 1.92.0-nightly (6501e64fc 2025-10-23)"
+    },
+    {
+      "name": "go",
+      "path": "/opt/homebrew/bin/go",
+      "version": "go version go1.26.4 darwin/arm64"
+    }
+  ],
+  "tool_paths": {
+    "bitcoin-cli": "/opt/homebrew/bin/bitcoin-cli",
+    "bitcoind": "/opt/homebrew/bin/bitcoind",
+    "cargo": "/Users/arthur/.cargo/bin/cargo",
+    "go": "/opt/homebrew/bin/go",
+    "kaspa-cli": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-cli",
+    "kaspa-node": null,
+    "kaspa-wallet": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-wallet",
+    "kaspad": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspad",
+    "lightning-cli": null,
+    "lightningd": null,
+    "lncli": "/Users/arthur/go/bin/lncli",
+    "lnd": "/Users/arthur/go/bin/lnd",
+    "rustc": "/Users/arthur/.cargo/bin/rustc",
+    "rusty-kaspa": null
+  },
+  "known_bin_dirs": [
+    "/Users/arthur/go/bin",
+    "/Users/arthur/RustroverProjects/rusty-kaspa/target/release",
+    "/Users/arthur/RustroverProjects/rusty-kaspa/target/debug",
+    "/Users/arthur/RustroverProjects/rusty-kaspa-toccata/target/release",
+    "/Users/arthur/RustroverProjects/rusty-kaspa-toccata/target/debug",
+    "/Users/arthur/RustroverProjects/rusty-kaspa/target/release",
+    "/Users/arthur/RustroverProjects/rusty-kaspa/target/debug"
+  ],
+  "parent_kaspa_repo": {
+    "path": "/Users/arthur/RustroverProjects/rusty-kaspa",
+    "current_branch": "master",
+    "head": "cfafeb4c093fa37a303f1b9f19c58f986b870ce3",
+    "origin_toccata": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
+    "origin_master": "cfafeb4c093fa37a303f1b9f19c58f986b870ce3",
+    "status_short": "## master...origin/master"
+  },
+  "selected_kaspa_repo": {
+    "path": "/Users/arthur/RustroverProjects/rusty-kaspa",
+    "current_branch": "master",
+    "head": "cfafeb4c093fa37a303f1b9f19c58f986b870ce3",
+    "origin_toccata": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
+    "origin_master": "cfafeb4c093fa37a303f1b9f19c58f986b870ce3",
+    "status_short": "## master...origin/master"
+  },
+  "lnd_repo": {
+    "path": "/Users/arthur/RustroverProjects/lnd",
+    "current_branch": "",
+    "head": "848b72ce96eb68fa90fd4336523ca4c59bddcd4c",
+    "origin_toccata": null,
+    "origin_master": "1f23a119d09192fb8c70b30957a14bed7a968714",
+    "status_short": "## HEAD (no branch)"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "receipt_hash": "f582b6a9aa0cba5bb184014eeef61320b18a5bda70c7a89a23432740e02aa229",
+  "scope": {
+    "channel_id": "channel-a",
+    "direction": null,
+    "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
+    "factory_id": null,
+    "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+    "network_profile": "kaspa-simnet-toccata",
+    "output_id": "3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458:0,3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458:1",
+    "protocol_version": 1,
+    "settlement_template_hash": "f5f1c78041f422e722b3c9e46b9b142e35aa758a907707164f7df4fb9cd79ff9",
+    "state_number": 2,
+    "swap_id": null,
+    "virtual_channel_id": null
+  }
+}

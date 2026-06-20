@@ -1,0 +1,25 @@
+[package]
+name = "kurrent-kaspa-devnet-driver"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+borsh = "1.5.1"
+hex = "0.4"
+kurrent = { path = "../.." }
+kaspa-addresses = { path = "../../../rusty-kaspa/crypto/addresses" }
+kaspa-consensus = { path = "../../../rusty-kaspa/consensus" }
+kaspa-consensus-core = { path = "../../../rusty-kaspa/consensus/core" }
+kaspa-grpc-client = { path = "../../../rusty-kaspa/rpc/grpc/client" }
+kaspa-hashes = { path = "../../../rusty-kaspa/crypto/hashes" }
+kaspa-rpc-core = { path = "../../../rusty-kaspa/rpc/core" }
+kaspa-seq-commit = { path = "../../../rusty-kaspa/consensus/seq-commit" }
+kaspa-smt = { path = "../../../rusty-kaspa/crypto/smt" }
+kaspa-testing-integration = { path = "../../../rusty-kaspa/testing/integration" }
+kaspa-txscript = { path = "../../../rusty-kaspa/crypto/txscript" }
+kaspad = { path = "../../../rusty-kaspa/kaspad" }
+secp256k1 = { version = "0.29.1", features = ["global-context", "rand-std"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time" ] }

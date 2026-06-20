@@ -1,0 +1,47 @@
+
+running 1 test
+2026-06-16 14:05:47.392+08:00 [INFO ] kaspad v2.0.1-cfafeb4c
+2026-06-16 14:05:47.392+08:00 [INFO ] Application directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmppWNGmq
+2026-06-16 14:05:47.392+08:00 [INFO ] Data directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmppWNGmq/kaspa-simnet/datadir
+2026-06-16 14:05:47.392+08:00 [INFO ] Logs to console only
+2026-06-16 14:05:47.392+08:00 [INFO ] Utxoindex Data directory /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmppWNGmq/kaspa-simnet/datadir/utxoindex
+2026-06-16 14:05:47.434+08:00 [INFO ] Resyncing the utxoindex...
+2026-06-16 14:05:47.453+08:00 [INFO ] kaspad v2.0.1-cfafeb4c
+2026-06-16 14:05:47.453+08:00 [INFO ] Application directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmp5goAoe
+2026-06-16 14:05:47.453+08:00 [INFO ] Data directory: /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmp5goAoe/kaspa-simnet/datadir
+2026-06-16 14:05:47.453+08:00 [INFO ] Logs to console only
+2026-06-16 14:05:47.453+08:00 [INFO ] Utxoindex Data directory /var/folders/kq/dz44fm994nz94zw2dfqnz_g00000gn/T/rusty-kaspa/.tmp5goAoe/kaspa-simnet/datadir/utxoindex
+2026-06-16 14:05:47.467+08:00 [INFO ] Resyncing the utxoindex...
+2026-06-16 14:05:47.471+08:00 [INFO ] GRPC Server starting on: 0.0.0.0:23243
+2026-06-16 14:05:47.473+08:00 [INFO ] P2P Server starting on: 0.0.0.0:52987
+2026-06-16 14:05:47.476+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:12639
+2026-06-16 14:05:47.476+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:11405
+2026-06-16 14:05:48.483+08:00 [INFO ] GRPC, new incoming connection be20bca1-a50c-4f9d-a777-49edde0200fc@127.0.0.1:49938 #1
+2026-06-16 14:05:48.489+08:00 [INFO ] GRPC Server starting on: 0.0.0.0:21276
+2026-06-16 14:05:48.489+08:00 [INFO ] P2P Server starting on: 0.0.0.0:42988
+2026-06-16 14:05:48.489+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:7479
+2026-06-16 14:05:48.489+08:00 [INFO ] WRPC Server starting on: 0.0.0.0:49937
+2026-06-16 14:05:49.491+08:00 [INFO ] GRPC, new incoming connection 35de99ad-984a-46b0-94b9-93132ffc1078@127.0.0.1:49944 #1
+2026-06-16 14:05:49.496+08:00 [INFO ] Registering p2p flows for peer 127.0.0.1:52987 for protocol version 10
+2026-06-16 14:05:49.496+08:00 [INFO ] Registering p2p flows for peer 127.0.0.1:49945 for protocol version 10
+2026-06-16 14:05:49.498+08:00 [INFO ] P2P Connected to outgoing peer 127.0.0.1:52987 (outbound: 1)
+2026-06-16 14:05:49.498+08:00 [INFO ] P2P Connected to incoming peer 127.0.0.1:49945 (inbound: 1)
+2026-06-16 14:05:49.803+08:00 [INFO ] GRPC, incoming stream ended by client be20bca1-a50c-4f9d-a777-49edde0200fc@127.0.0.1:49938
+2026-06-16 14:05:49.803+08:00 [INFO ] GRPC, incoming stream ended by client 35de99ad-984a-46b0-94b9-93132ffc1078@127.0.0.1:49944
+2026-06-16 14:05:49.803+08:00 [INFO ] GRPC, end connection be20bca1-a50c-4f9d-a777-49edde0200fc@127.0.0.1:49938 #1
+2026-06-16 14:05:49.803+08:00 [INFO ] GRPC, end connection 35de99ad-984a-46b0-94b9-93132ffc1078@127.0.0.1:49944 #1
+2026-06-16 14:05:49.803+08:00 [INFO ] P2P, incoming stream ended from peer 127.0.0.1:52987
+2026-06-16 14:05:49.803+08:00 [INFO ] P2P Server stopped: 0.0.0.0:52987
+2026-06-16 14:05:49.803+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:11405
+2026-06-16 14:05:49.803+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:12639
+2026-06-16 14:05:49.815+08:00 [INFO ] GRPC Server stopped on: 0.0.0.0:23243
+2026-06-16 14:05:50.305+08:00 [INFO ] Accepted 11 blocks ...374afdd6830382a638def190ca5492e814a26e021e78588537c6e63ff60531d7 via submit block
+2026-06-16 14:05:50.312+08:00 [INFO ] P2P Server stopped: 0.0.0.0:42988
+2026-06-16 14:05:50.312+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:49937
+2026-06-16 14:05:50.312+08:00 [INFO ] WRPC Server stopped on: 0.0.0.0:7479
+2026-06-16 14:05:50.312+08:00 [INFO ] GRPC Server stopped on: 0.0.0.0:21276
+2026-06-16 14:05:50.560+08:00 [INFO ] Accepted 11 blocks ...374afdd6830382a638def190ca5492e814a26e021e78588537c6e63ff60531d7 via relay
+test daemon_integration_tests::daemon_compute_budget_relay_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 3.46s
+

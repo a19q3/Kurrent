@@ -1,0 +1,43 @@
+{
+  "checked_at_unix": 1781589967,
+  "checks": [
+    {
+      "details": "funding, update, wrong-lane rejections, stale rejection, and settlement transactions decode and match recorded txids, outpoints, values, lane ids, rejection status, JSON hashes, and typed state-model bindings",
+      "id": "state_channel_transactions",
+      "status": "passed"
+    },
+    {
+      "details": "KIP-21 lane proof verifies against the recorded selected-parent accepted_id_merkle_root, and lane activity reconstructs funding < update < settlement order for the bound Kurrent lane",
+      "id": "kip21_lane_monitor_evidence",
+      "status": "passed"
+    },
+    {
+      "details": "lane-proven candidate markers decode, lower candidate is displaced within the response window, and the higher candidate is eligible-to-finalise under the local-devnet DAA policy",
+      "id": "settlement_eligibility_evidence",
+      "status": "passed"
+    },
+    {
+      "details": "sponsored marker fee accounting is bound to the signed fee policy, the stale lower marker pays a higher sponsor fee, and lane-proven latest-state semantics still select the higher survivor",
+      "id": "fee_sponsored_displacement_evidence",
+      "status": "passed"
+    },
+    {
+      "details": "factory funding and materialisation transactions decode and preserve recorded txid, spend, output semantics, script hash, and typed factory materialisation bindings",
+      "id": "factory_transactions",
+      "status": "passed"
+    },
+    {
+      "details": "both hashlock directions decode, consume the LN preimage hash, spend their recorded funding outputs, and match typed swap receipt bindings",
+      "id": "hashlock_transactions",
+      "status": "passed"
+    },
+    {
+      "details": "early and mature refund transactions decode, spend the recorded funding output, use the expected sequence-lock values, and match typed refund claim bindings",
+      "id": "refund_transactions",
+      "status": "passed"
+    }
+  ],
+  "decoded_transactions": 22,
+  "status": "passed",
+  "verified_hex_records": 36
+}

@@ -1,0 +1,125 @@
+{
+  "flow": "kaspa_factory_flow",
+  "funding": {
+    "outpoint": "b03c3bd240d24993f94748db7859e658185f1d978737de969afaa9e5207789b8:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-factory-funding-tx.hex",
+      "sha256": "9f2c0d2b6a74c700f3544353f0d7b5222eb813e81110843e7cd3c521f16a7b2d"
+    },
+    "txid": "b03c3bd240d24993f94748db7859e658185f1d978737de969afaa9e5207789b8",
+    "value": 5022000000
+  },
+  "materialisation": {
+    "outputs": {
+      "alice": 2748350000,
+      "bob": 2248650000
+    },
+    "raw_tx": {
+      "path": "evidence/kurrent-live-factory-materialisation-tx.hex",
+      "sha256": "675cdb03480143dcad4c08e0cbf23f2fd37a5975f7936eae3c69dd4dfc725a08"
+    },
+    "redeem_script": {
+      "path": "evidence/kurrent-live-factory-redeem-script.hex",
+      "sha256": "c2fcbe75a016693bf8dd8ed4fa6621f1794232dbdcf82b1ef15fab531801a17b"
+    },
+    "txid": "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858",
+    "witness": {
+      "path": "evidence/kurrent-live-factory-materialisation-witness.hex",
+      "sha256": "879cc8e20677c3857d218c24a80297b6202fb7d63f36384e742e3f44f31bc2a8"
+    }
+  },
+  "model_validation": {
+    "after": {
+      "factory_id": "factory-live-1",
+      "fee_reserve": 0,
+      "materialised_receipts": [
+        "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:0,6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:1"
+      ],
+      "network_profile": "kaspa-simnet-toccata",
+      "total_principal": 1000000,
+      "virtual_channels": {
+        "factory-live-vc-2": {
+          "balance_by_participant": {
+            "carol": 1000000
+          },
+          "channel_id": "factory-live-channel-2",
+          "state_commitment": "0a72e5f28979fbc4783a8591ef3b241d07a05d70e94c79a1a6503ca36ec556a8",
+          "state_number": 0,
+          "virtual_channel_id": "factory-live-vc-2"
+        }
+      }
+    },
+    "before": {
+      "factory_id": "factory-live-1",
+      "fee_reserve": 0,
+      "materialised_receipts": [],
+      "network_profile": "kaspa-simnet-toccata",
+      "total_principal": 4998000000,
+      "virtual_channels": {
+        "factory-live-vc-1": {
+          "balance_by_participant": {
+            "alice": 2748350000,
+            "bob": 2248650000
+          },
+          "channel_id": "factory-live-channel-1",
+          "state_commitment": "a52101489bf89776be16e8ea48a2ed40e6f4760c884f78953dbaf5d7a0adccb7",
+          "state_number": 2,
+          "virtual_channel_id": "factory-live-vc-1"
+        },
+        "factory-live-vc-2": {
+          "balance_by_participant": {
+            "carol": 1000000
+          },
+          "channel_id": "factory-live-channel-2",
+          "state_commitment": "0a72e5f28979fbc4783a8591ef3b241d07a05d70e94c79a1a6503ca36ec556a8",
+          "state_number": 0,
+          "virtual_channel_id": "factory-live-vc-2"
+        }
+      }
+    },
+    "factory_state_roots": [
+      "2737abe7874ff53babbc8b56c2549f527070204dfea23dbc09adf620ce06d9cf",
+      "f0bfc7f8561ce4ee3aacc27a4199aee8e6022ee88ca53464345a5ef87d75b223"
+    ],
+    "plan": {
+      "factory_id": "factory-live-1",
+      "fee_amount": 0,
+      "fee_input_ids": [],
+      "materialisation_id": "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:0,6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:1",
+      "output_amounts": {
+        "alice": 2748350000,
+        "bob": 2248650000
+      },
+      "principal_amount": 4997000000,
+      "principal_input_ids": [
+        "b03c3bd240d24993f94748db7859e658185f1d978737de969afaa9e5207789b8:0"
+      ],
+      "touched_leaves": {
+        "virtual_channel_ids": [
+          "factory-live-vc-1"
+        ]
+      },
+      "virtual_channel_id": "factory-live-vc-1"
+    },
+    "plan_hash": "1172374b29d51b2e7e0089805b7082dea7b92176bcaebd37dae260ad12ee2b13",
+    "receipt": {
+      "channel_id": "factory-live-vc-1",
+      "direction": null,
+      "factory_id": "factory-live-1",
+      "funding_outpoint": "factory-live-1",
+      "network_profile": "kaspa-simnet-toccata",
+      "output_id": "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:0,6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:1",
+      "protocol_version": 1,
+      "receipt_hash": "77bb743b079d9e1fa78b53d38c768f783fdc44eae289493c8d627c3d5dfba3f2",
+      "settlement_template_hash": "1172374b29d51b2e7e0089805b7082dea7b92176bcaebd37dae260ad12ee2b13",
+      "state_number": 2,
+      "swap_id": null,
+      "virtual_channel_id": "factory-live-vc-1"
+    },
+    "redeem_script_sha256": "c2fcbe75a016693bf8dd8ed4fa6621f1794232dbdcf82b1ef15fab531801a17b",
+    "status": "passed",
+    "validation_layer": "typed-kurrent-protocol-model"
+  },
+  "network_profile": "kaspa-simnet-toccata",
+  "status": "passed"
+}

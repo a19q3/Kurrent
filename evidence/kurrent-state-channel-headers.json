@@ -1,0 +1,65 @@
+[
+  {
+    "hash": "9ee2cba110a17c28698920369067dc3478747a5f511ce7ede51b69b188684bc0",
+    "header": {
+      "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
+      "channel_id": "channel-a",
+      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "domain_separator": "KURRENT_STATE_V1",
+      "factory_id": null,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "genesis_or_devnet_id": "local-toccata-simnet",
+      "network_profile": "kaspa-simnet-toccata",
+      "new_state_commitment": "16d2a6265ad6245f61fc9c648b24c1e397a9b489e316975771cfd80e79eaac56",
+      "participant_set_hash": "4653498cadd1f924ee9946bdfa5133386b49e6624922a45d22ab228ae36554a7",
+      "previous_state_commitment": "538c72c4f4660b420682c75d2f3ee379746fcba1dbbed7f430c5b297f0a838a2",
+      "protocol_version": 1,
+      "script_covenant_hash": "6c6fdfbd299b9c8e0f7632fff2854eda493ed0334144d0d765195dec4aa7c9fc",
+      "settlement_template_hash": "f5f1c78041f422e722b3c9e46b9b142e35aa758a907707164f7df4fb9cd79ff9",
+      "state_number": 0,
+      "virtual_channel_id": null
+    }
+  },
+  {
+    "hash": "65fd721877beaf08801052e72518a7dfe3e5a95ceaf678710e193e36dcd5fd34",
+    "header": {
+      "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
+      "channel_id": "channel-a",
+      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "domain_separator": "KURRENT_STATE_V1",
+      "factory_id": null,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "genesis_or_devnet_id": "local-toccata-simnet",
+      "network_profile": "kaspa-simnet-toccata",
+      "new_state_commitment": "7dbbbbd8d5360afd09b5838e35641283c0d253c324327c3f388c9ba88974218d",
+      "participant_set_hash": "4653498cadd1f924ee9946bdfa5133386b49e6624922a45d22ab228ae36554a7",
+      "previous_state_commitment": "16d2a6265ad6245f61fc9c648b24c1e397a9b489e316975771cfd80e79eaac56",
+      "protocol_version": 1,
+      "script_covenant_hash": "6c6fdfbd299b9c8e0f7632fff2854eda493ed0334144d0d765195dec4aa7c9fc",
+      "settlement_template_hash": "f5f1c78041f422e722b3c9e46b9b142e35aa758a907707164f7df4fb9cd79ff9",
+      "state_number": 1,
+      "virtual_channel_id": null
+    }
+  },
+  {
+    "hash": "533e975e9ceb493393837c89d84eee03409c233a304b85329ab19099e9217ae7",
+    "header": {
+      "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
+      "channel_id": "channel-a",
+      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "domain_separator": "KURRENT_STATE_V1",
+      "factory_id": null,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "genesis_or_devnet_id": "local-toccata-simnet",
+      "network_profile": "kaspa-simnet-toccata",
+      "new_state_commitment": "7287db807fad621ce901aea46e7f5cd7e2d525e9cb5da837a91cee6aa10637ed",
+      "participant_set_hash": "4653498cadd1f924ee9946bdfa5133386b49e6624922a45d22ab228ae36554a7",
+      "previous_state_commitment": "7dbbbbd8d5360afd09b5838e35641283c0d253c324327c3f388c9ba88974218d",
+      "protocol_version": 1,
+      "script_covenant_hash": "6c6fdfbd299b9c8e0f7632fff2854eda493ed0334144d0d765195dec4aa7c9fc",
+      "settlement_template_hash": "f5f1c78041f422e722b3c9e46b9b142e35aa758a907707164f7df4fb9cd79ff9",
+      "state_number": 2,
+      "virtual_channel_id": null
+    }
+  }
+]

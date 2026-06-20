@@ -1,0 +1,667 @@
+diff --git a/src/lib.rs b/src/lib.rs
+index fdde56b..46576fd 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -15,6 +15,9 @@ pub const DOMAIN_LN_INTEROP: &str = "KURRENT_LN_INTEROP_V1";
+ pub const DOMAIN_PARTICIPANT_SET: &str = "KURRENT_PARTICIPANT_SET_V1";
+ pub const DOMAIN_CLAIM_SCOPE: &str = "KURRENT_CLAIM_SCOPE_V1";
+ pub const DOMAIN_STATE_SIGNATURE: &str = "KURRENT_STATE_SIGNATURE_V1";
++pub const DOMAIN_LANE_ID: &str = "KURRENT_LANE_V1";
++pub const DOMAIN_SETTLEMENT_DISTRIBUTION: &str = "KURRENT_SETTLEMENT_DISTRIBUTION_V1";
++pub const DOMAIN_SETTLEMENT_FEE_POLICY: &str = "KURRENT_SETTLEMENT_FEE_POLICY_V1";
+ 
+ #[derive(Debug, Clone, PartialEq, Eq)]
+ pub enum KurrentError {
+@@ -97,6 +100,15 @@ pub enum KurrentError {
+         expected: Option<String>,
+         actual: Option<String>,
+     },
++    InvalidLaneId {
++        field: String,
++        value: String,
++    },
++    WrongLaneId {
++        expected: Option<String>,
++        actual: Option<String>,
++    },
++    SettlementEligibilityEvidenceMismatch(String),
+     InvalidSwapEvidence(String),
+     ReceiptReplay,
+     RefundNotMature {
+@@ -132,6 +144,8 @@ pub struct KurrentChannelConfig {
+     pub participants: Vec<String>,
+     pub challenge_policy: ChallengePolicy,
+     pub access_manifest: AccessManifest,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub expected_lane_id: Option<String>,
+ }
+ 
+ #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+@@ -142,6 +156,8 @@ pub struct FundingState {
+     pub fee_reserve: u64,
+     #[serde(default, skip_serializing_if = "Option::is_none")]
+     pub covenant_id: Option<String>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub expected_lane_id: Option<String>,
+     pub script_covenant_hash: String,
+ }
+ 
+@@ -157,10 +173,14 @@ pub struct LatestStateHeader {
+     pub previous_state_commitment: String,
+     pub new_state_commitment: String,
+     pub settlement_template_hash: String,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub fee_policy_hash: Option<String>,
+     pub challenge_policy_hash: String,
+     pub participant_set_hash: String,
+     #[serde(default, skip_serializing_if = "Option::is_none")]
+     pub covenant_id: Option<String>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub expected_lane_id: Option<String>,
+     pub script_covenant_hash: String,
+     pub protocol_version: u16,
+     pub domain_separator: String,
+@@ -179,6 +199,93 @@ pub struct StateUpdate {
+     pub participant_signatures: BTreeMap<String, String>,
+ }
+ 
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct SettlementEligibilityPolicy {
++    pub response_window_daa: u64,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct SettlementCandidateEvidence {
++    pub network_profile: String,
++    pub funding_outpoint: String,
++    pub channel_id: String,
++    pub factory_id: Option<String>,
++    pub virtual_channel_id: Option<String>,
++    pub state_number: u64,
++    pub state_header_hash: String,
++    pub lane_id: String,
++    pub candidate_txid: String,
++    pub accepted_order_index: u64,
++    pub accepting_chain_block_hash: String,
++    pub daa_score: u64,
++    pub blue_score: u64,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct SettlementEligibilityCandidate {
++    pub update: StateUpdate,
++    pub evidence: SettlementCandidateEvidence,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++#[serde(rename_all = "snake_case")]
++pub enum SettlementEligibilityStatus {
++    Provisional,
++    Displaced,
++    EligibleToFinalise,
++    NotYetEligible,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct SettlementEligibilityDecision {
++    pub candidate_txid: String,
++    pub state_number: u64,
++    pub status: SettlementEligibilityStatus,
++    pub displaced_by: Option<String>,
++    pub accepted_order_index: u64,
++    pub accepted_daa_score: u64,
++    pub eligible_after_daa: u64,
++    pub observed_daa_score: u64,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct SettlementFeePolicy {
++    pub policy_id: String,
++    pub max_sponsor_fee: u64,
++    pub sponsor_mode: String,
++}
++
++impl SettlementFeePolicy {
++    pub fn hash(&self) -> String {
++        hash_json(DOMAIN_SETTLEMENT_FEE_POLICY, self)
++    }
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct SettlementSponsorEvidence {
++    pub candidate_txid: String,
++    pub sponsor_input_outpoints: Vec<String>,
++    pub sponsor_input_total: u64,
++    pub sponsor_change_total: u64,
++    pub sponsor_fee: u64,
++    pub settlement_template_hash: String,
++    pub settlement_distribution_hash: String,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct FeeSponsoredSettlementCandidate {
++    pub eligibility: SettlementEligibilityCandidate,
++    pub sponsor: SettlementSponsorEvidence,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
++pub struct FeeSponsoredSettlementDecision {
++    pub eligibility: SettlementEligibilityDecision,
++    pub sponsor_fee: u64,
++    pub fee_policy_hash: String,
++    pub settlement_distribution_hash: String,
++}
++
+ #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+ pub struct SettlementTemplate {
+     pub template_id: String,
+@@ -204,6 +311,20 @@ impl SettlementTemplate {
+     }
+ }
+ 
++pub fn settlement_distribution_hash(template: &SettlementTemplate) -> String {
++    #[derive(Serialize)]
++    struct SettlementDistribution<'a> {
++        outputs: &'a BTreeMap<String, u64>,
++    }
++
++    hash_json(
++        DOMAIN_SETTLEMENT_DISTRIBUTION,
++        &SettlementDistribution {
++            outputs: &template.outputs,
++        },
++    )
++}
++
+ #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+ pub struct ChallengePolicy {
+     pub mode: String,
+@@ -222,6 +343,8 @@ pub struct ChannelReceipt {
+     pub output_id: String,
+     pub state_number: u64,
+     pub settlement_template_hash: String,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub fee_policy_hash: Option<String>,
+     pub swap_id: Option<String>,
+     pub direction: Option<String>,
+     pub receipt_hash: String,
+@@ -247,6 +370,7 @@ impl ChannelReceipt {
+             output_id: output_id.into(),
+             state_number,
+             settlement_template_hash: settlement_template_hash.into(),
++            fee_policy_hash: None,
+             swap_id: None,
+             direction: None,
+             receipt_hash: String::new(),
+@@ -282,6 +406,7 @@ impl ChannelReceipt {
+             output_id: &self.output_id,
+             state_number: self.state_number,
+             settlement_template_hash: &self.settlement_template_hash,
++            fee_policy_hash: self.fee_policy_hash.as_deref(),
+             swap_id: self.swap_id.as_deref(),
+             direction: self.direction.as_deref(),
+         }
+@@ -299,6 +424,8 @@ struct ChannelReceiptScope<'a> {
+     output_id: &'a str,
+     state_number: u64,
+     settlement_template_hash: &'a str,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    fee_policy_hash: Option<&'a str>,
+     swap_id: Option<&'a str>,
+     direction: Option<&'a str>,
+ }
+@@ -627,6 +754,7 @@ impl SettlementRegistry {
+             || latest.network_profile != update.header.network_profile
+             || latest.protocol_version != update.header.protocol_version
+             || latest.settlement_template_hash != update.header.settlement_template_hash
++            || latest.fee_policy_hash != update.header.fee_policy_hash
+             || latest.covenant_id != update.header.covenant_id
+             || latest.script_covenant_hash != update.header.script_covenant_hash
+             || latest.participant_set_hash != update.header.participant_set_hash
+@@ -645,7 +773,7 @@ impl SettlementRegistry {
+             return Err(KurrentError::DuplicateSettlement(channel_id));
+         }
+ 
+-        let receipt = ChannelReceipt::new(
++        let mut receipt = ChannelReceipt::new(
+             latest.protocol_version,
+             latest.network_profile.clone(),
+             channel_id.clone(),
+@@ -654,6 +782,8 @@ impl SettlementRegistry {
+             latest.state_number,
+             latest.settlement_template_hash.clone(),
+         );
++        receipt.fee_policy_hash = latest.fee_policy_hash.clone();
++        receipt.refresh_hash();
+         self.register_receipt(&receipt)?;
+         self.settled_channels.insert(channel_id);
+         Ok(receipt)
+@@ -755,6 +885,71 @@ pub fn state_update_signing_digest(update: &StateUpdate) -> [u8; 32] {
+         .expect("state update signing hash must be 32 bytes")
+ }
+ 
++pub fn derive_kurrent_channel_lane_id(channel_id: &str) -> String {
++    let mut hasher = Sha256::new();
++    hasher.update(DOMAIN_LANE_ID.as_bytes());
++    hasher.update([0]);
++    hasher.update(b"channel");
++    hasher.update([0]);
++    hasher.update(channel_id.as_bytes());
++    let digest = hasher.finalize();
++
++    let mut lane = [0u8; 20];
++    lane[..4].copy_from_slice(&digest[..4]);
++    if lane[1..4].iter().all(|byte| *byte == 0) {
++        lane[3] = 1;
++    }
++    hex::encode(lane)
++}
++
++pub fn is_valid_kurrent_user_lane_id(lane_id: &str) -> bool {
++    let Ok(bytes) = decode_fixed_hex::<20>(lane_id) else {
++        return false;
++    };
++    if lane_id != hex::encode(bytes) {
++        return false;
++    }
++    bytes[4..].iter().all(|byte| *byte == 0) && bytes[1..4].iter().any(|byte| *byte != 0)
++}
++
++fn validate_lane_id_field(field: &str, lane_id: &Option<String>) -> Result<()> {
++    if let Some(lane_id) = lane_id {
++        if !is_valid_kurrent_user_lane_id(lane_id) {
++            return Err(KurrentError::InvalidLaneId {
++                field: field.to_string(),
++                value: lane_id.clone(),
++            });
++        }
++    }
++    Ok(())
++}
++
++fn validate_lane_binding(
++    config: &KurrentChannelConfig,
++    funding: &FundingState,
++    update: &StateUpdate,
++) -> Result<()> {
++    validate_lane_id_field("config.expected_lane_id", &config.expected_lane_id)?;
++    validate_lane_id_field("funding.expected_lane_id", &funding.expected_lane_id)?;
++    validate_lane_id_field("header.expected_lane_id", &update.header.expected_lane_id)?;
++
++    if let Some(expected) = &config.expected_lane_id {
++        if funding.expected_lane_id.as_ref() != Some(expected) {
++            return Err(KurrentError::WrongLaneId {
++                expected: Some(expected.clone()),
++                actual: funding.expected_lane_id.clone(),
++            });
++        }
++        if update.header.expected_lane_id.as_ref() != Some(expected) {
++            return Err(KurrentError::WrongLaneId {
++                expected: Some(expected.clone()),
++                actual: update.header.expected_lane_id.clone(),
++            });
++        }
++    }
++    Ok(())
++}
++
+ fn checked_sum<I>(values: I) -> Option<u64>
+ where
+     I: IntoIterator<Item = u64>,
+@@ -810,6 +1005,7 @@ pub fn validate_channel_update(
+             actual: update.header.funding_outpoint.clone(),
+         });
+     }
++    validate_lane_binding(config, funding, update)?;
+     if update.header.settlement_template_hash != template.hash() {
+         return Err(KurrentError::SettlementTemplateMismatch);
+     }
+@@ -921,6 +1117,348 @@ pub fn validate_channel_update(
+     Ok(())
+ }
+ 
++/// Evaluate settlement eligibility for a set of lane-bound candidates.
++///
++/// # Accepted-order precondition
++///
++/// The semantic verifier is expected to feed this function candidates whose
++/// `accepted_order_index` has already been pinned by the KIP-21 lane proof
++/// against the selected-parent sequencing commitment. This function
++/// re-establishes the `accepted_order_index` ordering locally (see
++/// `sort_by_key` below) and then enforces the chain of pairwise invariants
++/// in the `windows(2)` loop:
++///
++/// 1. `accepted_order_index` is strictly increasing;
++/// 2. `daa_score` is non-decreasing in accepted order;
++/// 3. `state_number` is strictly increasing by exactly one;
++/// 4. `previous_state_commitment` chains to the prior `new_state_commitment`.
++///
++/// The displacement check further down iterates `ordered[index + 1..]`,
++/// which is only sound if the ordering precondition holds. In debug and
++/// test builds we therefore assert it explicitly; the release build still
++/// relies on the `windows(2)` invariant loop above.
++pub fn evaluate_settlement_eligibility(
++    config: &KurrentChannelConfig,
++    funding: &FundingState,
++    template: &SettlementTemplate,
++    policy: &SettlementEligibilityPolicy,
++    candidates: &[SettlementEligibilityCandidate],
++    current_daa: u64,
++) -> Result<Vec<SettlementEligibilityDecision>> {
++    for candidate in candidates {
++        validate_channel_update(config, funding, &candidate.update, template)?;
++        validate_settlement_candidate_evidence(config, funding, candidate)?;
++    }
++
++    let mut ordered: Vec<&SettlementEligibilityCandidate> = candidates.iter().collect();
++    ordered.sort_by_key(|candidate| candidate.evidence.accepted_order_index);
++
++    // Precondition: every candidate carries a distinct accepted-order index.
++    // The semantic verifier is responsible for sourcing this from the
++    // KIP-21 lane proof; if a caller hands us duplicates or out-of-order
++    // evidence, fail loud rather than silently mis-rank candidates.
++    debug_assert!(
++        ordered.windows(2).all(|w| w[0].evidence.accepted_order_index
++            < w[1].evidence.accepted_order_index),
++        "candidates must be strictly ordered by accepted_order_index (sourced from KIP-21 lane proof)"
++    );
++
++    for pair in ordered.windows(2) {
++        let previous = pair[0];
++        let next = pair[1];
++        if previous.evidence.accepted_order_index == next.evidence.accepted_order_index {
++            return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++                "candidate accepted-order indices must be unique".to_string(),
++            ));
++        }
++        if next.evidence.daa_score < previous.evidence.daa_score {
++            return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++                "candidate DAA scores must not go backwards in accepted order".to_string(),
++            ));
++        }
++        let previous_state = previous.update.header.state_number;
++        let next_state = next.update.header.state_number;
++        if next_state == previous_state {
++            return Err(KurrentError::SameNumberConflict {
++                state_number: next_state,
++            });
++        }
++        if next_state <= previous_state || next_state != previous_state + 1 {
++            return Err(KurrentError::NonMonotonicState {
++                current: previous_state,
++                attempted: next_state,
++            });
++        }
++        if next.update.header.previous_state_commitment
++            != previous.update.header.new_state_commitment
++        {
++            return Err(KurrentError::PreviousStateMismatch {
++                expected: previous.update.header.new_state_commitment.clone(),
++                actual: next.update.header.previous_state_commitment.clone(),
++            });
++        }
++    }
++
++    let mut decisions = Vec::with_capacity(ordered.len());
++    for (index, candidate) in ordered.iter().enumerate() {
++        let eligible_after_daa = candidate
++            .evidence
++            .daa_score
++            .checked_add(policy.response_window_daa)
++            .ok_or_else(|| {
++                KurrentError::SettlementEligibilityEvidenceMismatch(
++                    "candidate response-window DAA overflows u64".to_string(),
++                )
++            })?;
++        let displacement = ordered[index + 1..].iter().find(|higher| {
++            higher.update.header.state_number > candidate.update.header.state_number
++                && higher.evidence.daa_score <= eligible_after_daa
++        });
++
++        let (status, displaced_by) = if let Some(higher) = displacement {
++            (
++                SettlementEligibilityStatus::Displaced,
++                Some(higher.evidence.candidate_txid.clone()),
++            )
++        } else if current_daa >= eligible_after_daa {
++            (SettlementEligibilityStatus::EligibleToFinalise, None)
++        } else if index == 0 {
++            (SettlementEligibilityStatus::Provisional, None)
++        } else {
++            (SettlementEligibilityStatus::NotYetEligible, None)
++        };
++
++        decisions.push(SettlementEligibilityDecision {
++            candidate_txid: candidate.evidence.candidate_txid.clone(),
++            state_number: candidate.update.header.state_number,
++            status,
++            displaced_by,
++            accepted_order_index: candidate.evidence.accepted_order_index,
++            accepted_daa_score: candidate.evidence.daa_score,
++            eligible_after_daa,
++            observed_daa_score: current_daa,
++        });
++    }
++
++    Ok(decisions)
++}
++
++pub fn evaluate_fee_sponsored_settlement_eligibility(
++    config: &KurrentChannelConfig,
++    funding: &FundingState,
++    template: &SettlementTemplate,
++    policy: &SettlementEligibilityPolicy,
++    fee_policy: &SettlementFeePolicy,
++    candidates: &[FeeSponsoredSettlementCandidate],
++    current_daa: u64,
++) -> Result<Vec<FeeSponsoredSettlementDecision>> {
++    let eligibility_candidates: Vec<SettlementEligibilityCandidate> = candidates
++        .iter()
++        .map(|candidate| candidate.eligibility.clone())
++        .collect();
++    let eligibility_decisions = evaluate_settlement_eligibility(
++        config,
++        funding,
++        template,
++        policy,
++        &eligibility_candidates,
++        current_daa,
++    )?;
++
++    let fee_policy_hash = fee_policy.hash();
++    let distribution_hash = settlement_distribution_hash(template);
++    for candidate in candidates {
++        validate_sponsor_evidence(
++            funding,
++            template,
++            fee_policy,
++            &fee_policy_hash,
++            &distribution_hash,
++            candidate,
++        )?;
++    }
++
++    let mut sponsored_by_txid: BTreeMap<&str, &SettlementSponsorEvidence> = BTreeMap::new();
++    for candidate in candidates {
++        sponsored_by_txid.insert(
++            candidate.eligibility.evidence.candidate_txid.as_str(),
++            &candidate.sponsor,
++        );
++    }
++
++    eligibility_decisions
++        .into_iter()
++        .map(|eligibility| {
++            let sponsor = sponsored_by_txid
++                .get(eligibility.candidate_txid.as_str())
++                .ok_or_else(|| {
++                    KurrentError::SettlementEligibilityEvidenceMismatch(
++                        "missing sponsor evidence for eligibility decision".to_string(),
++                    )
++                })?;
++            Ok(FeeSponsoredSettlementDecision {
++                eligibility,
++                sponsor_fee: sponsor.sponsor_fee,
++                fee_policy_hash: fee_policy_hash.clone(),
++                settlement_distribution_hash: distribution_hash.clone(),
++            })
++        })
++        .collect()
++}
++
++fn validate_sponsor_evidence(
++    funding: &FundingState,
++    template: &SettlementTemplate,
++    fee_policy: &SettlementFeePolicy,
++    fee_policy_hash: &str,
++    distribution_hash: &str,
++    candidate: &FeeSponsoredSettlementCandidate,
++) -> Result<()> {
++    let update = &candidate.eligibility.update;
++    let evidence = &candidate.eligibility.evidence;
++    let sponsor = &candidate.sponsor;
++
++    if update.header.fee_policy_hash.as_deref() != Some(fee_policy_hash) {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsored candidate fee-policy hash does not match policy".to_string(),
++        ));
++    }
++    if sponsor.candidate_txid != evidence.candidate_txid {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor evidence candidate txid does not match eligibility evidence".to_string(),
++        ));
++    }
++    if sponsor.sponsor_input_outpoints.is_empty() {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor evidence requires at least one external input".to_string(),
++        ));
++    }
++    if sponsor
++        .sponsor_input_outpoints
++        .iter()
++        .any(|outpoint| outpoint == &funding.funding_outpoint)
++    {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor input must be external to the channel funding outpoint".to_string(),
++        ));
++    }
++    if sponsor.sponsor_fee == 0 {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor fee must be non-zero".to_string(),
++        ));
++    }
++    if sponsor.sponsor_fee > fee_policy.max_sponsor_fee {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor fee exceeds fee policy maximum".to_string(),
++        ));
++    }
++    let accounted_total = sponsor
++        .sponsor_change_total
++        .checked_add(sponsor.sponsor_fee)
++        .ok_or_else(|| {
++            KurrentError::SettlementEligibilityEvidenceMismatch(
++                "sponsor fee accounting overflows u64".to_string(),
++            )
++        })?;
++    if accounted_total != sponsor.sponsor_input_total {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor input total must equal sponsor change plus sponsor fee".to_string(),
++        ));
++    }
++    let template_hash = template.hash();
++    if sponsor.settlement_template_hash != template_hash
++        || sponsor.settlement_template_hash != update.header.settlement_template_hash
++    {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor settlement-template hash does not match signed state".to_string(),
++        ));
++    }
++    if sponsor.settlement_distribution_hash != distribution_hash {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "sponsor settlement-distribution hash does not match template outputs".to_string(),
++        ));
++    }
++    Ok(())
++}
++
++fn validate_settlement_candidate_evidence(
++    config: &KurrentChannelConfig,
++    funding: &FundingState,
++    candidate: &SettlementEligibilityCandidate,
++) -> Result<()> {
++    let update = &candidate.update;
++    let evidence = &candidate.evidence;
++
++    if evidence.network_profile != update.header.network_profile {
++        return Err(KurrentError::WrongNetworkProfile {
++            expected: update.header.network_profile.clone(),
++            actual: evidence.network_profile.clone(),
++        });
++    }
++    if evidence.funding_outpoint != update.header.funding_outpoint {
++        return Err(KurrentError::WrongFundingOutpoint {
++            expected: update.header.funding_outpoint.clone(),
++            actual: evidence.funding_outpoint.clone(),
++        });
++    }
++    if evidence.funding_outpoint != funding.funding_outpoint {
++        return Err(KurrentError::WrongFundingOutpoint {
++            expected: funding.funding_outpoint.clone(),
++            actual: evidence.funding_outpoint.clone(),
++        });
++    }
++    if evidence.channel_id != update.header.channel_id {
++        return Err(KurrentError::WrongChannelId {
++            expected: update.header.channel_id.clone(),
++            actual: evidence.channel_id.clone(),
++        });
++    }
++    if evidence.channel_id != config.channel_id {
++        return Err(KurrentError::WrongChannelId {
++            expected: config.channel_id.clone(),
++            actual: evidence.channel_id.clone(),
++        });
++    }
++    if evidence.factory_id != update.header.factory_id {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "candidate factory scope does not match state header".to_string(),
++        ));
++    }
++    if evidence.virtual_channel_id != update.header.virtual_channel_id {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "candidate virtual-channel scope does not match state header".to_string(),
++        ));
++    }
++    if evidence.state_number != update.header.state_number {
++        return Err(KurrentError::NonMonotonicState {
++            current: update.header.state_number,
++            attempted: evidence.state_number,
++        });
++    }
++    let header_hash = update.header.hash();
++    if evidence.state_header_hash != header_hash {
++        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(
++            "candidate state-header hash does not match signed state".to_string(),
++        ));
++    }
++    validate_lane_id_field("candidate.lane_id", &Some(evidence.lane_id.clone()))?;
++    if let Some(expected) = &config.expected_lane_id {
++        if evidence.lane_id != *expected {
++            return Err(KurrentError::WrongLaneId {
++                expected: Some(expected.clone()),
++                actual: Some(evidence.lane_id.clone()),
++            });
++        }
++    }
++    if update.header.expected_lane_id.as_ref() != Some(&evidence.lane_id) {
++        return Err(KurrentError::WrongLaneId {
++            expected: update.header.expected_lane_id.clone(),
++            actual: Some(evidence.lane_id.clone()),
++        });
++    }
++    Ok(())
++}
++
+ fn verify_participant_signature(
+     participant: &str,
+     public_key: &str,

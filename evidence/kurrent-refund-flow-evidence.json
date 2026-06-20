@@ -1,0 +1,16 @@
+{
+  "blockers": [],
+  "flow": "refund_timeout_flow",
+  "live_evidence": {
+    "path": "evidence/kurrent-live-refund-evidence.json",
+    "sha256": "c6b87a3055dba56911e7eb9bf4dc74267f9811690c59e2edafeef556d66bd12d"
+  },
+  "model_status": "passed",
+  "protocol_files": [
+    {
+      "path": "evidence/kurrent-refund-model.json",
+      "sha256": "405738e0d2357305db95680545db3e6bce18c175a4052c8d75402ff6086c1c51"
+    }
+  ],
+  "status": "passed"
+}

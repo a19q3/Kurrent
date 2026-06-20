@@ -1,0 +1,108 @@
+{
+  "alias": "0303be157099a5d0d768",
+  "best_header_timestamp": "1781589947",
+  "block_hash": "4d97e6c04af0e11fc975b272649316c6ff577a1ae4c8844dd85148b69c01b85b",
+  "block_height": 101,
+  "chains": [
+    {
+      "chain": "bitcoin",
+      "network": "regtest"
+    }
+  ],
+  "color": "#3399ff",
+  "commit_hash": "848b72ce96eb68fa90fd4336523ca4c59bddcd4c",
+  "features": {
+    "0": {
+      "is_known": true,
+      "is_required": true,
+      "name": "data-loss-protect"
+    },
+    "12": {
+      "is_known": true,
+      "is_required": true,
+      "name": "static-remote-key"
+    },
+    "14": {
+      "is_known": true,
+      "is_required": true,
+      "name": "payment-addr"
+    },
+    "17": {
+      "is_known": true,
+      "is_required": false,
+      "name": "multi-path-payments"
+    },
+    "2023": {
+      "is_known": true,
+      "is_required": false,
+      "name": "script-enforced-lease"
+    },
+    "23": {
+      "is_known": true,
+      "is_required": false,
+      "name": "anchors-zero-fee-htlc-tx"
+    },
+    "25": {
+      "is_known": true,
+      "is_required": false,
+      "name": "route-blinding"
+    },
+    "261": {
+      "is_known": true,
+      "is_required": false,
+      "name": "endorsement-x"
+    },
+    "27": {
+      "is_known": true,
+      "is_required": false,
+      "name": "shutdown-any-segwit"
+    },
+    "30": {
+      "is_known": true,
+      "is_required": true,
+      "name": "amp"
+    },
+    "31": {
+      "is_known": true,
+      "is_required": false,
+      "name": "amp"
+    },
+    "35": {
+      "is_known": true,
+      "is_required": false,
+      "name": "quiescence"
+    },
+    "45": {
+      "is_known": true,
+      "is_required": false,
+      "name": "explicit-commitment-type"
+    },
+    "5": {
+      "is_known": true,
+      "is_required": false,
+      "name": "upfront-shutdown-script"
+    },
+    "7": {
+      "is_known": true,
+      "is_required": false,
+      "name": "gossip-queries"
+    },
+    "8": {
+      "is_known": true,
+      "is_required": true,
+      "name": "tlv-onion"
+    }
+  },
+  "identity_pubkey": "0303be157099a5d0d76884219118e679d12351bcd398027e41c0325e5329ac0c37",
+  "num_active_channels": 0,
+  "num_inactive_channels": 0,
+  "num_peers": 0,
+  "num_pending_channels": 0,
+  "require_htlc_interceptor": false,
+  "store_final_htlc_resolutions": false,
+  "synced_to_chain": true,
+  "synced_to_graph": false,
+  "testnet": false,
+  "uris": [],
+  "version": "0.20.1-beta commit="
+}

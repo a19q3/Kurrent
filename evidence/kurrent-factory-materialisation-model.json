@@ -1,0 +1,84 @@
+{
+  "after": {
+    "factory_id": "factory-1",
+    "fee_reserve": 0,
+    "materialised_receipts": [
+      "f8f912bd83cb4d08198c118adc59d7ff9dc600f96c84d114ce646775d52c4ea0"
+    ],
+    "network_profile": "kaspa-simnet-toccata",
+    "total_principal": 500000,
+    "virtual_channels": {
+      "vc-2": {
+        "balances": {
+          "carol": 250000,
+          "dave": 250000
+        },
+        "channel_id": "channel-vc-2",
+        "state_commitment": "bfa06c9ff9eb183d0f46ca29325459179eafd610736f24227bce29f70eb58933",
+        "state_number": 0
+      }
+    }
+  },
+  "before": {
+    "domain_separator": "KURRENT_FACTORY_MATERIALISATION_V1",
+    "factory_id": "factory-1",
+    "fee_reserve": 10000,
+    "materialised_receipts": [],
+    "network_profile": "kaspa-simnet-toccata",
+    "total_principal": 1000000,
+    "virtual_channels": {
+      "vc-1": {
+        "balances": {
+          "alice": 300000,
+          "bob": 200000
+        },
+        "channel_id": "channel-vc-1",
+        "state_commitment": "7db29c65c15affc8b6861d5be1f9b89b2847212dabe8df6c4bec1c76ad956f40",
+        "state_number": 2
+      },
+      "vc-2": {
+        "balances": {
+          "carol": 250000,
+          "dave": 250000
+        },
+        "channel_id": "channel-vc-2",
+        "state_commitment": "bfa06c9ff9eb183d0f46ca29325459179eafd610736f24227bce29f70eb58933",
+        "state_number": 0
+      }
+    }
+  },
+  "model_assertions": [
+    "fee and principal inputs are disjoint",
+    "materialised virtual channel leaves the active factory set",
+    "principal amount equals the touched virtual channel principal",
+    "fee amount equals the consumed factory fee reserve",
+    "principal plus fee conservation holds",
+    "untouched virtual channel vc-2 is unchanged",
+    "wrong factory id is rejected",
+    "wrong virtual channel id is rejected",
+    "double materialisation is rejected"
+  ],
+  "plan": {
+    "domain_separator": "KURRENT_FACTORY_MATERIALISATION_V1",
+    "factory_id": "factory-1",
+    "fee_amount": 10000,
+    "fee_input_ids": [
+      "fee-in"
+    ],
+    "materialisation_id": "mat-1",
+    "output_amounts": {
+      "alice": 300000,
+      "bob": 200000,
+      "fee": 10000
+    },
+    "principal_amount": 500000,
+    "principal_input_ids": [
+      "principal-in"
+    ],
+    "touched_leaves": [
+      "vc-1"
+    ],
+    "virtual_channel_id": "vc-1"
+  },
+  "plan_hash": "01915c6d0ed515fc4d13dd6617e023fddfcb51b06dced62667b7ece31c70c1fa"
+}

@@ -1,0 +1,91 @@
+{
+  "status": "passed",
+  "generated_at": "1781589978",
+  "scope": "deterministic local adversarial model soak for Kurrent production-readiness gating",
+  "deterministic_seed": "kurrent-adversarial-soak-v1",
+  "iterations": 64,
+  "scenario_count": 6,
+  "check_count": 4291,
+  "checks": [
+    {
+      "scenario": "state-channel mempool and alternate-history resistance",
+      "iterations": 64,
+      "check_count": 1600,
+      "assertions": [
+        "signed latest-state sequence validates and settles only at the newest state",
+        "stale state 0 and state 1 settlements are rejected after state 2",
+        "same-number conflicting branches are rejected",
+        "skipped numbers and wrong previous commitments are rejected",
+        "wrong funding, lane mismatch, malformed lane ids, under-signed updates, forged signatures, and wrong templates are rejected"
+      ]
+    },
+    {
+      "scenario": "fee-sponsored displacement evidence tamper resistance",
+      "iterations": 64,
+      "check_count": 448,
+      "assertions": [
+        "higher authorised state displaces the lower marker even when the lower marker pays a larger sponsor fee",
+        "missing fee-policy hashes are rejected",
+        "channel funding cannot be reused as the sponsor input",
+        "zero, over-limit, inconsistent, and distribution-tampered sponsor evidence is rejected"
+      ]
+    },
+    {
+      "scenario": "factory materialisation accounting resistance",
+      "iterations": 64,
+      "check_count": 512,
+      "assertions": [
+        "valid materialisation conserves factory principal and fee reserve",
+        "wrong factory and virtual-channel ids are rejected",
+        "duplicate materialisation ids are rejected",
+        "untouched virtual-channel leaves cannot be mutated",
+        "principal and fee input overlap is rejected",
+        "wrong principal and non-conserving output amounts are rejected"
+      ]
+    },
+    {
+      "scenario": "LN and Kaspa atomic-swap replay resistance",
+      "iterations": 64,
+      "check_count": 1280,
+      "assertions": [
+        "valid LN-to-Kaspa and Kaspa-to-LN receipts validate",
+        "wrong preimages and stale receipt hashes are rejected",
+        "invalid directions and opposite-direction receipt replay are rejected",
+        "wrong funding, settlement, script, protocol, and zero-amount evidence are rejected"
+      ]
+    },
+    {
+      "scenario": "refund timeout and double-claim race resistance",
+      "iterations": 64,
+      "check_count": 448,
+      "assertions": [
+        "early refunds are rejected before the required DAA score",
+        "mature refunds succeed once",
+        "settlement and refund are mutually exclusive for the same claim scope",
+        "claim scopes do not collide across funding outputs",
+        "duplicate refund claims are rejected"
+      ]
+    },
+    {
+      "scenario": "production evidence hash tamper resistance",
+      "iterations": 1,
+      "check_count": 3,
+      "assertions": [
+        "matching file hashes validate",
+        "tampered file hashes are rejected",
+        "missing evidence files are rejected"
+      ]
+    }
+  ],
+  "evidence_files": [
+    {
+      "path": "evidence/production/adversarial-soak-corpus/anchor.txt",
+      "sha256": "aae0ed22f9bc1ce5d4cb3b3589357c3ff98dd3ce0029e624579dbdbd931e3c7b"
+    }
+  ],
+  "boundaries": [
+    "Runs against Kurrent protocol validators and local evidence files; it does not claim mainnet deployment readiness by itself.",
+    "Models mempool conflict, stale-state, fee-sponsor tamper, alternate-history, refund-race, swap-replay, and evidence-tamper cases locally.",
+    "Independent external security review remains required before production readiness can pass."
+  ]
+}

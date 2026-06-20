@@ -1,0 +1,152 @@
+{
+  "claim_boundary": "KIP-21 proves lane-local accepted-order evidence; Kurrent's replacement rule is still supplied by the covenant and semantic verifier.",
+  "driver": "kurrent-kaspa-devnet-driver",
+  "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+  "lane_activity_blocks": [
+    {
+      "accepted_id_merkle_root": "cb022144aba6596fbb9b9ff7b6c551f61a14279271bce4894a678bf3050790df",
+      "accepted_order_start": 1,
+      "activity_digest": "4ea06f3ae37c42231fb88c1055ce86ba4e587fae005bced34cd0b9c67af7b862",
+      "blue_score": 12,
+      "chain_block_hash": "3fcd870d9a4f3a579939218559ca91747edcdf07d9a5426fcf22cd29c795f17e",
+      "chain_block_timestamp": 1781589953955,
+      "daa_score": 11,
+      "events": [
+        {
+          "accepted_order_index": 2,
+          "accepting_chain_block_hash": "3fcd870d9a4f3a579939218559ca91747edcdf07d9a5426fcf22cd29c795f17e",
+          "activity_leaf": "4ea06f3ae37c42231fb88c1055ce86ba4e587fae005bced34cd0b9c67af7b862",
+          "kind": "funding",
+          "lane_id": "ed33cf9800000000000000000000000000000000",
+          "merge_index": 1,
+          "txid": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8",
+          "version": 1
+        }
+      ],
+      "lane_tip_after_block": "da63af9509eecac076dd5cc6fa0b0e0f8c82a543795e92d4ada31d56f4559dc2",
+      "parent_seq_commit": "171e7c27faf00c5ef8687417f746b448ced88f33dbc839c013f235d5c336a989",
+      "timestamp": 1781589953907
+    },
+    {
+      "accepted_id_merkle_root": "4545b57a5fa60d47fe3b4ed49f3bc6b5a84fc18c014be2c158959fa9e0695cbf",
+      "accepted_order_start": 3,
+      "activity_digest": "00270c6a9686b432b0ee2cba091688d84d31057aa3e5e4e00ead72e85ab70f21",
+      "blue_score": 13,
+      "chain_block_hash": "75ee2c33bf9bf98ab365de6d01b6e1a1ea7f37e8db849c9385fd2bdb3d388228",
+      "chain_block_timestamp": 1781589953989,
+      "daa_score": 12,
+      "events": [
+        {
+          "accepted_order_index": 4,
+          "accepting_chain_block_hash": "75ee2c33bf9bf98ab365de6d01b6e1a1ea7f37e8db849c9385fd2bdb3d388228",
+          "activity_leaf": "00270c6a9686b432b0ee2cba091688d84d31057aa3e5e4e00ead72e85ab70f21",
+          "kind": "state_update",
+          "lane_id": "ed33cf9800000000000000000000000000000000",
+          "merge_index": 1,
+          "txid": "74ddaf2db39d0a969f12a789e70f1dd3e0fd49b2d1015ca20a8605aabb796eff",
+          "version": 1
+        }
+      ],
+      "lane_tip_after_block": "d2b1123ac7b95487212e602264b110a092d2997429e3ed2567a72e1023d1ed29",
+      "parent_seq_commit": "cb022144aba6596fbb9b9ff7b6c551f61a14279271bce4894a678bf3050790df",
+      "timestamp": 1781589953955
+    },
+    {
+      "accepted_id_merkle_root": "7876dc630fe70937b0a0bc206770243eda4c9a9d27029cfdb3eef71f05650837",
+      "accepted_order_start": 5,
+      "activity_digest": "72fa6925d86ad1e82f743d4a48f2ea0a66b1a06252aedc72321bc09acbb6e665",
+      "blue_score": 14,
+      "chain_block_hash": "6732c1b40957d94d78c35f6d3ee560d7f4f0fbe5fb20466b17778693b9d076fa",
+      "chain_block_timestamp": 1781589954021,
+      "daa_score": 13,
+      "events": [
+        {
+          "accepted_order_index": 6,
+          "accepting_chain_block_hash": "6732c1b40957d94d78c35f6d3ee560d7f4f0fbe5fb20466b17778693b9d076fa",
+          "activity_leaf": "72fa6925d86ad1e82f743d4a48f2ea0a66b1a06252aedc72321bc09acbb6e665",
+          "kind": "settlement",
+          "lane_id": "ed33cf9800000000000000000000000000000000",
+          "merge_index": 1,
+          "txid": "3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458",
+          "version": 1
+        }
+      ],
+      "lane_tip_after_block": "f60ad28cef38870576c6cf6b6ff93773bcda38f1191c025402f8ea60107d93bc",
+      "parent_seq_commit": "4545b57a5fa60d47fe3b4ed49f3bc6b5a84fc18c014be2c158959fa9e0695cbf",
+      "timestamp": 1781589953989
+    }
+  ],
+  "lane_events": [
+    {
+      "accepted_order_index": 2,
+      "accepting_chain_block_hash": "3fcd870d9a4f3a579939218559ca91747edcdf07d9a5426fcf22cd29c795f17e",
+      "activity_leaf": "4ea06f3ae37c42231fb88c1055ce86ba4e587fae005bced34cd0b9c67af7b862",
+      "kind": "funding",
+      "lane_id": "ed33cf9800000000000000000000000000000000",
+      "merge_index": 1,
+      "txid": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8",
+      "version": 1
+    },
+    {
+      "accepted_order_index": 4,
+      "accepting_chain_block_hash": "75ee2c33bf9bf98ab365de6d01b6e1a1ea7f37e8db849c9385fd2bdb3d388228",
+      "activity_leaf": "00270c6a9686b432b0ee2cba091688d84d31057aa3e5e4e00ead72e85ab70f21",
+      "kind": "state_update",
+      "lane_id": "ed33cf9800000000000000000000000000000000",
+      "merge_index": 1,
+      "txid": "74ddaf2db39d0a969f12a789e70f1dd3e0fd49b2d1015ca20a8605aabb796eff",
+      "version": 1
+    },
+    {
+      "accepted_order_index": 6,
+      "accepting_chain_block_hash": "6732c1b40957d94d78c35f6d3ee560d7f4f0fbe5fb20466b17778693b9d076fa",
+      "activity_leaf": "72fa6925d86ad1e82f743d4a48f2ea0a66b1a06252aedc72321bc09acbb6e665",
+      "kind": "settlement",
+      "lane_id": "ed33cf9800000000000000000000000000000000",
+      "merge_index": 1,
+      "txid": "3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458",
+      "version": 1
+    }
+  ],
+  "lane_key": "6e7cbe913fda211e0311c553cf604790f9d28cccc0dce8daa5af80d3239cfda8",
+  "monitor_scope": "state-channel-lane-local-evidence",
+  "monitor_start_accepted_id_merkle_root": "c5921bf02616e918daa022c18fcfd21cc5695912e77d2148420ba27832efffc6",
+  "monitor_start_block": "d81bf1608bd37f248d631aea4529ed1d88c84bb8cee539ff75cd3bc08b6b929c",
+  "network_profile": "kaspa-simnet-toccata",
+  "proof": {
+    "inactivity_shortcut": "0000000000000000000000000000000000000000000000000000000000000000",
+    "lane": {
+      "blue_score": 14,
+      "tip": "f60ad28cef38870576c6cf6b6ff93773bcda38f1191c025402f8ea60107d93bc"
+    },
+    "parent_seq_commit": "4545b57a5fa60d47fe3b4ed49f3bc6b5a84fc18c014be2c158959fa9e0695cbf",
+    "payload_and_ctx_digest": "699a8c06a08fe2838cd87d267d839456ffe33fad49a65efc9fe3f24ff0bf0cc6",
+    "smt_proof": "feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff010129f3022c2a7533ea1e6d8a80c0192c1a40bef618f00f3006f7df9297d6d9f9bc"
+  },
+  "proof_block_hash": "6732c1b40957d94d78c35f6d3ee560d7f4f0fbe5fb20466b17778693b9d076fa",
+  "proof_header": {
+    "accepted_id_merkle_root": "7876dc630fe70937b0a0bc206770243eda4c9a9d27029cfdb3eef71f05650837",
+    "blue_score": 14,
+    "daa_score": 13,
+    "timestamp": 1781589954021
+  },
+  "status": "passed",
+  "wrong_lane_absence": [
+    {
+      "absent_from_accepted_activity": true,
+      "txid": "511d5ce9a1777ffd57b22f40674ab8a27f73ab734f23e8355c6794f08fc76e60"
+    },
+    {
+      "absent_from_accepted_activity": true,
+      "txid": "5074f2309628d6928a2877270a6fa53a073f1d3378fbc51524b3572122c601b8"
+    },
+    {
+      "absent_from_accepted_activity": true,
+      "txid": "851366b4f264c043c0230772259df5992c4132dfab66ada27c33be3177c2f6f0"
+    },
+    {
+      "absent_from_accepted_activity": true,
+      "txid": "26b881da9358013fe3f4ab5f58ea58489fd3be2b5ac317278f0281ff740542b6"
+    }
+  ]
+}

@@ -1,0 +1,323 @@
+{
+  "channel_receipt": {
+    "hash": "2a41ab30107b57567131a794a10b6b4e9a67fb7a78a35bdf552a6d4a0e0ec27b",
+    "scope": {
+      "channel_id": "channel-a",
+      "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "network_profile": "kaspa-simnet-toccata",
+      "output_id": "3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458:0,3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458:1",
+      "protocol_version": 1,
+      "settlement_template_hash": "2ee368769bd078db46694c116af2f1d2438c2f8f56d31e743d9c6b2be4578e4a",
+      "state_number": 2
+    }
+  },
+  "driver": "kurrent-kaspa-devnet-driver",
+  "funding": {
+    "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+    "input_outpoint": "5d01474a53ce146511ec1d4c7653900f098bc680c68c749ac2d328c2aeaba67d:0",
+    "observed_lane_id": "ed33cf9800000000000000000000000000000000",
+    "outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-funding-tx.hex",
+      "sha256": "c65835b3745c203bfc33cbc3ef0ca5c2a12a95120172afa17bf1116e6f4d1e93"
+    },
+    "txid": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8",
+    "value": 4998000000
+  },
+  "lane_binding": {
+    "binding_status": "script-enforced-by-OpTxSubnetId",
+    "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+    "proof_status": "kip21-lane-proof-recorded-in-kurrent-live-lane-monitor-evidence",
+    "wrong_user_lane_id": "3749230300000000000000000000000000000000"
+  },
+  "miner_address": "kaspasim:qzaf6y5axxspjhsrasuvs3gqkfc4d5yf9ezkmwf2ceqwv5fth4kv5tlzhnh5k",
+  "model_validation": {
+    "funding_state": {
+      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+      "fee_reserve": 0,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "principal_by_participant": {
+        "alice": 2968800000,
+        "bob": 1979200000
+      },
+      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "total_principal": 4948000000
+    },
+    "latest_state_header": {
+      "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
+      "channel_id": "channel-a",
+      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "domain_separator": "KURRENT_STATE_V1",
+      "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+      "factory_id": null,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "genesis_or_devnet_id": "in-process-simnet",
+      "network_profile": "kaspa-simnet-toccata",
+      "new_state_commitment": "9155bfc8e64f41e73a03d9123bbf1502b2026eb537edf0ad29116caeba757d5d",
+      "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
+      "previous_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
+      "protocol_version": 1,
+      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+      "state_number": 2,
+      "virtual_channel_id": null
+    },
+    "latest_state_number": 2,
+    "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
+    "receipt": {
+      "channel_id": "channel-a",
+      "direction": null,
+      "factory_id": null,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "network_profile": "kaspa-simnet-toccata",
+      "output_id": "3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458:0,3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458:1",
+      "protocol_version": 1,
+      "receipt_hash": "be0484d91bd8aef1aa097f8ef413495865ebcccb7d59d919879d4471d9d94972",
+      "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+      "state_number": 2,
+      "swap_id": null,
+      "virtual_channel_id": null
+    },
+    "required_signatures": 2,
+    "settlement_template": {
+      "outputs": {
+        "alice": 2968800000,
+        "bob": 1979200000
+      },
+      "refund_after_daa": 120,
+      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "template_id": "live-state-2-settlement"
+    },
+    "stale_rejection": "StaleState { latest: 2, attempted: 1 }",
+    "stale_state_number": 1,
+    "state_hashes": [
+      {
+        "hash": "6ad13e7a14a541b1fd2f15d30b3c48fa3be0300d58ed646b85f1e72749329656",
+        "state_number": 0
+      },
+      {
+        "hash": "accd38d76409b84ab1705ccfe3a9397e4fcb1f708103d48420dafee3d645d235",
+        "state_number": 1
+      },
+      {
+        "hash": "03aaaf8c3da141901002097931ecd8bed493b06d86371002629b63a14ac94c1b",
+        "state_number": 2
+      }
+    ],
+    "state_updates": {
+      "state_1": {
+        "balances": {
+          "alice": 2968800000,
+          "bob": 1979200000
+        },
+        "header": {
+          "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
+          "channel_id": "channel-a",
+          "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+          "domain_separator": "KURRENT_STATE_V1",
+          "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+          "factory_id": null,
+          "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+          "genesis_or_devnet_id": "in-process-simnet",
+          "network_profile": "kaspa-simnet-toccata",
+          "new_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
+          "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
+          "previous_state_commitment": "6ceb50b33e95381a2826908984eeb9c2705a7707562d4bdabaf60e7ce17b94ba",
+          "protocol_version": 1,
+          "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+          "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+          "state_number": 1,
+          "virtual_channel_id": null
+        },
+        "participant_signatures": {
+          "alice": "34f1d122d2b0933a372e297553475503784456dcb470b9f8dfcc05761abcf8d1499723e4b3919fd83520e7ef9d4e2c039884426b1a8bc672af15c49ad313ca8d",
+          "bob": "675ce87b4ed85ca771e43660daf52aed0a03630ffc88d7f9c977e5709e8b6afb557d6b34620dd9b0ccf7ea5d403838b0df5ad40cc995b30ea69ebeab4b7bf2ef"
+        }
+      },
+      "state_2": {
+        "balances": {
+          "alice": 2968800000,
+          "bob": 1979200000
+        },
+        "header": {
+          "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
+          "channel_id": "channel-a",
+          "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+          "domain_separator": "KURRENT_STATE_V1",
+          "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+          "factory_id": null,
+          "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+          "genesis_or_devnet_id": "in-process-simnet",
+          "network_profile": "kaspa-simnet-toccata",
+          "new_state_commitment": "9155bfc8e64f41e73a03d9123bbf1502b2026eb537edf0ad29116caeba757d5d",
+          "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
+          "previous_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
+          "protocol_version": 1,
+          "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+          "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+          "state_number": 2,
+          "virtual_channel_id": null
+        },
+        "participant_signatures": {
+          "alice": "878538fa7d731eb101f01f3a378c1f55fa6a63a0c682ac95e3c2c2b4aec87697972e050424a10f5880fd10c68ebd501fc4215c11626866ea06e500086ca8f5fd",
+          "bob": "b0f2afddb467b9714d184b72b387f16ef3860a4a640579bdc736f94d8bba0d98dc2ca05207860b99621ade2c00ae411beca1841e0f9b264b2d0db0dfff9d5730"
+        }
+      }
+    },
+    "status": "passed",
+    "validated_state_numbers": [
+      0,
+      1,
+      2
+    ],
+    "validation_layer": "typed-kurrent-protocol-model"
+  },
+  "network_profile": "kaspa-simnet-toccata",
+  "participants": {
+    "alice_address": "kaspasim:qrnhdf4mljyfqyfm6jpwl9hwlp5edap89pl6r6fws2h6saad0gdygkzpyyk8a",
+    "bob_address": "kaspasim:qpajjpd2y2y9g4k5ka6neg66x8pahzj4aqm80qhr74dftsctt8pc2adptavc3"
+  },
+  "settlement": {
+    "observed_lane_id": "ed33cf9800000000000000000000000000000000",
+    "outputs": {
+      "alice": 2968800000,
+      "bob": 1979200000
+    },
+    "raw_tx": {
+      "path": "evidence/kurrent-live-settlement-tx.hex",
+      "sha256": "4e15aefa3aa80953248d52c316d7fb36341a861c9c1ea008b545d428b6c44cdb"
+    },
+    "state_1_redeem_script": {
+      "path": "evidence/kurrent-live-state-1-redeem-script.hex",
+      "sha256": "d2506c8813a16ec72aceb1d25a7076c21bf4ab20d98b25178fc4b882cd45778a"
+    },
+    "state_2_redeem_script": {
+      "path": "evidence/kurrent-live-state-2-redeem-script.hex",
+      "sha256": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472"
+    },
+    "state_number": 2,
+    "txid": "3ac0e5621b74f5e837ce2c440d99b27df56fc983e70314e71e29382e9c963458",
+    "witness": {
+      "path": "evidence/kurrent-live-settlement-witness.hex",
+      "sha256": "65b9da59ee51c8d4026b8eaa1203b462b6c3c44b550045d35553dc7d0298334b"
+    }
+  },
+  "settlement_template": {
+    "hash": "2ee368769bd078db46694c116af2f1d2438c2f8f56d31e743d9c6b2be4578e4a",
+    "template": {
+      "domain_separator": "KURRENT_SETTLEMENT_TEMPLATE_V1",
+      "outputs": {
+        "alice": 2968800000,
+        "bob": 1979200000
+      },
+      "refund_after_daa": 120,
+      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "template_id": "live-state-2-settlement"
+    }
+  },
+  "stale_state_rejection": {
+    "attempted_tx": {
+      "path": "evidence/kurrent-live-stale-rejected-tx.hex",
+      "sha256": "b1c23a5692edb13960ccae5575b04fa5d955dfb948035759c1dbe37f5e8b7f6d"
+    },
+    "attempted_txid": "a19b39a605661f3a9380b37e545b25b23872e5e022950fe4c12323f6330760cd",
+    "node_error": "Rejected transaction a19b39a605661f3a9380b37e545b25b23872e5e022950fe4c12323f6330760cd: failed to verify the signature script: stack contains 1 unexpected items",
+    "observed_lane_id": "ed33cf9800000000000000000000000000000000",
+    "status": "rejected",
+    "witness": {
+      "path": "evidence/kurrent-live-stale-rejected-witness.hex",
+      "sha256": "02b4263d20ef753e51a05db04e9555aa5fb75e05560f2c06d283d206289d62a6"
+    }
+  },
+  "state_header": {
+    "hash": "090f2b967e88ee780347f40b04ffbc6ba63ae11fc226747c9d108860b97ab11a",
+    "header": {
+      "challenge_policy_hash": "58293bd20cf49308119fc543d22f7e91b5712d45e202516dc1584b26e7c692c1",
+      "channel_id": "channel-a",
+      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "domain_separator": "KURRENT_STATE_V1",
+      "expected_lane_id": "ed33cf9800000000000000000000000000000000",
+      "factory_id": null,
+      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "genesis_or_devnet_id": "in-process-simnet",
+      "network_profile": "kaspa-simnet-toccata",
+      "new_state_commitment": "7287db807fad621ce901aea46e7f5cd7e2d525e9cb5da837a91cee6aa10637ed",
+      "participant_set_hash": "4653498cadd1f924ee9946bdfa5133386b49e6624922a45d22ab228ae36554a7",
+      "previous_state_commitment": "7dbbbbd8d5360afd09b5838e35641283c0d253c324327c3f388c9ba88974218d",
+      "protocol_version": 1,
+      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "settlement_template_hash": "2ee368769bd078db46694c116af2f1d2438c2f8f56d31e743d9c6b2be4578e4a",
+      "state_number": 2,
+      "virtual_channel_id": null
+    }
+  },
+  "state_update": {
+    "from_state": 1,
+    "observed_lane_id": "ed33cf9800000000000000000000000000000000",
+    "outpoint": "74ddaf2db39d0a969f12a789e70f1dd3e0fd49b2d1015ca20a8605aabb796eff:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-state-update-tx.hex",
+      "sha256": "c4314c72ab77362336704e45631c2306b3704e9fe6544cca3cba8772272aabed"
+    },
+    "to_state": 2,
+    "txid": "74ddaf2db39d0a969f12a789e70f1dd3e0fd49b2d1015ca20a8605aabb796eff",
+    "value": 4973000000,
+    "witness": {
+      "path": "evidence/kurrent-live-state-update-witness.hex",
+      "sha256": "b92b1e9b8d34e42e076de51bdd585541af5d770c42a3e38971395cb91ca821de"
+    }
+  },
+  "status": "passed",
+  "wrong_lane_rejections": {
+    "native_settlement": {
+      "attempted_tx": {
+        "path": "evidence/kurrent-live-native-lane-settlement-rejected-tx.hex",
+        "sha256": "b830d9a9c45fd72637ca2e12530a4cd58a970d0f6b4816b636c23dd48bbbdff9"
+      },
+      "attempted_txid": "851366b4f264c043c0230772259df5992c4132dfab66ada27c33be3177c2f6f0",
+      "node_error": "Rejected transaction 851366b4f264c043c0230772259df5992c4132dfab66ada27c33be3177c2f6f0: failed to verify the signature script: script ran, but verification failed",
+      "observed_lane_id": "0000000000000000000000000000000000000000",
+      "status": "rejected",
+      "witness": {
+        "path": "evidence/kurrent-live-settlement-witness.hex",
+        "sha256": "65b9da59ee51c8d4026b8eaa1203b462b6c3c44b550045d35553dc7d0298334b"
+      }
+    },
+    "native_state_update": {
+      "attempted_tx": {
+        "path": "evidence/kurrent-live-native-lane-state-update-rejected-tx.hex",
+        "sha256": "c1213d81c0dd86f2f21607e0d5749261316f85350376d74c5bfadc0d0b7cbdd1"
+      },
+      "attempted_txid": "511d5ce9a1777ffd57b22f40674ab8a27f73ab734f23e8355c6794f08fc76e60",
+      "node_error": "Rejected transaction 511d5ce9a1777ffd57b22f40674ab8a27f73ab734f23e8355c6794f08fc76e60: failed to verify the signature script: script ran, but verification failed",
+      "observed_lane_id": "0000000000000000000000000000000000000000",
+      "status": "rejected"
+    },
+    "wrong_user_settlement": {
+      "attempted_tx": {
+        "path": "evidence/kurrent-live-wrong-lane-settlement-rejected-tx.hex",
+        "sha256": "9d5df9ede55909f769e81fcef5d36d31c5ffa835392c8a9e995b0918ea867530"
+      },
+      "attempted_txid": "26b881da9358013fe3f4ab5f58ea58489fd3be2b5ac317278f0281ff740542b6",
+      "node_error": "Rejected transaction 26b881da9358013fe3f4ab5f58ea58489fd3be2b5ac317278f0281ff740542b6: failed to verify the signature script: script ran, but verification failed",
+      "observed_lane_id": "3749230300000000000000000000000000000000",
+      "status": "rejected",
+      "witness": {
+        "path": "evidence/kurrent-live-settlement-witness.hex",
+        "sha256": "65b9da59ee51c8d4026b8eaa1203b462b6c3c44b550045d35553dc7d0298334b"
+      }
+    },
+    "wrong_user_state_update": {
+      "attempted_tx": {
+        "path": "evidence/kurrent-live-wrong-lane-state-update-rejected-tx.hex",
+        "sha256": "a806344e8e4273f5f6cc49b6fa728bddd8aac3e339d2cde48e4e2ec30a6a80a0"
+      },
+      "attempted_txid": "5074f2309628d6928a2877270a6fa53a073f1d3378fbc51524b3572122c601b8",
+      "node_error": "Rejected transaction 5074f2309628d6928a2877270a6fa53a073f1d3378fbc51524b3572122c601b8: failed to verify the signature script: script ran, but verification failed",
+      "observed_lane_id": "3749230300000000000000000000000000000000",
+      "status": "rejected"
+    }
+  }
+}

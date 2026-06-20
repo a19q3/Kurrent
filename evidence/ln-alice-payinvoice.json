@@ -1,0 +1,59 @@
+{
+  "creation_date": "1781589944",
+  "creation_time_ns": "1781589944539908000",
+  "failure_reason": "FAILURE_REASON_NONE",
+  "fee": "0",
+  "fee_msat": "0",
+  "fee_sat": "0",
+  "first_hop_custom_records": {},
+  "htlcs": [
+    {
+      "attempt_id": "1",
+      "attempt_time_ns": "1781589944572722000",
+      "failure": null,
+      "preimage": "0001020304050607080900010203040506070809000102030405060708090001",
+      "resolve_time_ns": "1781589944825688000",
+      "route": {
+        "custom_channel_data": "",
+        "first_hop_amount_msat": "1000000",
+        "hops": [
+          {
+            "amp_record": null,
+            "amt_to_forward": "1000",
+            "amt_to_forward_msat": "1000000",
+            "blinding_point": "",
+            "chan_capacity": "1000000",
+            "chan_id": "118747255865344",
+            "custom_records": {},
+            "encrypted_data": "",
+            "expiry": 196,
+            "fee": "0",
+            "fee_msat": "0",
+            "metadata": "",
+            "mpp_record": {
+              "payment_addr": "feecc0dd06ef40b1e139e1879d3d517bf771f99f8fa0fac9fa2ffec1fc68d5e8",
+              "total_amt_msat": "1000000"
+            },
+            "pub_key": "035d30f7e0c8e8139a0699c62debed94b469245e399c793feaddfc3ab2127b41fa",
+            "tlv_payload": true,
+            "total_amt_msat": "0"
+          }
+        ],
+        "total_amt": "1000",
+        "total_amt_msat": "1000000",
+        "total_fees": "0",
+        "total_fees_msat": "0",
+        "total_time_lock": 196
+      },
+      "status": "SUCCEEDED"
+    }
+  ],
+  "payment_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
+  "payment_index": "1",
+  "payment_preimage": "0001020304050607080900010203040506070809000102030405060708090001",
+  "payment_request": "lnbcrt10u1p4rpeacpp5mjc6cjjaudcv45y3cyl38thzlymvy786qhfxgefupsfjrpf2xh5qdqcdd6hyun9de6z6un9va6x2um5cqzzsxqyz5vqsp5lmkvphgxaaqtrcfeuxre602300mhr7vl37s04j069llvrlrg6h5q9qxpqysgq6dngchycsayg6afwm3z2e2h9xhht5kr0thvqx56jzpc27zw25aj8587pfucx3md8djfnn6hhxd8xzepvhqpxr3zh0wrg94gvchecd4gpa8yzd6",
+  "status": "SUCCEEDED",
+  "value": "1000",
+  "value_msat": "1000000",
+  "value_sat": "1000"
+}

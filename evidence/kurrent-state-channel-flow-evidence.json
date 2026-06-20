@@ -1,0 +1,108 @@
+{
+  "blockers": [],
+  "capability_status": "passed",
+  "commands": [
+    {
+      "command": [
+        "cargo",
+        "run",
+        "--release",
+        "-p",
+        "kaspa-txscript",
+        "--example",
+        "covenants"
+      ],
+      "cwd": "/Users/arthur/RustroverProjects/rusty-kaspa",
+      "label": "kaspa-txscript-covenants",
+      "status_code": 0,
+      "stderr": {
+        "path": "evidence/kaspa-txscript-covenants.stderr.log",
+        "sha256": "5c802fcb846a85a6fa5a22628e2d2ca803d1f74f5f08005ef7de400731bd9af4"
+      },
+      "stdout": {
+        "path": "evidence/kaspa-txscript-covenants.stdout.log",
+        "sha256": "fd8869dff4ea69d0347d8c7f3831e11be3d0b3e94208083baf1f9b0d2247f618"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "kaspa-testing-integration",
+        "--lib",
+        "daemon_integration_tests::daemon_compute_budget_relay_test",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/Users/arthur/RustroverProjects/rusty-kaspa",
+      "label": "kaspa-daemon-compute-budget-relay",
+      "status_code": 0,
+      "stderr": {
+        "path": "evidence/kaspa-daemon-compute-budget-relay.stderr.log",
+        "sha256": "2fc48d4cc6378bd70b57f00a03b6c18e35ad334a963a35329dea1be3ccb670f5"
+      },
+      "stdout": {
+        "path": "evidence/kaspa-daemon-compute-budget-relay.stdout.log",
+        "sha256": "4a7813a87f097f8411f26ff37c58228c628f1ea160befb8ce78305676d188c6a"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "run",
+        "--manifest-path",
+        "/Users/arthur/RustroverProjects/Kurrent/drivers/kaspa-devnet/Cargo.toml",
+        "--",
+        "evidence"
+      ],
+      "cwd": "/Users/arthur/RustroverProjects/Kurrent",
+      "label": "kurrent-live-state-channel-driver",
+      "status_code": 0,
+      "stderr": {
+        "path": "evidence/kurrent-live-state-channel-driver.stderr.log",
+        "sha256": "caec09317def1d4ca5e5613954570043832eeb782d9f5f4220f855cda7736a6f"
+      },
+      "stdout": {
+        "path": "evidence/kurrent-live-state-channel-driver.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "flow": "kaspa_state_channel_flow",
+  "interaction_safety_assertions": [
+    "state update domain separator is KURRENT_STATE_V1",
+    "state numbers must advance exactly one step",
+    "previous_state_commitment must match the current latest commitment",
+    "same-number conflicting commitments are rejected",
+    "settlement must use the latest accepted state",
+    "settlement template hash must match the accepted state header",
+    "channel receipt hash binds network, channel, funding, output, and state number"
+  ],
+  "live_evidence": {
+    "path": "evidence/kurrent-live-state-channel-evidence.json",
+    "sha256": "a169b6fea244192e65394a97a91e2fb4c355e5d3422bda3435aca7789b1fb2ff"
+  },
+  "protocol_files": [
+    {
+      "path": "evidence/kurrent-state-channel-settlement-template.json",
+      "sha256": "d7a4da0c1dff0b568ca9eddae6aa9e94836bfb19ab8efe89555633ab07d290ad"
+    },
+    {
+      "path": "evidence/kurrent-state-channel-headers.json",
+      "sha256": "78d4a7147ed3019f6e2ce8998f26f6c5575de3a40c4013cd23d8527885ba67de"
+    },
+    {
+      "path": "evidence/kurrent-state-channel-receipt.json",
+      "sha256": "2370f803f3877bd6f7fc417d742ffabbb24d9df7365f60289d6cc971cc0bab07"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/crypto/txscript/examples/covenants.rs",
+      "sha256": "3ec90ea5376314ea4b9cfef3a51655a0472ccd8c02b22a73bbbc3d8dbb9e95a1"
+    }
+  ],
+  "status": "passed"
+}

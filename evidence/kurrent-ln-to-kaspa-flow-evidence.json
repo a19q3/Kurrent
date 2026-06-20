@@ -1,0 +1,36 @@
+{
+  "blockers": [],
+  "flow": "ln_to_kaspa_atomic_settlement",
+  "interaction_safety_assertions": [
+    "LN preimage hashes to the invoice payment hash",
+    "swap direction must be either ln-to-kaspa or kaspa-to-ln",
+    "receipt hash must be fresh after swap scope mutation",
+    "receipt protocol version, network profile, swap id, direction, funding outpoint, settlement outpoint, and script hash are bound to evidence",
+    "zero-amount or empty-recipient swap evidence is rejected by the model"
+  ],
+  "live_evidence": {
+    "path": "evidence/kurrent-live-ln-to-kaspa-evidence.json",
+    "sha256": "dc1483b9e3b053b1186e92a84371680fa31e2c995f2f6d3249530ba2b89daa96"
+  },
+  "ln_evidence": {
+    "path": "evidence/ln-devnet-evidence.json",
+    "sha256": "b2064d3bfcb496f70ea8e3a22b1aca955e17f54f8edb514f6d47127d02ae4433"
+  },
+  "preimage_status": "passed",
+  "receipt_scope": {
+    "amount": 1000,
+    "direction": "ln-to-kaspa",
+    "domain_separator": "KURRENT_LN_INTEROP_V1",
+    "kaspa_funding_outpoint": "7b407ad252ec4f62d4fa5f9e55c266337da4a03851f9acb50afce00a6edd1b82:0",
+    "kaspa_settlement_outpoint": "18ecda6f6e833f1164a349dd0efab711b8d20e76b30ddaee8858172b1ac49d57:0",
+    "ln_payment_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
+    "network_profile": "kaspa-simnet-toccata + bitcoin-regtest-lnd",
+    "preimage_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
+    "protocol_version": 1,
+    "recipient": "alice",
+    "script_hash": "d20f2528354e1a1343691fe0740b72596ef791e1c0392c9aebfece837da65a89",
+    "swap_id": "swap-ln-to-kaspa-001"
+  },
+  "status": "passed",
+  "swap_receipt_hash": "a1fdcb726d2ec6207ca18837a853ab8c03c2162ec595c626023b72499bb24579"
+}

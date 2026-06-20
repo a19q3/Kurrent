@@ -1,0 +1,13 @@
+{
+  "claim_id": "refund-swap-1",
+  "domain_separator": "KURRENT_CHANNEL_RECEIPT_V1",
+  "model_assertions": [
+    "refund before DAA 120 is rejected",
+    "refund at DAA 120 succeeds",
+    "settlement plus refund double claim is rejected",
+    "scoped settlement and refund claims bind network, funding outpoint, output id, and claim subject",
+    "claim scopes do not collide across different funding outputs"
+  ],
+  "refund_claim_hash": "705d476bbf6508910b1c47b144a1316dc0d0502de92caf91a965e34e893fdbc0",
+  "required_daa": 120
+}

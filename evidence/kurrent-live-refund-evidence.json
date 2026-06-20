@@ -1,0 +1,58 @@
+{
+  "early_refund_rejection": {
+    "attempted_tx": {
+      "path": "evidence/kurrent-live-early-refund-rejected-tx.hex",
+      "sha256": "0dd855f150b60ce7e955bad6594f5bd3fdcc79dffa075d1199373e4e8e41e7d4"
+    },
+    "attempted_txid": "ff9ce6ccf51f4e1a2c816fb56d5a87c1b2e92e51417bf923ea63464b35f0dc40",
+    "node_error": "Rejected transaction ff9ce6ccf51f4e1a2c816fb56d5a87c1b2e92e51417bf923ea63464b35f0dc40: one of the transaction sequence locks conditions was not met",
+    "status": "rejected",
+    "witness": {
+      "path": "evidence/kurrent-live-early-refund-rejected-witness.hex",
+      "sha256": "d5ab310630a307847b431db7c664077557172993aa7d008eb919b44b30aeeb0e"
+    }
+  },
+  "flow": "refund_timeout_flow",
+  "funding": {
+    "outpoint": "2aa3497f9e6d899313d63a10e862b030e842592008d62b220f9407320d6f22c7:0",
+    "raw_tx": {
+      "path": "evidence/kurrent-live-refund-funding-tx.hex",
+      "sha256": "8a5a58eaed1fee0fdbd56d418310b0c3d71c36c07ffb731193c258debe23ee3f"
+    },
+    "txid": "2aa3497f9e6d899313d63a10e862b030e842592008d62b220f9407320d6f22c7",
+    "value": 5023000000
+  },
+  "model_validation": {
+    "claim_key": "099cd62d8614ef2cc7df518e2e9b5b3c848c3ae7895d0870314f8604082ab737",
+    "claim_scope": {
+      "claim_subject": "refund-timeout-live",
+      "funding_outpoint": "2aa3497f9e6d899313d63a10e862b030e842592008d62b220f9407320d6f22c7:0",
+      "network_profile": "kaspa-simnet-toccata",
+      "output_id": "f26903d7d2bc6a79c4d2d78aa79ca76efd54911ab72781d1570ff240b95096ed:0"
+    },
+    "duplicate_rejection": "DoubleClaim(\"099cd62d8614ef2cc7df518e2e9b5b3c848c3ae7895d0870314f8604082ab737\")",
+    "early_rejection": "RefundNotMature { current_daa: 119, required_daa: 120 }",
+    "redeem_script_sha256": "083abc31afa081e600faddde61516c2d372b28bb0203ff2d37e234064f8bdd08",
+    "refund_sequence": 120,
+    "status": "passed",
+    "validation_layer": "typed-kurrent-protocol-model"
+  },
+  "network_profile": "kaspa-simnet-toccata",
+  "refund": {
+    "output_value": 4998000000,
+    "raw_tx": {
+      "path": "evidence/kurrent-live-refund-tx.hex",
+      "sha256": "602829aa22a1622d455b1ac092e641e34e33742576d895157671a7ca25256b3f"
+    },
+    "redeem_script": {
+      "path": "evidence/kurrent-live-refund-redeem-script.hex",
+      "sha256": "083abc31afa081e600faddde61516c2d372b28bb0203ff2d37e234064f8bdd08"
+    },
+    "txid": "f26903d7d2bc6a79c4d2d78aa79ca76efd54911ab72781d1570ff240b95096ed",
+    "witness": {
+      "path": "evidence/kurrent-live-refund-witness.hex",
+      "sha256": "d5ab310630a307847b431db7c664077557172993aa7d008eb919b44b30aeeb0e"
+    }
+  },
+  "status": "passed"
+}
