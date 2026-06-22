@@ -1120,7 +1120,7 @@ fn production_runbook_satisfies(id: &str, text: &str) -> bool {
     text.len() >= 1_000
         && required_sections
             .iter()
-            .all(|section| text.contains(section))
+            .all(|section| text.lines().any(|line| line.trim() == *section))
 }
 
 fn security_review_required_scopes() -> [&'static str; 8] {
@@ -4227,6 +4227,20 @@ mod tests {
         assert!(!production_runbook_satisfies(
             "key_management_recovery",
             text
+        ));
+    }
+
+    #[test]
+    fn inline_runbook_section_mentions_do_not_satisfy_gate() {
+        let text = format!(
+            "{}\n{}\n{}",
+            "Status: passed",
+            "This paragraph mentions ## Scope, ## Controls, ## Recovery Procedure, and ## Evidence without declaring any of them as markdown section headers.",
+            "x".repeat(1_000)
+        );
+        assert!(!production_runbook_satisfies(
+            "key_management_recovery",
+            &text
         ));
     }
 
