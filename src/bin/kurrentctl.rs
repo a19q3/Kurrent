@@ -294,6 +294,11 @@ fn git_stdout(repo: &Path, args: &[&str]) -> Option<String> {
     command_stdout(cmd)
 }
 
+fn current_git_commit(repo: &Path) -> Result<String, String> {
+    git_stdout(repo, &["rev-parse", "--verify", "HEAD"])
+        .ok_or_else(|| "failed to resolve current git HEAD".to_string())
+}
+
 fn repo_record(path: Option<PathBuf>) -> Option<RepoRecord> {
     let path = path?;
     if !path.join(".git").exists() {
@@ -826,6 +831,14 @@ fn verify_evidence() -> Result<u8, String> {
     let report: AcceptanceReport =
         serde_json::from_slice(&fs::read(&path).map_err(|e| e.to_string())?)
             .map_err(|e| e.to_string())?;
+    let current_commit = current_git_commit(&root)?;
+    if report.git_commit.as_deref() != Some(current_commit.as_str()) {
+        eprintln!(
+            "acceptance evidence git_commit does not match HEAD: report={}, head={current_commit}",
+            report.git_commit.as_deref().unwrap_or("<missing>")
+        );
+        return Ok(EXIT_EVIDENCE);
+    }
     if report.status != "passed" {
         eprintln!("acceptance evidence is not passed");
         return Ok(EXIT_EVIDENCE);
@@ -1004,13 +1017,11 @@ fn production_evidence_satisfies(id: &str, path: &Path) -> Result<bool, String> 
                     path.display()
                 )
             })?;
-        Ok(value.get("status").and_then(Value::as_str) == Some("passed"))
+        Ok(production_json_evidence_satisfies(id, &value))
     } else if path.extension().and_then(|ext| ext.to_str()) == Some("md") {
         let text = fs::read_to_string(path)
             .map_err(|e| format!("failed to read production runbook {}: {e}", path.display()))?;
-        Ok(text
-            .lines()
-            .any(|line| line.trim().eq_ignore_ascii_case("Status: passed")))
+        Ok(production_runbook_satisfies(id, &text))
     } else {
         let len = path.metadata().map_err(|e| {
             format!(
@@ -1020,6 +1031,96 @@ fn production_evidence_satisfies(id: &str, path: &Path) -> Result<bool, String> 
         })?;
         Ok(len.len() > 0)
     }
+}
+
+fn production_json_evidence_satisfies(id: &str, value: &Value) -> bool {
+    if value.get("status").and_then(Value::as_str) != Some("passed") {
+        return false;
+    }
+    match id {
+        "prod_target_profile" => {
+            value
+                .get("git_commit")
+                .and_then(Value::as_str)
+                .is_some_and(|commit| !commit.is_empty())
+                && value
+                    .get("required_production_gates")
+                    .and_then(Value::as_array)
+                    .is_some_and(|items| items.len() >= 5)
+                && value
+                    .get("local_acceptance")
+                    .and_then(|local| local.get("acceptance_report"))
+                    .is_some()
+        }
+        "semantic_transaction_verifier" => {
+            value
+                .get("checks")
+                .and_then(Value::as_array)
+                .is_some_and(|checks| checks.len() >= 3)
+                && value
+                    .get("verified_hex_records")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|records| records > 0)
+                && value
+                    .get("decoded_transactions")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|transactions| transactions > 0)
+        }
+        "adversarial_mempool_soak" => {
+            value
+                .get("deterministic_seed")
+                .and_then(Value::as_str)
+                .is_some_and(|seed| !seed.is_empty())
+                && value
+                    .get("iterations")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|iterations| iterations > 0)
+                && value
+                    .get("checks")
+                    .and_then(Value::as_array)
+                    .is_some_and(|checks| checks.len() >= 5)
+                && value
+                    .get("evidence_files")
+                    .and_then(Value::as_array)
+                    .is_some_and(|files| !files.is_empty())
+        }
+        _ => true,
+    }
+}
+
+fn production_runbook_satisfies(id: &str, text: &str) -> bool {
+    if !text
+        .lines()
+        .any(|line| line.trim().eq_ignore_ascii_case("Status: passed"))
+    {
+        return false;
+    }
+    let required_sections: &[&str] = match id {
+        "key_management_recovery" => &[
+            "## Scope",
+            "## Controls",
+            "## Recovery Procedure",
+            "## Evidence",
+        ],
+        "monitoring_alerting" => &["## Scope", "## Signals", "## Alert Response", "## Evidence"],
+        "incident_recovery" => &[
+            "## Scope",
+            "## Incident Classes",
+            "## Recovery Procedure",
+            "## Evidence",
+        ],
+        "release_rollout_rollback" => &[
+            "## Scope",
+            "## Rollout Procedure",
+            "## Rollback Procedure",
+            "## Evidence",
+        ],
+        _ => &["## Scope", "## Evidence"],
+    };
+    text.len() >= 1_000
+        && required_sections
+            .iter()
+            .all(|section| text.contains(section))
 }
 
 fn security_review_required_scopes() -> [&'static str; 8] {
@@ -1193,6 +1294,7 @@ fn security_review_evidence_satisfies(path: &Path) -> Result<bool, String> {
 
 fn verify_production_readiness() -> Result<u8, String> {
     let root = root()?;
+    let current_commit = current_git_commit(&root)?;
     let evidence = evidence_dir()?;
     let acceptance_path = evidence.join("kurrent-acceptance.json");
     let mut blockers = Vec::new();
@@ -1205,6 +1307,12 @@ fn verify_production_readiness() -> Result<u8, String> {
                 "local devnet acceptance must pass before production readiness can pass"
                     .to_string(),
             );
+        }
+        if report.git_commit.as_deref() != Some(current_commit.as_str()) {
+            blockers.push(format!(
+                "local devnet acceptance git_commit must match HEAD before production readiness can pass: report={}, head={current_commit}",
+                report.git_commit.as_deref().unwrap_or("<missing>")
+            ));
         }
         report.status
     } else {
@@ -1248,6 +1356,7 @@ fn verify_production_readiness() -> Result<u8, String> {
     .to_string();
     let report = ProductionReadinessReport {
         timestamp: timestamp(),
+        git_commit: Some(current_commit),
         status: status.clone(),
         acceptance_status,
         requirements,
@@ -4110,6 +4219,40 @@ mod tests {
         assert!(!satisfied);
 
         let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn superficial_runbook_status_does_not_satisfy_gate() {
+        let text = "Status: passed\n";
+        assert!(!production_runbook_satisfies(
+            "key_management_recovery",
+            text
+        ));
+    }
+
+    #[test]
+    fn structured_runbook_satisfies_gate() {
+        let text = format!(
+            "{}\n{}\n{}\n{}\n{}\n",
+            "Status: passed",
+            "## Scope\nThis runbook covers signer isolation, backup, and recovery controls for the local Kurrent production-readiness gate. The document is intentionally procedural and does not claim mainnet deployment.",
+            "## Controls\nKeys are generated offline, signer hosts are isolated, access is reviewed, backups are encrypted, and recovery material is tested against non-production fixtures before any release claim.",
+            "## Recovery Procedure\nDeclare the incident owner, freeze signing, recover from an encrypted backup into an isolated host, verify participant public keys, replay local acceptance, and record the operator sign-off.",
+            "## Evidence\nThe operator keeps the recovery transcript, backup identifier, acceptance report hash, reviewer identity, and final go/no-go decision with the release artefacts."
+        );
+        let padded = format!("{text}\n{}", "x".repeat(1_000));
+        assert!(production_runbook_satisfies(
+            "key_management_recovery",
+            &padded
+        ));
+    }
+
+    #[test]
+    fn superficial_json_status_does_not_satisfy_target_profile_gate() {
+        assert!(!production_json_evidence_satisfies(
+            "prod_target_profile",
+            &json!({"status": "passed"})
+        ));
     }
 
     #[test]

@@ -1,5 +1,6 @@
 /target/
 /.cap/
+/.idea/
 /.kurrent-devnet/
 /evidence/acceptance-logs/
 /drivers/*/target/

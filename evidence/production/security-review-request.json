@@ -14,8 +14,8 @@
     "Only a completed independent external security review at evidence/production/security-review.json can satisfy the final gate.",
     "Any source, evidence, or runbook change after this package is generated requires regenerating the package and re-reviewing changed artefacts."
   ],
-  "generated_at": "1781419433",
-  "git_commit": "5b60ade4da19f5aec16e4ad4239a1be7a772a825",
+  "generated_at": "1782116152",
+  "git_commit": "6134cadc72b86ce287aa6c1938f229cfa7131078",
   "passing_evidence_template": {
     "completed_at": "YYYY-MM-DD",
     "finding_summary": {
@@ -40,77 +40,77 @@
       {
         "id": "cargo_manifest",
         "path": "Cargo.toml",
-        "sha256": "6938d66b45d47a4fc653261d75c83ac696bdde7ccc30f7d0e4ffb362442d557d"
+        "sha256": "a32eb89a093c0bc0bdff0579aee3b9048382b5d70feb160bae012f22f2bb3602"
       },
       {
         "id": "cargo_lock",
         "path": "Cargo.lock",
-        "sha256": "7981280d62206971ffe3eaeadf1c0718f360102f962fb3d28efc6f3ddbadbcf8"
+        "sha256": "d1a086ebdf524f12bd90565e2557f8dafa31236248ecefb3fda0d4840495b172"
       },
       {
         "id": "protocol_library",
         "path": "src/lib.rs",
-        "sha256": "faf6562c79bba8bcf51ca1f53f04216e2c9bde4ddcacac2507192ec90145c21d"
+        "sha256": "f16e54651d05cde734bf8292b6a5f0eb2f752f18f4fc9476af9fd21e0ae1833a"
       },
       {
         "id": "control_binary",
         "path": "src/bin/kurrentctl.rs",
-        "sha256": "9c71a9cdfe2f78e7e9e4fea349d65123ab5071e39f332b922f4a0cb0137cb74c"
+        "sha256": "b0891bdbdebcd190e0312492b4672689e94bd6537782521383bc916dcd1128cc"
       },
       {
         "id": "protocol_tests",
         "path": "tests/protocol_model.rs",
-        "sha256": "8d601c49d29c51d5b1c375b4a325518bddc683dcffb1c3f915018256d43d6f01"
+        "sha256": "bc1db382b4b49acc636322428d3bf8fcac744e0bf931df6dd0b049a78a50ece6"
       },
       {
         "id": "kaspa_devnet_driver",
         "path": "drivers/kaspa-devnet/src/main.rs",
-        "sha256": "a217934f97a409181511708469d5c0baf129782ffa43006b949eac452635cf1d"
+        "sha256": "6dc4061720ad86885d265183f4d7448ba4b74bc2356747ab2425142333cdc79b"
       },
       {
         "id": "driver_lock",
         "path": "drivers/kaspa-devnet/Cargo.lock",
-        "sha256": "18ad740cb740367bfd56cf433b7135c8e4778532d5373ddfdb792b790b5241e3"
+        "sha256": "e7cbe373a375bf13d98df6f0e255f934d013e2c9a1320e33bdf34cca2b7c52df"
       },
       {
         "id": "security_assumptions",
         "path": "docs/KURRENT_SECURITY_ASSUMPTIONS.md",
-        "sha256": "7fe4170f433c9dff7cf7f3a8a084005842fa6e6ce677b8cf427bad8bdec4de6a"
+        "sha256": "3f1501c2e0207074faf84d796c478bbf28bf875b86dc1a18140b5c7ceadc0680"
       },
       {
         "id": "production_acceptance",
         "path": "docs/KURRENT_PRODUCTION_ACCEPTANCE.md",
-        "sha256": "b9ea5111b56be468cadad4155e3631778dc64b5d8473bd7a5cb587b0686fd119"
+        "sha256": "a7790372fe9bb67eda8dbd18d5d1481d7af30c800ff49c8cb8a24d7ef3aae963"
       },
       {
         "id": "production_security_review_brief",
         "path": "docs/PRODUCTION_SECURITY_REVIEW.md",
-        "sha256": "469f5271c1396ad80031ed053a20d7310610c924bf49d236de9270695ac5e589"
+        "sha256": "787111bb5f5c904d554e287e40b03421bfa4802c48b4ebd0c3132bac5d5c5970"
       },
       {
         "id": "key_management_runbook",
         "path": "docs/PRODUCTION_KEY_MANAGEMENT.md",
-        "sha256": "1ad6b818bc60c1e74b66cd74511a6530bc448a0007f4de785655fde62a2a01b1"
+        "sha256": "d7cfba74fc190e9de4f3926bae6f5327726218474a87f12596c8ed254e21d1fa"
       },
       {
         "id": "monitoring_runbook",
         "path": "docs/PRODUCTION_MONITORING.md",
-        "sha256": "fcdead9764b45e75eee3d44f087f8d6395c96ac850769b27e6aabb288c8f6931"
+        "sha256": "9e15301f58de16640d696765a96bab148f3d3de6244c7f7802301c46810c1de9"
       },
       {
         "id": "recovery_runbook",
         "path": "docs/PRODUCTION_RECOVERY.md",
-        "sha256": "634bd424a398ff09c4be9b73a0e0f1d95cbd82fc4dfd253986b28e21ff5dd5f9"
+        "sha256": "a40403937934546a365c2bb6894053f8a82c3e95e6bbd62488cb8b3882135b93"
       },
       {
         "id": "rollout_runbook",
         "path": "docs/PRODUCTION_ROLLOUT.md",
-        "sha256": "88318a0ddde318f867d4cc6b1a2735930eb19e785cc4061c30dc8013db14f9a1"
+        "sha256": "eaf35c0817978615261a20dbe455f82ec39f0299befafbfdfe247cd47272b829"
       },
       {
         "id": "local_acceptance",
         "path": "evidence/kurrent-acceptance.json",
-        "sha256": "d380673be8708cbbd8951f5e872d99e224253530e001c02951d815c19576ed83"
+        "sha256": "6ec5b8bf06a53d644427998157e20c239d104e495e2b01b4777e5b78ea183a75"
       },
       {
         "id": "target_profile",
@@ -120,15 +120,15 @@
       {
         "id": "semantic_transaction_verifier",
         "path": "evidence/production/semantic-transaction-verifier.json",
-        "sha256": "36a036ea2916c7b6fa6456db1b0bb653894e4a3cb839c0043f0b37e3cd35f168"
+        "sha256": "aec6a5a0eb9ed4077142ca7525370702d1a13b813d558042cfebfebd8c854047"
       },
       {
         "id": "adversarial_soak",
         "path": "evidence/production/adversarial-mempool-soak.json",
-        "sha256": "2144f0ea6943f5a1f0e258d073987f45d09a9889108b80d717483cfdae816d8a"
+        "sha256": "17387851c76762ec2fe44bef03526c71d5ea751af887f963a285c71fc1c67e47"
       }
     ],
-    "reviewed_git_commit": "5b60ade4da19f5aec16e4ad4239a1be7a772a825",
+    "reviewed_git_commit": "6134cadc72b86ce287aa6c1938f229cfa7131078",
     "reviewer_contact": "<external reviewer contact>",
     "reviewer_independence_attestation": "<statement of independence, conflicts, and review authority>",
     "reviewer_name": "<external reviewer name>",
@@ -170,77 +170,77 @@
     {
       "id": "cargo_manifest",
       "path": "Cargo.toml",
-      "sha256": "6938d66b45d47a4fc653261d75c83ac696bdde7ccc30f7d0e4ffb362442d557d"
+      "sha256": "a32eb89a093c0bc0bdff0579aee3b9048382b5d70feb160bae012f22f2bb3602"
     },
     {
       "id": "cargo_lock",
       "path": "Cargo.lock",
-      "sha256": "7981280d62206971ffe3eaeadf1c0718f360102f962fb3d28efc6f3ddbadbcf8"
+      "sha256": "d1a086ebdf524f12bd90565e2557f8dafa31236248ecefb3fda0d4840495b172"
     },
     {
       "id": "protocol_library",
       "path": "src/lib.rs",
-      "sha256": "faf6562c79bba8bcf51ca1f53f04216e2c9bde4ddcacac2507192ec90145c21d"
+      "sha256": "f16e54651d05cde734bf8292b6a5f0eb2f752f18f4fc9476af9fd21e0ae1833a"
     },
     {
       "id": "control_binary",
       "path": "src/bin/kurrentctl.rs",
-      "sha256": "9c71a9cdfe2f78e7e9e4fea349d65123ab5071e39f332b922f4a0cb0137cb74c"
+      "sha256": "b0891bdbdebcd190e0312492b4672689e94bd6537782521383bc916dcd1128cc"
     },
     {
       "id": "protocol_tests",
       "path": "tests/protocol_model.rs",
-      "sha256": "8d601c49d29c51d5b1c375b4a325518bddc683dcffb1c3f915018256d43d6f01"
+      "sha256": "bc1db382b4b49acc636322428d3bf8fcac744e0bf931df6dd0b049a78a50ece6"
     },
     {
       "id": "kaspa_devnet_driver",
       "path": "drivers/kaspa-devnet/src/main.rs",
-      "sha256": "a217934f97a409181511708469d5c0baf129782ffa43006b949eac452635cf1d"
+      "sha256": "6dc4061720ad86885d265183f4d7448ba4b74bc2356747ab2425142333cdc79b"
     },
     {
       "id": "driver_lock",
       "path": "drivers/kaspa-devnet/Cargo.lock",
-      "sha256": "18ad740cb740367bfd56cf433b7135c8e4778532d5373ddfdb792b790b5241e3"
+      "sha256": "e7cbe373a375bf13d98df6f0e255f934d013e2c9a1320e33bdf34cca2b7c52df"
     },
     {
       "id": "security_assumptions",
       "path": "docs/KURRENT_SECURITY_ASSUMPTIONS.md",
-      "sha256": "7fe4170f433c9dff7cf7f3a8a084005842fa6e6ce677b8cf427bad8bdec4de6a"
+      "sha256": "3f1501c2e0207074faf84d796c478bbf28bf875b86dc1a18140b5c7ceadc0680"
     },
     {
       "id": "production_acceptance",
       "path": "docs/KURRENT_PRODUCTION_ACCEPTANCE.md",
-      "sha256": "b9ea5111b56be468cadad4155e3631778dc64b5d8473bd7a5cb587b0686fd119"
+      "sha256": "a7790372fe9bb67eda8dbd18d5d1481d7af30c800ff49c8cb8a24d7ef3aae963"
     },
     {
       "id": "production_security_review_brief",
       "path": "docs/PRODUCTION_SECURITY_REVIEW.md",
-      "sha256": "469f5271c1396ad80031ed053a20d7310610c924bf49d236de9270695ac5e589"
+      "sha256": "787111bb5f5c904d554e287e40b03421bfa4802c48b4ebd0c3132bac5d5c5970"
     },
     {
       "id": "key_management_runbook",
       "path": "docs/PRODUCTION_KEY_MANAGEMENT.md",
-      "sha256": "1ad6b818bc60c1e74b66cd74511a6530bc448a0007f4de785655fde62a2a01b1"
+      "sha256": "d7cfba74fc190e9de4f3926bae6f5327726218474a87f12596c8ed254e21d1fa"
     },
     {
       "id": "monitoring_runbook",
       "path": "docs/PRODUCTION_MONITORING.md",
-      "sha256": "fcdead9764b45e75eee3d44f087f8d6395c96ac850769b27e6aabb288c8f6931"
+      "sha256": "9e15301f58de16640d696765a96bab148f3d3de6244c7f7802301c46810c1de9"
     },
     {
       "id": "recovery_runbook",
       "path": "docs/PRODUCTION_RECOVERY.md",
-      "sha256": "634bd424a398ff09c4be9b73a0e0f1d95cbd82fc4dfd253986b28e21ff5dd5f9"
+      "sha256": "a40403937934546a365c2bb6894053f8a82c3e95e6bbd62488cb8b3882135b93"
     },
     {
       "id": "rollout_runbook",
       "path": "docs/PRODUCTION_ROLLOUT.md",
-      "sha256": "88318a0ddde318f867d4cc6b1a2735930eb19e785cc4061c30dc8013db14f9a1"
+      "sha256": "eaf35c0817978615261a20dbe455f82ec39f0299befafbfdfe247cd47272b829"
     },
     {
       "id": "local_acceptance",
       "path": "evidence/kurrent-acceptance.json",
-      "sha256": "d380673be8708cbbd8951f5e872d99e224253530e001c02951d815c19576ed83"
+      "sha256": "6ec5b8bf06a53d644427998157e20c239d104e495e2b01b4777e5b78ea183a75"
     },
     {
       "id": "target_profile",
@@ -250,12 +250,12 @@
     {
       "id": "semantic_transaction_verifier",
       "path": "evidence/production/semantic-transaction-verifier.json",
-      "sha256": "36a036ea2916c7b6fa6456db1b0bb653894e4a3cb839c0043f0b37e3cd35f168"
+      "sha256": "aec6a5a0eb9ed4077142ca7525370702d1a13b813d558042cfebfebd8c854047"
     },
     {
       "id": "adversarial_soak",
       "path": "evidence/production/adversarial-mempool-soak.json",
-      "sha256": "2144f0ea6943f5a1f0e258d073987f45d09a9889108b80d717483cfdae816d8a"
+      "sha256": "17387851c76762ec2fe44bef03526c71d5ea751af887f963a285c71fc1c67e47"
     }
   ],
   "schema_version": "kurrent-security-review-request-v1",

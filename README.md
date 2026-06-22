@@ -150,6 +150,10 @@ cargo test
 ./scripts/verify-evidence.sh
 ```
 
+`verify-evidence.sh` is intentionally commit-bound. If the source revision has
+changed, regenerate local acceptance with `./scripts/check.sh` before expecting
+the verifier to pass.
+
 ## Production Readiness
 
 Kurrent does not claim production readiness.
@@ -199,10 +203,14 @@ Key documents:
 
 - `docs/KURRENT_THESIS.pdf` - current research note.
 - `docs/KURRENT_THESIS.tex` - source for the thesis.
+- `docs/KURRENT_INVOICE_DESIGN_RESEARCH.md` - non-normative invoice design research.
 - `docs/KURRENT_SECURITY_ASSUMPTIONS.md` - prototype evidence assumptions.
 - `docs/KURRENT_PRODUCTION_ACCEPTANCE.md` - production acceptance criteria.
 - `docs/PRODUCTION_SECURITY_REVIEW.md` - security-review brief.
-- `docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md` - future factory design target.
+- `docs/PRODUCTION_KEY_MANAGEMENT.md` - key-management runbook.
+- `docs/PRODUCTION_MONITORING.md` - monitoring and alerting runbook.
+- `docs/PRODUCTION_RECOVERY.md` - incident recovery runbook.
+- `docs/PRODUCTION_ROLLOUT.md` - rollout and rollback runbook.
 
 Primary evidence outputs:
 
@@ -228,13 +236,15 @@ For protocol review:
 1. Read `docs/KURRENT_THESIS.pdf`.
 2. Check the status boundary in this README.
 3. Inspect `docs/KURRENT_SECURITY_ASSUMPTIONS.md` for prototype-only evidence assumptions.
-4. Use the evidence files only as local-devnet support, not as production proof.
+4. Treat `docs/KURRENT_INVOICE_DESIGN_RESEARCH.md` as future protocol research only.
+5. Use the evidence files only as local-devnet support, not as production proof.
 
 For implementation work:
 
 1. Run `./scripts/check.sh`.
 2. Inspect `evidence/kurrent-acceptance.json`.
-3. Run the production-readiness script to see which gates remain blocked.
+3. Run `./scripts/verify-evidence.sh` against the freshly generated report.
+4. Run the production-readiness script to see which gates remain blocked.
 
 ## Non-Claims
 

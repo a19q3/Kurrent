@@ -170,8 +170,8 @@
 //!   proofs, factory-update authorisation rules, unilateral exit and
 //!   unavailable-data behaviour, proof-size and verification-cost
 //!   bounds. The factory evidence path in this crate uses full-state
-//!   recomputation; the compressed-factory commitment work is recorded
-//!   in `docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md`.
+//!   recomputation; compressed-factory commitment work remains future
+//!   protocol-specification work in the thesis.
 //!
 //! # Missing design bridge
 //!
@@ -882,6 +882,8 @@ pub struct ProductionEvidenceRequirement {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProductionReadinessReport {
     pub timestamp: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub git_commit: Option<String>,
     pub status: String,
     pub acceptance_status: String,
     pub requirements: Vec<ProductionEvidenceRequirement>,

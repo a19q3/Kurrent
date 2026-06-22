@@ -71,11 +71,11 @@ fn channel_config() -> KurrentChannelConfig {
         expected_lane_id: Some(derive_kurrent_channel_lane_id(&channel_id)),
         channel_id,
         participants: participants(),
-challenge_policy: ChallengePolicy {
-                mode: "latest-state".to_string(),
-                challenge_window_daa: 120,
-                same_number_conflict_rule: SameNumberConflictRule::RejectConflict,
-            },
+        challenge_policy: ChallengePolicy {
+            mode: "latest-state".to_string(),
+            challenge_window_daa: 120,
+            same_number_conflict_rule: SameNumberConflictRule::RejectConflict,
+        },
         access_manifest: AccessManifest {
             authorised_participants: participants(),
             participant_public_keys: participant_public_keys(),
@@ -649,7 +649,10 @@ fn same_number_conflict_rule_parse_defaults_unknown_values_to_reject_conflict() 
         SameNumberConflictRule::parse("garbage"),
         SameNumberConflictRule::RejectConflict
     );
-    assert_eq!(SameNumberConflictRule::default(), SameNumberConflictRule::RejectConflict);
+    assert_eq!(
+        SameNumberConflictRule::default(),
+        SameNumberConflictRule::RejectConflict
+    );
 }
 
 #[test]
@@ -744,12 +747,30 @@ fn scope_id_is_deterministic_and_changes_with_any_input() {
 
     // Vary each field in turn and verify the hash changes.
     for variant in [
-        KurrentScope { chain_id: "different".into(), ..scope.clone() },
-        KurrentScope { origin_id: "funding:1".into(), ..scope.clone() },
-        KurrentScope { auth_policy_hash: "different-auth".into(), ..scope.clone() },
-        KurrentScope { covenant_binding_hash: "different-covenant".into(), ..scope.clone() },
-        KurrentScope { settlement_policy_hash: "different-settlement".into(), ..scope.clone() },
-        KurrentScope { challenge_policy_hash: "different-challenge".into(), ..scope.clone() },
+        KurrentScope {
+            chain_id: "different".into(),
+            ..scope.clone()
+        },
+        KurrentScope {
+            origin_id: "funding:1".into(),
+            ..scope.clone()
+        },
+        KurrentScope {
+            auth_policy_hash: "different-auth".into(),
+            ..scope.clone()
+        },
+        KurrentScope {
+            covenant_binding_hash: "different-covenant".into(),
+            ..scope.clone()
+        },
+        KurrentScope {
+            settlement_policy_hash: "different-settlement".into(),
+            ..scope.clone()
+        },
+        KurrentScope {
+            challenge_policy_hash: "different-challenge".into(),
+            ..scope.clone()
+        },
     ] {
         assert_ne!(
             compute_scope_id(&variant),
@@ -777,11 +798,17 @@ fn state_root_does_not_include_static_context_fields() {
         ..state.clone()
     };
     let second = compute_state_root(&state_alt);
-    assert_ne!(first, second, "settlement_distribution_hash is dynamic; flipping it must change the root");
+    assert_ne!(
+        first, second,
+        "settlement_distribution_hash is dynamic; flipping it must change the root"
+    );
     // Now the property we actually want: the state_root with the *original*
     // dynamic state is reproducible; no implicit static fields enter.
     let third = compute_state_root(&state);
-    assert_eq!(first, third, "state_root must be a pure function of dynamic fields");
+    assert_eq!(
+        first, third,
+        "state_root must be a pure function of dynamic fields"
+    );
 }
 
 #[test]
@@ -798,7 +825,11 @@ fn state_cert_message_is_constant_size_under_fixed_participant_set() {
     let m1 = compute_state_cert_message(&scope_id, 1, 5, &state_root);
     let m2 = compute_state_cert_message(&scope_id, 1, 5, &state_root);
     assert_eq!(m1, m2, "state_cert_message must be deterministic");
-    assert_eq!(m1.len(), 64, "state_cert_message must be 32-byte hex digest (64 chars)");
+    assert_eq!(
+        m1.len(),
+        64,
+        "state_cert_message must be 32-byte hex digest (64 chars)"
+    );
 
     // Vary each binding input and confirm the message changes.
     assert_ne!(
@@ -843,8 +874,7 @@ fn transition_record_is_off_chain_transcript_metadata_only() {
     // The on-chain signed payload does NOT include the transition record.
     let scope = sample_scope();
     let scope_id = compute_scope_id(&scope);
-    let state_cert_with_record =
-        compute_state_cert_message(&scope_id, 1, 5, &b);
+    let state_cert_with_record = compute_state_cert_message(&scope_id, 1, 5, &b);
     let state_cert_without_record = state_cert_with_record.clone();
     // If a future refactor accidentally pulls the transition record into
     // the signed payload, this assertion would still pass but the
