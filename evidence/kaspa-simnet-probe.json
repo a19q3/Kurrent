@@ -1,0 +1,23 @@
+{
+  "appdir": "/Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet",
+  "daemon": "kaspad",
+  "network": "simnet",
+  "p2p_listen": "127.0.0.1:16211",
+  "rpc_listen": "127.0.0.1:16210",
+  "status": "passed",
+  "stderr_bytes": 0,
+  "stderr_excerpt": [],
+  "stdout_bytes": 801,
+  "stdout_excerpt": [
+    "2026-06-27 15:25:42.391+08:00 [INFO ] kaspad v2.0.0-1fe3697b",
+    "2026-06-27 15:25:42.391+08:00 [INFO ] Application directory: /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet",
+    "2026-06-27 15:25:42.391+08:00 [INFO ] Data directory: /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir",
+    "2026-06-27 15:25:42.391+08:00 [INFO ] Logs to console only",
+    "2026-06-27 15:25:42.391+08:00 [INFO ] Deleting databases",
+    "2026-06-27 15:25:42.402+08:00 [INFO ] Utxoindex Data directory /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/kaspa-simnet/kaspa-simnet/datadir/utxoindex",
+    "2026-06-27 15:25:42.492+08:00 [INFO ] Resyncing the utxoindex...",
+    "2026-06-27 15:25:42.496+08:00 [INFO ] [UPnP] Attempting to register upnp... (to disable run the node with --disable-upnp)"
+  ],
+  "unsynchronised_mining": true,
+  "utxoindex": true
+}

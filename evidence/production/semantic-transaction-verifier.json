@@ -1,5 +1,5 @@
 {
-  "checked_at_unix": 1781589967,
+  "checked_at_unix": 1782571600,
   "checks": [
     {
       "details": "funding, update, wrong-lane rejections, stale rejection, and settlement transactions decode and match recorded txids, outpoints, values, lane ids, rejection status, JSON hashes, and typed state-model bindings",

@@ -1,2 +1,4 @@
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.49s
+   Compiling kurrent v0.1.0 (/Users/arthur/RustroverProjects/Kurrent)
+   Compiling kurrent-kaspa-devnet-driver v0.1.0 (/Users/arthur/RustroverProjects/Kurrent/drivers/kaspa-devnet)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.07s
      Running `drivers/kaspa-devnet/target/debug/kurrent-kaspa-devnet-driver evidence`

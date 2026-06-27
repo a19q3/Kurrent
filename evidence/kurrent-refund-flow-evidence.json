@@ -3,7 +3,7 @@
   "flow": "refund_timeout_flow",
   "live_evidence": {
     "path": "evidence/kurrent-live-refund-evidence.json",
-    "sha256": "c6b87a3055dba56911e7eb9bf4dc74267f9811690c59e2edafeef556d66bd12d"
+    "sha256": "b5d1f438cd2a815e5662d8f2c27de919ad34091f3f90c1c3418a8886738b1d9f"
   },
   "model_status": "passed",
   "protocol_files": [

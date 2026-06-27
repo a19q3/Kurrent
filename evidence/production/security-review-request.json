@@ -14,33 +14,27 @@
     "Only a completed independent external security review at evidence/production/security-review.json can satisfy the final gate.",
     "Any source, evidence, or runbook change after this package is generated requires regenerating the package and re-reviewing changed artefacts."
   ],
-  "generated_at": "1782116152",
-  "git_commit": "6134cadc72b86ce287aa6c1938f229cfa7131078",
-  "passing_evidence_template": {
-    "completed_at": "YYYY-MM-DD",
-    "finding_summary": {
-      "accepted_risk_count": 0,
-      "critical_open": 0,
-      "fixed_count": 0,
-      "high_open": 0,
-      "low_open": 0,
-      "medium_open": 0
+  "generated_at": "1782572167",
+  "git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
+  "passing_evidence_schema": {
+    "required_constant_fields": {
+      "review_type": "independent_external_security_review",
+      "reviewed_git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
+      "schema_version": "kurrent-security-review-v1",
+      "status": "passed"
     },
-    "methodology": [
-      "manual protocol-design review",
-      "manual script/covenant constraint review",
-      "evidence and production-gate replay"
+    "required_empty_arrays": [
+      "unresolved_blocking_findings"
     ],
-    "report": {
-      "path": "evidence/production/security-review-report.pdf",
-      "sha256": "<sha256 of report file bytes>"
-    },
-    "review_type": "independent_external_security_review",
-    "reviewed_artifacts": [
+    "required_file_hashes": [
+      "report.sha256 must equal the SHA-256 of evidence/production/security-review-report.pdf",
+      "signed_attestation.sha256 must equal the SHA-256 of evidence/production/security-review-attestation.txt"
+    ],
+    "required_reviewed_artifacts": [
       {
         "id": "cargo_manifest",
         "path": "Cargo.toml",
-        "sha256": "a32eb89a093c0bc0bdff0579aee3b9048382b5d70feb160bae012f22f2bb3602"
+        "sha256": "1d45ca0dd257af04c30d02faea206f7551deb9a0717b1018118277d1bca75bc1"
       },
       {
         "id": "cargo_lock",
@@ -50,27 +44,27 @@
       {
         "id": "protocol_library",
         "path": "src/lib.rs",
-        "sha256": "f16e54651d05cde734bf8292b6a5f0eb2f752f18f4fc9476af9fd21e0ae1833a"
+        "sha256": "27cd432985b599f90d50508f9fb47244aa4571e0a356f24e1a5d0e043f489aa7"
       },
       {
         "id": "control_binary",
         "path": "src/bin/kurrentctl.rs",
-        "sha256": "b0891bdbdebcd190e0312492b4672689e94bd6537782521383bc916dcd1128cc"
+        "sha256": "706bc392861cde660c7c5e592b64c8584f68a1ba49bd73468ba7166d021ada42"
       },
       {
         "id": "protocol_tests",
         "path": "tests/protocol_model.rs",
-        "sha256": "bc1db382b4b49acc636322428d3bf8fcac744e0bf931df6dd0b049a78a50ece6"
+        "sha256": "97b4d6ffdc8d598dd71cb5841eb5846734434ef8947073db8758764f1284aace"
       },
       {
         "id": "kaspa_devnet_driver",
         "path": "drivers/kaspa-devnet/src/main.rs",
-        "sha256": "6dc4061720ad86885d265183f4d7448ba4b74bc2356747ab2425142333cdc79b"
+        "sha256": "4f020a3d610c232775a1f3e1637c9dff10f90676c50cdeb71ee6d7745594f4b9"
       },
       {
         "id": "driver_lock",
         "path": "drivers/kaspa-devnet/Cargo.lock",
-        "sha256": "e7cbe373a375bf13d98df6f0e255f934d013e2c9a1320e33bdf34cca2b7c52df"
+        "sha256": "a001be3f9df281a53753b54b011a008469064739a9b28fc231fdae832c2521d1"
       },
       {
         "id": "security_assumptions",
@@ -86,6 +80,11 @@
         "id": "production_security_review_brief",
         "path": "docs/PRODUCTION_SECURITY_REVIEW.md",
         "sha256": "787111bb5f5c904d554e287e40b03421bfa4802c48b4ebd0c3132bac5d5c5970"
+      },
+      {
+        "id": "factory_commitment_design_boundary",
+        "path": "docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md",
+        "sha256": "c2933bf41bbfc5b37b26f943b9c7467d5bcfda131a6a1d0ead814cdd273c311e"
       },
       {
         "id": "key_management_runbook",
@@ -110,31 +109,25 @@
       {
         "id": "local_acceptance",
         "path": "evidence/kurrent-acceptance.json",
-        "sha256": "6ec5b8bf06a53d644427998157e20c239d104e495e2b01b4777e5b78ea183a75"
+        "sha256": "e05070a026ab991d96f34a5b29c37f8879d55615c833535f8a55e162429fb4f5"
       },
       {
         "id": "target_profile",
         "path": "evidence/production/target-profile.json",
-        "sha256": "93f4638a24e37d61986b90f0154c95ca5aab12602208a384eb1bde7e642f60ad"
+        "sha256": "c150a0b941d80e29c272dde625d51de155cf41fb2a837cbb670cfc6d42980605"
       },
       {
         "id": "semantic_transaction_verifier",
         "path": "evidence/production/semantic-transaction-verifier.json",
-        "sha256": "aec6a5a0eb9ed4077142ca7525370702d1a13b813d558042cfebfebd8c854047"
+        "sha256": "8a78d6c045cbbe8937da457ceaf010935001fdd5952977309faa88a94b141bab"
       },
       {
-        "id": "adversarial_soak",
-        "path": "evidence/production/adversarial-mempool-soak.json",
-        "sha256": "17387851c76762ec2fe44bef03526c71d5ea751af887f963a285c71fc1c67e47"
+        "id": "adversarial_model_soak",
+        "path": "evidence/production/adversarial-model-soak.json",
+        "sha256": "8fb8318c02482dc18460b60236cb7b1891b114a1d98a7623eb86d4788cc5b087"
       }
     ],
-    "reviewed_git_commit": "6134cadc72b86ce287aa6c1938f229cfa7131078",
-    "reviewer_contact": "<external reviewer contact>",
-    "reviewer_independence_attestation": "<statement of independence, conflicts, and review authority>",
-    "reviewer_name": "<external reviewer name>",
-    "reviewer_organisation": "<external reviewer organisation>",
-    "schema_version": "kurrent-security-review-v1",
-    "scope": [
+    "required_scope": [
       "protocol_design",
       "state_channel_latest_state_safety",
       "kaspa_script_and_covenant_constraints",
@@ -144,12 +137,23 @@
       "evidence_verification_and_production_gates",
       "operational_controls_and_runbooks"
     ],
-    "signed_attestation": {
-      "path": "evidence/production/security-review-attestation.txt",
-      "sha256": "<sha256 of signed attestation file bytes>"
-    },
-    "status": "passed",
-    "unresolved_blocking_findings": []
+    "required_supplied_fields": [
+      "completed_at",
+      "reviewer_name",
+      "reviewer_organisation",
+      "reviewer_contact",
+      "reviewer_independence_attestation",
+      "methodology",
+      "finding_summary",
+      "report",
+      "signed_attestation"
+    ],
+    "required_zero_open_findings": [
+      "critical_open",
+      "high_open",
+      "medium_open",
+      "low_open"
+    ]
   },
   "repository": "https://github.com/a19q3/Kurrent.git",
   "required_output_path": "evidence/production/security-review.json",
@@ -170,7 +174,7 @@
     {
       "id": "cargo_manifest",
       "path": "Cargo.toml",
-      "sha256": "a32eb89a093c0bc0bdff0579aee3b9048382b5d70feb160bae012f22f2bb3602"
+      "sha256": "1d45ca0dd257af04c30d02faea206f7551deb9a0717b1018118277d1bca75bc1"
     },
     {
       "id": "cargo_lock",
@@ -180,27 +184,27 @@
     {
       "id": "protocol_library",
       "path": "src/lib.rs",
-      "sha256": "f16e54651d05cde734bf8292b6a5f0eb2f752f18f4fc9476af9fd21e0ae1833a"
+      "sha256": "27cd432985b599f90d50508f9fb47244aa4571e0a356f24e1a5d0e043f489aa7"
     },
     {
       "id": "control_binary",
       "path": "src/bin/kurrentctl.rs",
-      "sha256": "b0891bdbdebcd190e0312492b4672689e94bd6537782521383bc916dcd1128cc"
+      "sha256": "706bc392861cde660c7c5e592b64c8584f68a1ba49bd73468ba7166d021ada42"
     },
     {
       "id": "protocol_tests",
       "path": "tests/protocol_model.rs",
-      "sha256": "bc1db382b4b49acc636322428d3bf8fcac744e0bf931df6dd0b049a78a50ece6"
+      "sha256": "97b4d6ffdc8d598dd71cb5841eb5846734434ef8947073db8758764f1284aace"
     },
     {
       "id": "kaspa_devnet_driver",
       "path": "drivers/kaspa-devnet/src/main.rs",
-      "sha256": "6dc4061720ad86885d265183f4d7448ba4b74bc2356747ab2425142333cdc79b"
+      "sha256": "4f020a3d610c232775a1f3e1637c9dff10f90676c50cdeb71ee6d7745594f4b9"
     },
     {
       "id": "driver_lock",
       "path": "drivers/kaspa-devnet/Cargo.lock",
-      "sha256": "e7cbe373a375bf13d98df6f0e255f934d013e2c9a1320e33bdf34cca2b7c52df"
+      "sha256": "a001be3f9df281a53753b54b011a008469064739a9b28fc231fdae832c2521d1"
     },
     {
       "id": "security_assumptions",
@@ -216,6 +220,11 @@
       "id": "production_security_review_brief",
       "path": "docs/PRODUCTION_SECURITY_REVIEW.md",
       "sha256": "787111bb5f5c904d554e287e40b03421bfa4802c48b4ebd0c3132bac5d5c5970"
+    },
+    {
+      "id": "factory_commitment_design_boundary",
+      "path": "docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md",
+      "sha256": "c2933bf41bbfc5b37b26f943b9c7467d5bcfda131a6a1d0ead814cdd273c311e"
     },
     {
       "id": "key_management_runbook",
@@ -240,22 +249,22 @@
     {
       "id": "local_acceptance",
       "path": "evidence/kurrent-acceptance.json",
-      "sha256": "6ec5b8bf06a53d644427998157e20c239d104e495e2b01b4777e5b78ea183a75"
+      "sha256": "e05070a026ab991d96f34a5b29c37f8879d55615c833535f8a55e162429fb4f5"
     },
     {
       "id": "target_profile",
       "path": "evidence/production/target-profile.json",
-      "sha256": "93f4638a24e37d61986b90f0154c95ca5aab12602208a384eb1bde7e642f60ad"
+      "sha256": "c150a0b941d80e29c272dde625d51de155cf41fb2a837cbb670cfc6d42980605"
     },
     {
       "id": "semantic_transaction_verifier",
       "path": "evidence/production/semantic-transaction-verifier.json",
-      "sha256": "aec6a5a0eb9ed4077142ca7525370702d1a13b813d558042cfebfebd8c854047"
+      "sha256": "8a78d6c045cbbe8937da457ceaf010935001fdd5952977309faa88a94b141bab"
     },
     {
-      "id": "adversarial_soak",
-      "path": "evidence/production/adversarial-mempool-soak.json",
-      "sha256": "17387851c76762ec2fe44bef03526c71d5ea751af887f963a285c71fc1c67e47"
+      "id": "adversarial_model_soak",
+      "path": "evidence/production/adversarial-model-soak.json",
+      "sha256": "8fb8318c02482dc18460b60236cb7b1891b114a1d98a7623eb86d4788cc5b087"
     }
   ],
   "schema_version": "kurrent-security-review-request-v1",

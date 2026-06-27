@@ -33,6 +33,15 @@ fn encode_spk_canonical_roundtrip() {
 }
 
 #[test]
+fn toccata_spk_is_distinct_from_commitment_spk() {
+    let spk = EncodedSpk::new(0x0102, vec![0x76, 0xa9, 0x14, 0xff]);
+    let commit = spk.encode();
+    let toccata = spk.toccata_encode();
+    assert_eq!(toccata, vec![0x01, 0x02, 0x76, 0xa9, 0x14, 0xff]);
+    assert_ne!(commit, toccata);
+}
+
+#[test]
 fn encode_spk_rejects_truncated_payload() {
     let bytes = vec![0x00, 0x00, 0x04, 0, 0, 0, 0, 0, 0, 0];
     assert!(EncodedSpk::decode(&bytes).is_err());
@@ -181,7 +190,9 @@ fn scope_id_changes_with_delta() {
 
 #[test]
 fn policy_v1_validates() {
-    assert!(PolicyEncoding::v1().validate_v1().is_ok());
+    let policy = PolicyEncoding::v1();
+    assert_eq!(policy.settlement_shape_id, 1);
+    assert!(policy.validate_v1().is_ok());
 }
 
 #[test]
@@ -208,7 +219,7 @@ fn policy_v1_rejects_non_external_sponsor() {
 #[test]
 fn policy_v1_rejects_non_two_party_shape() {
     let mut p = PolicyEncoding::v1();
-    p.settlement_shape_id = 1;
+    p.settlement_shape_id = 0;
     assert!(p.validate_v1().is_err());
 }
 
@@ -234,6 +245,7 @@ fn policy_v1_hash_changes_with_coop_close_flag() {
 
 fn sample_state_root_input() -> StateRootInput {
     StateRootInput {
+        settlement_mask: SettlementMask::Both,
         spk_a: EncodedSpk::new(0, vec![0xaa; 32]),
         value_a: 60,
         spk_b: EncodedSpk::new(0, vec![0xbb; 32]),
@@ -246,9 +258,27 @@ fn state_root_canonical_payload_is_fixed_width() {
     let s = sample_state_root_input();
     let p = s.canonical_payload();
     // The sample uses 32-byte scripts, so each encodeSPK is 2 + 8 + 32 = 42.
-    // Total: 1 (slot A) + 42 (encodeSPK_A) + 8 (le64 v_A)
+    // Total: 1 (mask) + 1 (slot A) + 42 (encodeSPK_A) + 8 (le64 v_A)
     //      + 1 (slot B) + 42 (encodeSPK_B) + 8 (le64 v_B)
-    assert_eq!(p.len(), 1 + 42 + 8 + 1 + 42 + 8);
+    assert_eq!(p.len(), 1 + 1 + 42 + 8 + 1 + 42 + 8);
+    assert_eq!(p[0], SettlementMask::Both.byte());
+}
+
+#[test]
+fn settlement_mask_is_derived_from_non_zero_outputs() {
+    assert_eq!(
+        SettlementMask::from_values(60, 40, 100).unwrap(),
+        SettlementMask::Both
+    );
+    assert_eq!(
+        SettlementMask::from_values(100, 0, 100).unwrap(),
+        SettlementMask::AOnly
+    );
+    assert_eq!(
+        SettlementMask::from_values(0, 100, 100).unwrap(),
+        SettlementMask::BOnly
+    );
+    assert!(SettlementMask::from_values(0, 0, 0).is_err());
 }
 
 #[test]
@@ -265,6 +295,14 @@ fn state_root_changes_with_slot() {
     let mut a = sample_state_root_input();
     let b = sample_state_root_input();
     std::mem::swap(&mut a.spk_a, &mut a.spk_b);
+    assert_ne!(a.compute_root(), b.compute_root());
+}
+
+#[test]
+fn state_root_changes_with_settlement_mask() {
+    let a = sample_state_root_input();
+    let mut b = sample_state_root_input();
+    b.settlement_mask = SettlementMask::AOnly;
     assert_ne!(a.compute_root(), b.compute_root());
 }
 
@@ -328,9 +366,11 @@ fn state_cert_message_rejects_out_of_range_state_number() {
 #[test]
 fn coop_close_outputs_hash_uses_distinct_domain_and_payload() {
     let s = sample_state_root_input();
-    let actual = coop_close_outputs_hash(&s.spk_a, s.value_a, &s.spk_b, s.value_b);
+    let actual =
+        coop_close_outputs_hash(s.settlement_mask, &s.spk_a, s.value_a, &s.spk_b, s.value_b);
 
     let mut payload = Vec::new();
+    payload.push(s.settlement_mask.byte());
     payload.extend_from_slice(&s.spk_a.encode());
     payload.extend_from_slice(&s.value_a.to_le_bytes());
     payload.extend_from_slice(&s.spk_b.encode());
@@ -403,8 +443,8 @@ fn verify_state_certificate_rejects_out_of_range_state_number() {
     let agg = AggregateVerificationKey(xonly.serialize());
     let mut m = sample_state_cert();
     m.state_number = u64::MAX;
-    let dummy_sig = [0u8; 64];
-    assert!(!verify_state_certificate(&m, &agg, &dummy_sig));
+    let invalid_sig = [0u8; 64];
+    assert!(!verify_state_certificate(&m, &agg, &invalid_sig));
 }
 
 #[test]
@@ -416,8 +456,8 @@ fn verify_state_certificate_rejects_bad_signature() {
     let agg = AggregateVerificationKey(xonly.serialize());
     let m = sample_state_cert();
     // All-zero signature is well-formed but invalid for any message.
-    let dummy_sig = [0u8; 64];
-    assert!(!verify_state_certificate(&m, &agg, &dummy_sig));
+    let invalid_sig = [0u8; 64];
+    assert!(!verify_state_certificate(&m, &agg, &invalid_sig));
 }
 
 #[test]
@@ -428,8 +468,8 @@ fn verify_coop_close_rejects_bad_signature() {
     let (xonly, _) = kp.x_only_public_key();
     let agg = AggregateVerificationKey(xonly.serialize());
     let m = sample_coop_close();
-    let dummy_sig = [0u8; 64];
-    assert!(!verify_coop_close(&m, &agg, &dummy_sig));
+    let invalid_sig = [0u8; 64];
+    assert!(!verify_coop_close(&m, &agg, &invalid_sig));
 }
 
 // --------------------------------------------------------------------------
@@ -469,6 +509,7 @@ fn verify_replacement_state_root_matches_recomputed() {
     let spk_a = EncodedSpk::new(0, vec![0xaa; 32]);
     let spk_b = EncodedSpk::new(0, vec![0xbb; 32]);
     let input = StateRootInput {
+        settlement_mask: SettlementMask::Both,
         spk_a: spk_a.clone(),
         value_a: 60,
         spk_b: spk_b.clone(),
@@ -563,13 +604,31 @@ fn bounded_shape_input_output_slots() {
         2
     );
     assert_eq!(
-        BoundedShape::ContestOpeningOrReplacement.output_slot_count(),
+        BoundedShape::ContestOpeningOrReplacement.output_slot_count(SettlementMask::Both, true),
         2
     );
     assert_eq!(BoundedShape::Settlement.input_slot_count(), 2);
-    assert_eq!(BoundedShape::Settlement.output_slot_count(), 3);
+    assert_eq!(
+        BoundedShape::Settlement.output_slot_count(SettlementMask::Both, false),
+        2
+    );
+    assert_eq!(
+        BoundedShape::Settlement.output_slot_count(SettlementMask::Both, true),
+        3
+    );
+    assert_eq!(
+        BoundedShape::Settlement.output_slot_count(SettlementMask::AOnly, false),
+        1
+    );
+    assert_eq!(
+        BoundedShape::Settlement.output_slot_count(SettlementMask::BOnly, true),
+        2
+    );
     assert_eq!(BoundedShape::CoopClose.input_slot_count(), 2);
-    assert_eq!(BoundedShape::CoopClose.output_slot_count(), 3);
+    assert_eq!(
+        BoundedShape::CoopClose.output_slot_count(SettlementMask::Both, true),
+        3
+    );
 }
 
 #[test]

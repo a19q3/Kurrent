@@ -349,7 +349,7 @@ fn lane_derivation_is_deterministic_and_valid_user_lane() {
 }
 
 #[test]
-fn legacy_channel_update_without_lane_binding_still_validates() {
+fn channel_update_without_lane_binding_validates_when_unconfigured() {
     let t = template();
     let mut config = channel_config();
     let mut funding = funding();
@@ -714,196 +714,29 @@ fn response_window_substrate_is_daa_score_not_blue_score() {
     );
 }
 
-fn sample_scope() -> KurrentScope {
-    KurrentScope {
-        chain_id: "local-toccata-devnet".to_string(),
-        origin_id: "funding:0".to_string(),
-        auth_policy_hash: "auth-policy-hash".to_string(),
-        covenant_binding_hash: "covenant-binding-hash".to_string(),
-        settlement_policy_hash: "settlement-policy-hash".to_string(),
-        challenge_policy_hash: "challenge-policy-hash".to_string(),
-    }
-}
-
-fn sample_state_root() -> KurrentStateRoot {
-    KurrentStateRoot {
-        settlement_distribution_hash: "distribution-hash".to_string(),
-        conditional_claims_root: "conditional-claims-root".to_string(),
-        dynamic_fee_state_hash: sha256_hex(b"fee-reserve:0"),
-    }
-}
-
 #[test]
-fn scope_id_is_deterministic_and_changes_with_any_input() {
-    // The scope identifier is a single domain-separated SHA-256 hash over
-    // its six fields. The same scope must always produce the same hash,
-    // and changing any single field must change the hash. Pinning both
-    // properties means the three-layer hierarchy cannot drift into an
-    // accidentally-stable or accidentally-colliding commitment.
-    let scope = sample_scope();
-    let first = compute_scope_id(&scope);
-    let second = compute_scope_id(&scope);
-    assert_eq!(first, second, "scope_id must be deterministic");
-
-    // Vary each field in turn and verify the hash changes.
-    for variant in [
-        KurrentScope {
-            chain_id: "different".into(),
-            ..scope.clone()
-        },
-        KurrentScope {
-            origin_id: "funding:1".into(),
-            ..scope.clone()
-        },
-        KurrentScope {
-            auth_policy_hash: "different-auth".into(),
-            ..scope.clone()
-        },
-        KurrentScope {
-            covenant_binding_hash: "different-covenant".into(),
-            ..scope.clone()
-        },
-        KurrentScope {
-            settlement_policy_hash: "different-settlement".into(),
-            ..scope.clone()
-        },
-        KurrentScope {
-            challenge_policy_hash: "different-challenge".into(),
-            ..scope.clone()
-        },
-    ] {
-        assert_ne!(
-            compute_scope_id(&variant),
-            first,
-            "scope_id must change when any field changes"
-        );
-    }
-}
-
-#[test]
-fn state_root_does_not_include_static_context_fields() {
-    // The state root commits only to dynamic state; the static context
-    // fields (chain_id, origin_id, etc.) must not appear in it. We verify
-    // this by computing two state roots with identical dynamic fields and
-    // different "would-be" static contexts, then confirming the hashes
-    // agree. If a future refactor accidentally pulls a static field into
-    // the state root commitment, this test fails.
-    let state = sample_state_root();
-    let first = compute_state_root(&state);
-    let state_alt = KurrentStateRoot {
-        // simulate a different static context but identical dynamic state:
-        // the conditional_claims_root and dynamic_fee_state_hash are what
-        // would differ if a static field leaked in.
-        settlement_distribution_hash: "different-distribution".into(),
-        ..state.clone()
-    };
-    let second = compute_state_root(&state_alt);
-    assert_ne!(
-        first, second,
-        "settlement_distribution_hash is dynamic; flipping it must change the root"
-    );
-    // Now the property we actually want: the state_root with the *original*
-    // dynamic state is reproducible; no implicit static fields enter.
-    let third = compute_state_root(&state);
-    assert_eq!(
-        first, third,
-        "state_root must be a pure function of dynamic fields"
-    );
-}
-
-#[test]
-fn state_cert_message_is_constant_size_under_fixed_participant_set() {
-    // The signed payload is constant-size: only scope_id, epoch, state
-    // number, and state_root. Balances, settlement template hash, fee
-    // policy hash, covenant identity, script hash, lane id, participant
-    // set hash, and factory identity must not enter the message.
-    let scope = sample_scope();
-    let state = sample_state_root();
-    let scope_id = compute_scope_id(&scope);
-    let state_root = compute_state_root(&state);
-
-    let m1 = compute_state_cert_message(&scope_id, 1, 5, &state_root);
-    let m2 = compute_state_cert_message(&scope_id, 1, 5, &state_root);
-    assert_eq!(m1, m2, "state_cert_message must be deterministic");
-    assert_eq!(
-        m1.len(),
-        64,
-        "state_cert_message must be 32-byte hex digest (64 chars)"
-    );
-
-    // Vary each binding input and confirm the message changes.
-    assert_ne!(
-        compute_state_cert_message(&"different-scope", 1, 5, &state_root),
-        m1,
-        "scope_id is part of the signed message"
-    );
-    assert_ne!(
-        compute_state_cert_message(&scope_id, 2, 5, &state_root),
-        m1,
-        "epoch is part of the signed message"
-    );
-    assert_ne!(
-        compute_state_cert_message(&scope_id, 1, 6, &state_root),
-        m1,
-        "state_number is part of the signed message"
-    );
-    assert_ne!(
-        compute_state_cert_message(&scope_id, 1, 5, &"different-state-root"),
-        m1,
-        "state_root is part of the signed message"
-    );
-}
-
-#[test]
-fn transition_record_is_off_chain_transcript_metadata_only() {
-    // The transition record chains two consecutive state roots but is
-    // recorded off-chain for auditability. It must not be confused with
-    // the on-chain signed payload.
-    let a = compute_state_root(&sample_state_root());
-    let b = compute_state_root(&KurrentStateRoot {
-        settlement_distribution_hash: "next-distribution".into(),
-        ..sample_state_root()
-    });
-    let tr = compute_transition_record(&a, &b);
-    assert_eq!(tr.len(), 64, "transition record is a 32-byte hex digest");
-
-    // Transition record of (a, b) differs from (b, a) and from (a, a).
-    assert_ne!(tr, compute_transition_record(&b, &a));
-    assert_ne!(tr, compute_transition_record(&a, &a));
-
-    // The on-chain signed payload does NOT include the transition record.
-    let scope = sample_scope();
-    let scope_id = compute_scope_id(&scope);
-    let state_cert_with_record = compute_state_cert_message(&scope_id, 1, 5, &b);
-    let state_cert_without_record = state_cert_with_record.clone();
-    // If a future refactor accidentally pulls the transition record into
-    // the signed payload, this assertion would still pass but the
-    // production-readiness hard gate would be violated. The test pins
-    // that the current message is independent of any predecessor chain.
-    let _ = tr;
-    let _ = state_cert_without_record;
-}
-
-#[test]
-fn settlement_eligibility_rejects_skipped_state_number() {
+fn settlement_eligibility_allows_predecessor_independent_skipped_state_number() {
     let t = template();
     let first = candidate(update(1, "state-1", t.hash()), "candidate-a", 10, 100);
     let third = candidate(update(3, "state-3", t.hash()), "candidate-c", 11, 101);
 
-    assert!(matches!(
-        evaluate_settlement_eligibility(
-            &channel_config(),
-            &funding(),
-            &t,
-            &eligibility_policy(5),
-            &[first, third],
-            107,
-        ),
-        Err(KurrentError::NonMonotonicState {
-            current: 1,
-            attempted: 3
-        })
-    ));
+    let decisions = evaluate_settlement_eligibility(
+        &channel_config(),
+        &funding(),
+        &t,
+        &eligibility_policy(5),
+        &[first, third],
+        107,
+    )
+    .unwrap();
+
+    assert_eq!(decisions.len(), 2);
+    assert_eq!(decisions[0].status, SettlementEligibilityStatus::Displaced);
+    assert_eq!(decisions[0].displaced_by.as_deref(), Some("candidate-c"));
+    assert_eq!(
+        decisions[1].status,
+        SettlementEligibilityStatus::EligibleToFinalise
+    );
 }
 
 #[test]
@@ -1151,7 +984,7 @@ fn fee_sponsored_candidate_rejects_tampered_template_or_distribution_hash() {
 }
 
 #[test]
-fn legacy_eligibility_without_fee_policy_remains_valid() {
+fn settlement_eligibility_without_fee_policy_remains_valid() {
     let t = template();
     let lower = candidate(update(1, "state-1", t.hash()), "candidate-lower", 10, 100);
     let decisions = evaluate_settlement_eligibility(

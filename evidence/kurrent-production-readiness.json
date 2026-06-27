@@ -1,6 +1,6 @@
 {
-  "timestamp": "1782116385",
-  "git_commit": "6134cadc72b86ce287aa6c1938f229cfa7131078",
+  "timestamp": "1782572176",
+  "git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
   "status": "failed/blocked",
   "acceptance_status": "passed",
   "requirements": [
@@ -17,9 +17,9 @@
       "present": true
     },
     {
-      "id": "adversarial_mempool_soak",
-      "description": "Deterministic adversarial mempool, alternate-history, stale-state, refund-race, swap-replay, and evidence-tamper soak evidence.",
-      "evidence_path": "evidence/production/adversarial-mempool-soak.json",
+      "id": "adversarial_model_soak",
+      "description": "Deterministic adversarial model soak covering registry conflict, alternate-history, stale-state, fee-sponsor, factory, swap, refund, and evidence-tamper cases.",
+      "evidence_path": "evidence/production/adversarial-model-soak.json",
       "present": true
     },
     {
@@ -54,7 +54,6 @@
     }
   ],
   "blockers": [
-    "local devnet acceptance git_commit must match HEAD before production readiness can pass: report=93e3f252d92d73cec411749921ceeb58e55ff1b2, head=6134cadc72b86ce287aa6c1938f229cfa7131078",
     "external_security_review: missing or non-passing required production evidence at evidence/production/security-review.json"
   ]
 }

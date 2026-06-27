@@ -2,37 +2,37 @@
   "early_refund_rejection": {
     "attempted_tx": {
       "path": "evidence/kurrent-live-early-refund-rejected-tx.hex",
-      "sha256": "0dd855f150b60ce7e955bad6594f5bd3fdcc79dffa075d1199373e4e8e41e7d4"
+      "sha256": "9b7a981a8b78c260fa24eb404b582695e92f6170080cec939946ab544890b154"
     },
-    "attempted_txid": "ff9ce6ccf51f4e1a2c816fb56d5a87c1b2e92e51417bf923ea63464b35f0dc40",
-    "node_error": "Rejected transaction ff9ce6ccf51f4e1a2c816fb56d5a87c1b2e92e51417bf923ea63464b35f0dc40: one of the transaction sequence locks conditions was not met",
+    "attempted_txid": "e7313b6240b6593ec6a70bd757610508cb54705d624347eb9777894a5e536211",
+    "node_error": "Rejected transaction e7313b6240b6593ec6a70bd757610508cb54705d624347eb9777894a5e536211: one of the transaction sequence locks conditions was not met",
     "status": "rejected",
     "witness": {
       "path": "evidence/kurrent-live-early-refund-rejected-witness.hex",
-      "sha256": "d5ab310630a307847b431db7c664077557172993aa7d008eb919b44b30aeeb0e"
+      "sha256": "a8ef755e472d0f204ed01b9ab4765aaa88d1afc60b188270d584abdab9eb662b"
     }
   },
   "flow": "refund_timeout_flow",
   "funding": {
-    "outpoint": "2aa3497f9e6d899313d63a10e862b030e842592008d62b220f9407320d6f22c7:0",
+    "outpoint": "cdb42c796f70d75a6ea35e7c7633d62b0f18aa9216663fc6620f1401fa3736c7:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-refund-funding-tx.hex",
-      "sha256": "8a5a58eaed1fee0fdbd56d418310b0c3d71c36c07ffb731193c258debe23ee3f"
+      "sha256": "467e09b18bad99cd4903260656f0ccd6b2b018ca7b0cb3b862982887379a4575"
     },
-    "txid": "2aa3497f9e6d899313d63a10e862b030e842592008d62b220f9407320d6f22c7",
+    "txid": "cdb42c796f70d75a6ea35e7c7633d62b0f18aa9216663fc6620f1401fa3736c7",
     "value": 5023000000
   },
   "model_validation": {
-    "claim_key": "099cd62d8614ef2cc7df518e2e9b5b3c848c3ae7895d0870314f8604082ab737",
+    "claim_key": "91d14214ede501da42605b54518a0b581f9ac94ec24cb79ea762b0d3e4d273cd",
     "claim_scope": {
       "claim_subject": "refund-timeout-live",
-      "funding_outpoint": "2aa3497f9e6d899313d63a10e862b030e842592008d62b220f9407320d6f22c7:0",
+      "funding_outpoint": "cdb42c796f70d75a6ea35e7c7633d62b0f18aa9216663fc6620f1401fa3736c7:0",
       "network_profile": "kaspa-simnet-toccata",
-      "output_id": "f26903d7d2bc6a79c4d2d78aa79ca76efd54911ab72781d1570ff240b95096ed:0"
+      "output_id": "f3c7b1935749eaf3ed7dde92a95700aa31c3c59ceb10fcb813f20737368c1131:0"
     },
-    "duplicate_rejection": "DoubleClaim(\"099cd62d8614ef2cc7df518e2e9b5b3c848c3ae7895d0870314f8604082ab737\")",
+    "duplicate_rejection": "DoubleClaim(\"91d14214ede501da42605b54518a0b581f9ac94ec24cb79ea762b0d3e4d273cd\")",
     "early_rejection": "RefundNotMature { current_daa: 119, required_daa: 120 }",
-    "redeem_script_sha256": "083abc31afa081e600faddde61516c2d372b28bb0203ff2d37e234064f8bdd08",
+    "redeem_script_sha256": "9967c426cfaa6a8077575c3aba432c8a663ce1505beccc2ada0fd42cab905648",
     "refund_sequence": 120,
     "status": "passed",
     "validation_layer": "typed-kurrent-protocol-model"
@@ -42,16 +42,16 @@
     "output_value": 4998000000,
     "raw_tx": {
       "path": "evidence/kurrent-live-refund-tx.hex",
-      "sha256": "602829aa22a1622d455b1ac092e641e34e33742576d895157671a7ca25256b3f"
+      "sha256": "3038532eec4df22528d0d55246926c9e0cba9f0140d9d4c67ca5e25713c3b817"
     },
     "redeem_script": {
       "path": "evidence/kurrent-live-refund-redeem-script.hex",
-      "sha256": "083abc31afa081e600faddde61516c2d372b28bb0203ff2d37e234064f8bdd08"
+      "sha256": "9967c426cfaa6a8077575c3aba432c8a663ce1505beccc2ada0fd42cab905648"
     },
-    "txid": "f26903d7d2bc6a79c4d2d78aa79ca76efd54911ab72781d1570ff240b95096ed",
+    "txid": "f3c7b1935749eaf3ed7dde92a95700aa31c3c59ceb10fcb813f20737368c1131",
     "witness": {
       "path": "evidence/kurrent-live-refund-witness.hex",
-      "sha256": "d5ab310630a307847b431db7c664077557172993aa7d008eb919b44b30aeeb0e"
+      "sha256": "a8ef755e472d0f204ed01b9ab4765aaa88d1afc60b188270d584abdab9eb662b"
     }
   },
   "status": "passed"

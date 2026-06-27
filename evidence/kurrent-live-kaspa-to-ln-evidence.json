@@ -1,12 +1,12 @@
 {
   "flow": "kaspa-to-ln",
   "funding": {
-    "outpoint": "35c13e429712f382828d6d5592d002b044b0a3942743ca9c01cf1a0703a4a639:0",
+    "outpoint": "8d4ae03e82604dcc44fe0318ef896fb3c447d971b1c358b315dfa777c5897326:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-kaspa_to_ln-funding-tx.hex",
-      "sha256": "c3b54b2036d31317e8f5f2fe8b9a39b363484db8aeac626f955f43688cda3d47"
+      "sha256": "aeed2151250553a95221ea20e47c19b1bc1a326749a02701ee30e12b202ff122"
     },
-    "txid": "35c13e429712f382828d6d5592d002b044b0a3942743ca9c01cf1a0703a4a639",
+    "txid": "8d4ae03e82604dcc44fe0318ef896fb3c447d971b1c358b315dfa777c5897326",
     "value": 5023000000
   },
   "model_validation": {
@@ -14,12 +14,12 @@
       "channel_id": "channel-kaspa-to-ln",
       "direction": "kaspa-to-ln",
       "factory_id": null,
-      "funding_outpoint": "35c13e429712f382828d6d5592d002b044b0a3942743ca9c01cf1a0703a4a639:0",
+      "funding_outpoint": "8d4ae03e82604dcc44fe0318ef896fb3c447d971b1c358b315dfa777c5897326:0",
       "network_profile": "kaspa-simnet-toccata",
-      "output_id": "efc0e7fca78009fd80c9798677aee3eb8951758f71daa4ee9314be5cf5d7c18d:0",
+      "output_id": "19c4eda968e41166f1e6f96e96128c1438078376490aef428ef7b1842220da1d:0",
       "protocol_version": 1,
-      "receipt_hash": "5d9af5bef84636db2aeee1d4eec84702bf8bc4586ec5e14b8f4fd5b4d5ff5da1",
-      "settlement_template_hash": "31b02a40034f9d94f48adb5527f4d066f70d35aa4e753e5eeeb959ec8b7dcff3",
+      "receipt_hash": "eb91c3ca0262b9990f28e88a34b561b04cad71429d4e38fcb5427cdb1dd89a3b",
+      "settlement_template_hash": "68f53cc6dd4f4dc6434a2270b394470ca13d76842fc1532473684c8e1f82c17b",
       "state_number": 2,
       "swap_id": "swap-kaspa-to-ln-live",
       "virtual_channel_id": null
@@ -29,15 +29,15 @@
       "amount": 4998000000,
       "direction": "kaspa-to-ln",
       "evidence_file_hashes": {},
-      "kaspa_funding_outpoint": "35c13e429712f382828d6d5592d002b044b0a3942743ca9c01cf1a0703a4a639:0",
-      "kaspa_settlement_outpoint": "efc0e7fca78009fd80c9798677aee3eb8951758f71daa4ee9314be5cf5d7c18d:0",
+      "kaspa_funding_outpoint": "8d4ae03e82604dcc44fe0318ef896fb3c447d971b1c358b315dfa777c5897326:0",
+      "kaspa_settlement_outpoint": "19c4eda968e41166f1e6f96e96128c1438078376490aef428ef7b1842220da1d:0",
       "ln_payment_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
       "network_profile": "kaspa-simnet-toccata",
       "preimage": "0001020304050607080900010203040506070809000102030405060708090001",
       "preimage_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
       "protocol_version": 1,
       "recipient": "bob",
-      "script_hash": "31b02a40034f9d94f48adb5527f4d066f70d35aa4e753e5eeeb959ec8b7dcff3",
+      "script_hash": "68f53cc6dd4f4dc6434a2270b394470ca13d76842fc1532473684c8e1f82c17b",
       "swap_id": "swap-kaspa-to-ln-live"
     },
     "validation_layer": "typed-kurrent-protocol-model"
@@ -48,16 +48,16 @@
     "output_value": 4998000000,
     "raw_tx": {
       "path": "evidence/kurrent-live-kaspa_to_ln-settlement-tx.hex",
-      "sha256": "6e4378feff7bde6308dff45376932510684d67376eab5d93e4bcdd5ff6dc97c1"
+      "sha256": "07869a4f9bcb7724d248c88a4515ab570bb57b42d3ea65cc469dcb9c3317bdf6"
     },
     "redeem_script": {
       "path": "evidence/kurrent-live-kaspa_to_ln-redeem-script.hex",
-      "sha256": "31b02a40034f9d94f48adb5527f4d066f70d35aa4e753e5eeeb959ec8b7dcff3"
+      "sha256": "68f53cc6dd4f4dc6434a2270b394470ca13d76842fc1532473684c8e1f82c17b"
     },
-    "txid": "efc0e7fca78009fd80c9798677aee3eb8951758f71daa4ee9314be5cf5d7c18d",
+    "txid": "19c4eda968e41166f1e6f96e96128c1438078376490aef428ef7b1842220da1d",
     "witness": {
       "path": "evidence/kurrent-live-kaspa_to_ln-settlement-witness.hex",
-      "sha256": "dbb13ac292f69297985909c1b544e16c3d60fef160513ad0ed81e4f69e6c3958"
+      "sha256": "1508901313f42754cb92248cae98501ede33cc2139e0943a874c491a5a04178e"
     }
   },
   "status": "passed"

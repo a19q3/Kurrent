@@ -1,22 +1,25 @@
 {
-  "generated_at": "1781419432",
-  "git_commit": "5b60ade4da19f5aec16e4ad4239a1be7a772a825",
+  "generated_at": "1782572166",
+  "git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
   "kaspa_source_profile": {
-    "current_branch": "toccata",
-    "head": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
-    "origin_master": null,
+    "current_branch": "master",
+    "head": "98a4ccd8d200853787f227bd4536ac540cf34957",
+    "origin_master": "98a4ccd8d200853787f227bd4536ac540cf34957",
     "origin_toccata": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
-    "path": "/Users/arthur/Documents/rusty-kaspa-toccata",
-    "status_short": "## toccata...origin/toccata"
+    "path": "/Users/arthur/RustroverProjects/rusty-kaspa",
+    "status_short": "## master...origin/master"
   },
   "local_acceptance": {
     "acceptance_report": {
       "path": "evidence/kurrent-acceptance.json",
-      "sha256": "d380673be8708cbbd8951f5e872d99e224253530e001c02951d815c19576ed83"
+      "sha256": "e05070a026ab991d96f34a5b29c37f8879d55615c833535f8a55e162429fb4f5"
     },
     "flows": {
       "evidence_verifier_flow": "passed",
       "kaspa_factory_flow": "passed",
+      "kaspa_fee_sponsored_displacement_flow": "passed",
+      "kaspa_lane_monitor_flow": "passed",
+      "kaspa_settlement_eligibility_flow": "passed",
       "kaspa_state_channel_flow": "passed",
       "kaspa_to_ln_atomic_settlement": "passed",
       "ln_to_kaspa_atomic_settlement": "passed",
@@ -28,15 +31,15 @@
   "lockfiles": [
     {
       "path": "Cargo.lock",
-      "sha256": "7981280d62206971ffe3eaeadf1c0718f360102f962fb3d28efc6f3ddbadbcf8"
+      "sha256": "d1a086ebdf524f12bd90565e2557f8dafa31236248ecefb3fda0d4840495b172"
     },
     {
       "path": "Cargo.toml",
-      "sha256": "6938d66b45d47a4fc653261d75c83ac696bdde7ccc30f7d0e4ffb362442d557d"
+      "sha256": "1d45ca0dd257af04c30d02faea206f7551deb9a0717b1018118277d1bca75bc1"
     },
     {
       "path": "drivers/kaspa-devnet/Cargo.lock",
-      "sha256": "18ad740cb740367bfd56cf433b7135c8e4778532d5373ddfdb792b790b5241e3"
+      "sha256": "a001be3f9df281a53753b54b011a008469064739a9b28fc231fdae832c2521d1"
     }
   ],
   "not_yet_supported_for_production_gate": [
@@ -77,12 +80,12 @@
     "refund timeout evidence",
     "typed local acceptance report",
     "semantic transaction decoding verifier",
-    "deterministic adversarial mempool, alternate-history, refund-race, swap-replay, and evidence-tamper soak"
+    "deterministic adversarial model soak for registry conflict, alternate-history, refund-race, swap-replay, and evidence tampering"
   ],
   "tool_versions": [
     {
       "name": "kaspad",
-      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/target/release/kaspad",
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspad",
       "version": null
     },
     {
@@ -92,13 +95,13 @@
     },
     {
       "name": "kaspa-cli",
-      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/target/release/kaspa-cli",
-      "version": "Kaspa Cli Wallet v1.2.2-toc.4 (type 'help' for list of commands)"
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-cli",
+      "version": "Kaspa Cli Wallet v2.0.0 (type 'help' for list of commands)"
     },
     {
       "name": "kaspa-wallet",
-      "path": "/Users/arthur/Documents/rusty-kaspa-toccata/target/release/kaspa-wallet",
-      "version": "Kaspa Cli Wallet v1.2.2-toc.4 (type 'help' for list of commands)"
+      "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-wallet",
+      "version": "Kaspa Cli Wallet v2.0.0 (type 'help' for list of commands)"
     },
     {
       "name": "rusty-kaspa",
@@ -108,12 +111,12 @@
     {
       "name": "lnd",
       "path": "/Users/arthur/go/bin/lnd",
-      "version": "lnd version 0.20.1-beta commit=v0.20.1-beta"
+      "version": "lnd version 0.20.1-beta commit="
     },
     {
       "name": "lncli",
       "path": "/Users/arthur/go/bin/lncli",
-      "version": "lncli version 0.20.1-beta commit=v0.20.1-beta"
+      "version": "lncli version 0.20.1-beta commit="
     },
     {
       "name": "lightningd",
@@ -128,7 +131,7 @@
     {
       "name": "bitcoind",
       "path": "/opt/homebrew/bin/bitcoind",
-      "version": "Bitcoin Core daemon version v31.0.0 bitcoind"
+      "version": null
     },
     {
       "name": "bitcoin-cli",
@@ -148,7 +151,7 @@
     {
       "name": "go",
       "path": "/opt/homebrew/bin/go",
-      "version": "go version go1.26.3 darwin/arm64"
+      "version": "go version go1.26.4 darwin/arm64"
     }
   ]
 }

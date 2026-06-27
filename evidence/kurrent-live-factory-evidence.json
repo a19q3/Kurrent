@@ -1,12 +1,12 @@
 {
   "flow": "kaspa_factory_flow",
   "funding": {
-    "outpoint": "b03c3bd240d24993f94748db7859e658185f1d978737de969afaa9e5207789b8:0",
+    "outpoint": "47da6b99f26b2f692f2028225634afd50655cd5387c5a1d856ba538eb91ef8c5:0",
     "raw_tx": {
       "path": "evidence/kurrent-live-factory-funding-tx.hex",
-      "sha256": "9f2c0d2b6a74c700f3544353f0d7b5222eb813e81110843e7cd3c521f16a7b2d"
+      "sha256": "248f025a1f7081a0674e037e7e9df87ad5e1dfa8944974be7fe4ec58a73c426f"
     },
-    "txid": "b03c3bd240d24993f94748db7859e658185f1d978737de969afaa9e5207789b8",
+    "txid": "47da6b99f26b2f692f2028225634afd50655cd5387c5a1d856ba538eb91ef8c5",
     "value": 5022000000
   },
   "materialisation": {
@@ -16,16 +16,16 @@
     },
     "raw_tx": {
       "path": "evidence/kurrent-live-factory-materialisation-tx.hex",
-      "sha256": "675cdb03480143dcad4c08e0cbf23f2fd37a5975f7936eae3c69dd4dfc725a08"
+      "sha256": "5de0bc6c0a982f251a27a601884ab85cb89e53b04e3a5ffcb10e5b99b10917b1"
     },
     "redeem_script": {
       "path": "evidence/kurrent-live-factory-redeem-script.hex",
-      "sha256": "c2fcbe75a016693bf8dd8ed4fa6621f1794232dbdcf82b1ef15fab531801a17b"
+      "sha256": "930d2f308fcb4e967f541ede916e02e34fe5211167f5b78ecda4fe5b6ca5cd5c"
     },
-    "txid": "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858",
+    "txid": "579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8",
     "witness": {
       "path": "evidence/kurrent-live-factory-materialisation-witness.hex",
-      "sha256": "879cc8e20677c3857d218c24a80297b6202fb7d63f36384e742e3f44f31bc2a8"
+      "sha256": "803a6944bc61c7d2f1e8c34e540648e5432c8c898f559d06a2627683f90df760"
     }
   },
   "model_validation": {
@@ -33,7 +33,7 @@
       "factory_id": "factory-live-1",
       "fee_reserve": 0,
       "materialised_receipts": [
-        "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:0,6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:1"
+        "579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8:0,579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8:1"
       ],
       "network_profile": "kaspa-simnet-toccata",
       "total_principal": 1000000,
@@ -79,20 +79,20 @@
     },
     "factory_state_roots": [
       "2737abe7874ff53babbc8b56c2549f527070204dfea23dbc09adf620ce06d9cf",
-      "f0bfc7f8561ce4ee3aacc27a4199aee8e6022ee88ca53464345a5ef87d75b223"
+      "7d7f6cbd25ec3ae219c1bfba72ed80b39318dbb2f6d014a0d0e511abfbd87fc2"
     ],
     "plan": {
       "factory_id": "factory-live-1",
       "fee_amount": 0,
       "fee_input_ids": [],
-      "materialisation_id": "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:0,6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:1",
+      "materialisation_id": "579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8:0,579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8:1",
       "output_amounts": {
         "alice": 2748350000,
         "bob": 2248650000
       },
       "principal_amount": 4997000000,
       "principal_input_ids": [
-        "b03c3bd240d24993f94748db7859e658185f1d978737de969afaa9e5207789b8:0"
+        "47da6b99f26b2f692f2028225634afd50655cd5387c5a1d856ba538eb91ef8c5:0"
       ],
       "touched_leaves": {
         "virtual_channel_ids": [
@@ -101,22 +101,22 @@
       },
       "virtual_channel_id": "factory-live-vc-1"
     },
-    "plan_hash": "1172374b29d51b2e7e0089805b7082dea7b92176bcaebd37dae260ad12ee2b13",
+    "plan_hash": "ceaff43d70981b46bffe801081d96fc28b690cabbf8c7dd420f44ce1ea0d41f6",
     "receipt": {
       "channel_id": "factory-live-vc-1",
       "direction": null,
       "factory_id": "factory-live-1",
       "funding_outpoint": "factory-live-1",
       "network_profile": "kaspa-simnet-toccata",
-      "output_id": "6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:0,6d22d1941779e8ab1cdcf7f2ff126b180c27c7cb58d722702c8e5a4f5e4da858:1",
+      "output_id": "579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8:0,579bb63176a531d503e87597d803e6d402a56f5319de1082a29b3a7bebae79f8:1",
       "protocol_version": 1,
-      "receipt_hash": "77bb743b079d9e1fa78b53d38c768f783fdc44eae289493c8d627c3d5dfba3f2",
-      "settlement_template_hash": "1172374b29d51b2e7e0089805b7082dea7b92176bcaebd37dae260ad12ee2b13",
+      "receipt_hash": "cb453ac103334dcc25a706e803aa437616e770c25c71b1df59ad17a0b04491ae",
+      "settlement_template_hash": "ceaff43d70981b46bffe801081d96fc28b690cabbf8c7dd420f44ce1ea0d41f6",
       "state_number": 2,
       "swap_id": null,
       "virtual_channel_id": "factory-live-vc-1"
     },
-    "redeem_script_sha256": "c2fcbe75a016693bf8dd8ed4fa6621f1794232dbdcf82b1ef15fab531801a17b",
+    "redeem_script_sha256": "930d2f308fcb4e967f541ede916e02e34fe5211167f5b78ecda4fe5b6ca5cd5c",
     "status": "passed",
     "validation_layer": "typed-kurrent-protocol-model"
   },

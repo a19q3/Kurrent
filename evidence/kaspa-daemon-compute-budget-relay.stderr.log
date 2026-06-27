@@ -1,2 +1,2 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
-     Running unittests src/lib.rs (target/debug/deps/kaspa_testing_integration-971a99089df189da)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+     Running unittests src/lib.rs (target/debug/deps/kaspa_testing_integration-d82e37bb689ecd0f)

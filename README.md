@@ -102,9 +102,9 @@ The safety argument is intentionally conditional:
 - once accepted and finalised under the deployment policy, the old contest UTXO
   is spent and cannot also settle.
 
-## What This Repository Demonstrates
+## What This Repository Proves Locally
 
-The repository currently demonstrates a local evidence harness, not the final
+The repository currently provides a local evidence harness, not the final
 production channel implementation.
 
 The local harness exercises:
@@ -150,6 +150,25 @@ cargo test
 ./scripts/verify-evidence.sh
 ```
 
+For a human-readable end-to-end local-devnet run suitable for presentation or review:
+
+```sh
+cargo run --quiet --bin run-devnet-tests
+```
+
+This is a screen-first presentation runner: it prints the workflow purpose,
+business proof point, command result, command output, and evidence snapshot
+directly to the terminal instead of writing a separate presentation `.log` file.
+The artefacts under `evidence/` remain the audit trail; the investor-facing
+presentation surface is the terminal output.
+
+It runs formatting, clippy, tests, build, tool detection, the Kaspa and LN
+devnets, all current live workflow evidence, aggregate evidence verification,
+semantic transaction verification, adversarial soak testing, the presentation
+reality verifier, and the production boundary check. The production-readiness
+step is reported as a boundary when the independent external security review
+evidence is still absent.
+
 `verify-evidence.sh` is intentionally commit-bound. If the source revision has
 changed, regenerate local acceptance with `./scripts/check.sh` before expecting
 the verifier to pass.
@@ -177,10 +196,11 @@ A production claim would require, at minimum:
 Useful production-evidence commands:
 
 ```sh
-./scripts/write-production-target-profile.sh
-./scripts/run-semantic-transaction-verifier.sh
-./scripts/run-adversarial-soak.sh
-./scripts/prepare-security-review-package.sh
+cargo run --quiet --bin kurrentctl -- write-production-target-profile
+cargo run --quiet --bin kurrentctl -- run-semantic-transaction-verifier
+cargo run --quiet --bin kurrentctl -- run-adversarial-soak
+cargo run --quiet --bin kurrentctl -- verify-presentation-reality
+cargo run --quiet --bin kurrentctl -- prepare-security-review-package
 ```
 
 ## Target Surface
@@ -203,6 +223,7 @@ Key documents:
 
 - `docs/KURRENT_THESIS.pdf` - current research note.
 - `docs/KURRENT_THESIS.tex` - source for the thesis.
+- `docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md` - boundary for current full-state factory evidence versus future compressed factory commitments.
 - `docs/KURRENT_INVOICE_DESIGN_RESEARCH.md` - non-normative invoice design research.
 - `docs/KURRENT_SECURITY_ASSUMPTIONS.md` - prototype evidence assumptions.
 - `docs/KURRENT_PRODUCTION_ACCEPTANCE.md` - production acceptance criteria.
@@ -217,7 +238,7 @@ Primary evidence outputs:
 - `evidence/kurrent-acceptance.json`
 - `evidence/acceptance-logs/latest.log`
 - `evidence/tool-detection.json`
-- `evidence/kaspa-simnet-probe.log`
+- `evidence/kaspa-simnet-probe.json`
 - `evidence/kaspa-txscript-covenants.stdout.log`
 - `evidence/ln-devnet-evidence.json`
 - `evidence/kurrent-live-state-channel-evidence.json`
@@ -227,7 +248,8 @@ Primary evidence outputs:
 - `evidence/kurrent-live-factory-evidence.json`
 - `evidence/production/target-profile.json`
 - `evidence/production/semantic-transaction-verifier.json`
-- `evidence/production/adversarial-mempool-soak.json`
+- `evidence/production/adversarial-model-soak.json`
+- `evidence/production/presentation-reality.json`
 
 ## Reading Order
 

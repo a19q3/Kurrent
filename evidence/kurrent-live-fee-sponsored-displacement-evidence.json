@@ -13,85 +13,85 @@
   "fee_policy_hash": "1032e9298cb5c9df670ed5cc74dd6cbaf8362dd65eee4a5d9586cf6f672ca0ef",
   "initial_lane": {
     "blue_score": 18,
-    "tip": "879cb4599a01e7a5b7afccb0f6ff57896b4a057c43964bbdac54da253e78da9c"
+    "tip": "d1a4ca82a74675abd3679620e50c1669cdec2c1799782a7db63fc99d11213af1"
   },
   "lane_activity_blocks": [
     {
-      "accepted_id_merkle_root": "9276646df88bd5a71dfbca264cdd363380959b0d57bb6e2cb7f514aa4c612825",
+      "accepted_id_merkle_root": "c430b29901cff1e99278a5d490423613190c67fe3f0cfb83a613abc347062a2e",
       "accepted_order_start": 1,
-      "activity_digest": "d83e72f92bb746214f316464551e893e7109b9d18256a49f02b3a0b758c50e5b",
+      "activity_digest": "8c2dc004d19f20946527a741db96a8cbdb4f9d4a264415076d8a000e2a9055e1",
       "blue_score": 23,
-      "chain_block_hash": "2264e72164b635f8816798cc85a9876b1a7d27675efc09cdad7613ad3d6e774c",
-      "chain_block_timestamp": 1781589954319,
+      "chain_block_hash": "1a6f00e2fcab3b52dd0aaae54591b5fd9f462b678d5bdec8e8943d13ebc5c706",
+      "chain_block_timestamp": 1782545182905,
       "daa_score": 22,
       "events": [
         {
           "accepted_order_index": 2,
-          "accepting_chain_block_hash": "2264e72164b635f8816798cc85a9876b1a7d27675efc09cdad7613ad3d6e774c",
-          "activity_leaf": "d83e72f92bb746214f316464551e893e7109b9d18256a49f02b3a0b758c50e5b",
+          "accepting_chain_block_hash": "1a6f00e2fcab3b52dd0aaae54591b5fd9f462b678d5bdec8e8943d13ebc5c706",
+          "activity_leaf": "8c2dc004d19f20946527a741db96a8cbdb4f9d4a264415076d8a000e2a9055e1",
           "blue_score": 23,
           "daa_score": 22,
           "kind": "lower_fee_sponsored_candidate",
           "lane_id": "ed33cf9800000000000000000000000000000000",
           "merge_index": 1,
-          "txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d",
+          "txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff",
           "version": 1
         }
       ],
-      "lane_tip_after_block": "3d4200686476b6034ed8bb0da952a77f2067611b8c8268426e44eb7b45cd81d7",
-      "parent_seq_commit": "6f372c2798b8f31b52f6608c04a3c513f296e916d9a21adfc0a3c538f6172125",
-      "timestamp": 1781589954284
+      "lane_tip_after_block": "f8da9a81ec7dfa945fbfe02fa446b08490df4bfa224d50e20fd15b4c6575b570",
+      "parent_seq_commit": "bac17cfa7ddbef19be252a0054a9fb3092fc8ce1562f626f97d540bcd8fb9566",
+      "timestamp": 1782545182834
     },
     {
-      "accepted_id_merkle_root": "6e0a98b3e739478bcb43cc7e52a7fa792e0bf8946bbb06245d890c11573372fa",
+      "accepted_id_merkle_root": "7becc054603c81c9feb612f3e53ed06d5d840458a231bbeffdfe9f4321d65093",
       "accepted_order_start": 3,
-      "activity_digest": "31b7f9faecc3eb4997a2b5ba22f02eccdae55c4dca9ac2188ef56fdc75da5124",
+      "activity_digest": "121dedeff48898014882cca4a74bceb66a6a6bd4e9a0abcd63ad0766408404f5",
       "blue_score": 24,
-      "chain_block_hash": "8060faf5f2f5b4e25de231265b01851f560dda017f63bc4cbed52c5d66a3f950",
-      "chain_block_timestamp": 1781589954347,
+      "chain_block_hash": "a1c2778f4506bdc802a3d03de2bcfaa44ef31072c2bc61987582aa4bb2a1a7a8",
+      "chain_block_timestamp": 1782545182949,
       "daa_score": 23,
       "events": [
         {
           "accepted_order_index": 4,
-          "accepting_chain_block_hash": "8060faf5f2f5b4e25de231265b01851f560dda017f63bc4cbed52c5d66a3f950",
-          "activity_leaf": "31b7f9faecc3eb4997a2b5ba22f02eccdae55c4dca9ac2188ef56fdc75da5124",
+          "accepting_chain_block_hash": "a1c2778f4506bdc802a3d03de2bcfaa44ef31072c2bc61987582aa4bb2a1a7a8",
+          "activity_leaf": "121dedeff48898014882cca4a74bceb66a6a6bd4e9a0abcd63ad0766408404f5",
           "blue_score": 24,
           "daa_score": 23,
           "kind": "higher_fee_sponsored_candidate",
           "lane_id": "ed33cf9800000000000000000000000000000000",
           "merge_index": 1,
-          "txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+          "txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
           "version": 1
         }
       ],
-      "lane_tip_after_block": "043c41081bf3f5769ab7562343bc26b88cd34e82547cb1189557622006562802",
-      "parent_seq_commit": "9276646df88bd5a71dfbca264cdd363380959b0d57bb6e2cb7f514aa4c612825",
-      "timestamp": 1781589954319
+      "lane_tip_after_block": "679599d9c6b4dca6ee5e5217eaae76eea211c1a4be9f0ead25557bc53cdc6dfb",
+      "parent_seq_commit": "c430b29901cff1e99278a5d490423613190c67fe3f0cfb83a613abc347062a2e",
+      "timestamp": 1782545182905
     }
   ],
   "lane_events": [
     {
       "accepted_order_index": 2,
-      "accepting_chain_block_hash": "2264e72164b635f8816798cc85a9876b1a7d27675efc09cdad7613ad3d6e774c",
-      "activity_leaf": "d83e72f92bb746214f316464551e893e7109b9d18256a49f02b3a0b758c50e5b",
+      "accepting_chain_block_hash": "1a6f00e2fcab3b52dd0aaae54591b5fd9f462b678d5bdec8e8943d13ebc5c706",
+      "activity_leaf": "8c2dc004d19f20946527a741db96a8cbdb4f9d4a264415076d8a000e2a9055e1",
       "blue_score": 23,
       "daa_score": 22,
       "kind": "lower_fee_sponsored_candidate",
       "lane_id": "ed33cf9800000000000000000000000000000000",
       "merge_index": 1,
-      "txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d",
+      "txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff",
       "version": 1
     },
     {
       "accepted_order_index": 4,
-      "accepting_chain_block_hash": "8060faf5f2f5b4e25de231265b01851f560dda017f63bc4cbed52c5d66a3f950",
-      "activity_leaf": "31b7f9faecc3eb4997a2b5ba22f02eccdae55c4dca9ac2188ef56fdc75da5124",
+      "accepting_chain_block_hash": "a1c2778f4506bdc802a3d03de2bcfaa44ef31072c2bc61987582aa4bb2a1a7a8",
+      "activity_leaf": "121dedeff48898014882cca4a74bceb66a6a6bd4e9a0abcd63ad0766408404f5",
       "blue_score": 24,
       "daa_score": 23,
       "kind": "higher_fee_sponsored_candidate",
       "lane_id": "ed33cf9800000000000000000000000000000000",
       "merge_index": 1,
-      "txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+      "txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
       "version": 1
     }
   ],
@@ -102,16 +102,16 @@
         "eligibility": {
           "evidence": {
             "accepted_order_index": 2,
-            "accepting_chain_block_hash": "2264e72164b635f8816798cc85a9876b1a7d27675efc09cdad7613ad3d6e774c",
+            "accepting_chain_block_hash": "1a6f00e2fcab3b52dd0aaae54591b5fd9f462b678d5bdec8e8943d13ebc5c706",
             "blue_score": 23,
-            "candidate_txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d",
+            "candidate_txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff",
             "channel_id": "channel-a",
             "daa_score": 22,
             "factory_id": null,
-            "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+            "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
             "lane_id": "ed33cf9800000000000000000000000000000000",
             "network_profile": "kaspa-simnet-toccata",
-            "state_header_hash": "a26809ae5e70fa0770306bd0997eab21c7c8e378b3520e242d89287a602a12d0",
+            "state_header_hash": "2fbc6c59b611d8dd96e5a879db4fa7f38e73d38230efc441773b62646010e65a",
             "state_number": 1,
             "virtual_channel_id": null
           },
@@ -123,37 +123,37 @@
             "header": {
               "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
               "channel_id": "channel-a",
-              "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+              "covenant_id": "5f9dcec76dcaec9def973a2a0433dc94326c84e1e2189f897cff654c2db42d2f",
               "domain_separator": "KURRENT_STATE_V1",
               "expected_lane_id": "ed33cf9800000000000000000000000000000000",
               "factory_id": null,
               "fee_policy_hash": "1032e9298cb5c9df670ed5cc74dd6cbaf8362dd65eee4a5d9586cf6f672ca0ef",
-              "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+              "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
               "genesis_or_devnet_id": "in-process-simnet",
               "network_profile": "kaspa-simnet-toccata",
               "new_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
               "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
               "previous_state_commitment": "6ceb50b33e95381a2826908984eeb9c2705a7707562d4bdabaf60e7ce17b94ba",
               "protocol_version": 1,
-              "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
-              "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+              "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
+              "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
               "state_number": 1,
               "virtual_channel_id": null
             },
             "participant_signatures": {
-              "alice": "da506df28ef1d79ad794643bd69e95ca425f97f0f1cdcc1ec97a69013190407dc863db562d917d9d1392a77d36590511f38d3c9e9fa8c7c269139a9ddd179e58",
-              "bob": "bd9cf8f7567931be039422085266b0bed28d1bdd873ab3c7771207857b2221ba6051e774f57c2c04aaef9421cd7d79c8c15a780d3688b686a288cb0b2daf7180"
+              "alice": "31c1eeeb92cf9b1da7ea75512d269a9a627a82b6596ba193303d0cec2ef1119c02abae21d45c3db287e8a95a02445a9b2bd3353c42cf08ed9432e2a75fd921de",
+              "bob": "bb84001367285b02ab87e0d7924f00fb617f97b1f8c9bb40db42add3b81fd4a30ef983e4625107261d453b17746a22cbc687179c622c1a4b3d72b36c53ed120e"
             }
           }
         },
         "sponsor": {
-          "candidate_txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d",
+          "candidate_txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff",
           "settlement_distribution_hash": "52b362f4943b8657ac888128d4856d104476422e4b93f27b092fd40ae5ff9f3a",
-          "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+          "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
           "sponsor_change_total": 4999000000,
           "sponsor_fee": 2000000,
           "sponsor_input_outpoints": [
-            "0ddb0e7861206e97d4a70d93c0dbcd1467ab0a1818d241fa15c46abd8ab5faca:0"
+            "eb9190a845225448f1a5da057da08cf71f91a019d3768cb8360956963480538a:0"
           ],
           "sponsor_input_total": 5001000000
         }
@@ -162,16 +162,16 @@
         "eligibility": {
           "evidence": {
             "accepted_order_index": 4,
-            "accepting_chain_block_hash": "8060faf5f2f5b4e25de231265b01851f560dda017f63bc4cbed52c5d66a3f950",
+            "accepting_chain_block_hash": "a1c2778f4506bdc802a3d03de2bcfaa44ef31072c2bc61987582aa4bb2a1a7a8",
             "blue_score": 24,
-            "candidate_txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+            "candidate_txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
             "channel_id": "channel-a",
             "daa_score": 23,
             "factory_id": null,
-            "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+            "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
             "lane_id": "ed33cf9800000000000000000000000000000000",
             "network_profile": "kaspa-simnet-toccata",
-            "state_header_hash": "3991c7a6e2643cc68e4cad8642c0f68a875d35faa98abb7b0d63b4bbc32184c1",
+            "state_header_hash": "873845acf0278188be76538f64a8a242bc772f948fd5698fff4d46538e538dd7",
             "state_number": 2,
             "virtual_channel_id": null
           },
@@ -183,37 +183,37 @@
             "header": {
               "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
               "channel_id": "channel-a",
-              "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+              "covenant_id": "5f9dcec76dcaec9def973a2a0433dc94326c84e1e2189f897cff654c2db42d2f",
               "domain_separator": "KURRENT_STATE_V1",
               "expected_lane_id": "ed33cf9800000000000000000000000000000000",
               "factory_id": null,
               "fee_policy_hash": "1032e9298cb5c9df670ed5cc74dd6cbaf8362dd65eee4a5d9586cf6f672ca0ef",
-              "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+              "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
               "genesis_or_devnet_id": "in-process-simnet",
               "network_profile": "kaspa-simnet-toccata",
               "new_state_commitment": "9155bfc8e64f41e73a03d9123bbf1502b2026eb537edf0ad29116caeba757d5d",
               "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
               "previous_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
               "protocol_version": 1,
-              "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
-              "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+              "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
+              "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
               "state_number": 2,
               "virtual_channel_id": null
             },
             "participant_signatures": {
-              "alice": "7b58814ea0965045737ccdc897b9db76020b7f035e9bfb6c018f4e1b99162d9111ce5ab5c816adfdbfea2a52c6a1e5311db3004febb4353bba771933e2bcdcdf",
-              "bob": "82e9df0e8582a96b50f9d6cc830d6087684232dba46526b2615218572cfbee43dd37cf89e0b133c4ac323c377a548587722d4131e52c3b55280924f4e066a5c0"
+              "alice": "6a67331be17ed3273b386cc42e186ad7f60b71ae8a3143d3ca075b9022ab53bab2cc7f9e97b22cd1b76cd86e545ab965951bf4f744c486053b4e6820b284a8dd",
+              "bob": "db315db5a1301dafd20e6847e4af13c0c7efc17f65f8623d461ca0f8e78172194cd0f5b4bc4382a787eabc6ac04dee30e0fb872eae52cb58dc7c5f1c2a381e15"
             }
           }
         },
         "sponsor": {
-          "candidate_txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+          "candidate_txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
           "settlement_distribution_hash": "52b362f4943b8657ac888128d4856d104476422e4b93f27b092fd40ae5ff9f3a",
-          "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+          "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
           "sponsor_change_total": 5000000000,
           "sponsor_fee": 1000000,
           "sponsor_input_outpoints": [
-            "4342b2e19b52f79d3701224f780ee833e8c6e477634525a805b661f9f2a77a17:0"
+            "084be353a31fac9459df9767ec43c234a6abdc407569f2ad26d3df753029938d:0"
           ],
           "sponsor_input_total": 5001000000
         }
@@ -226,8 +226,8 @@
           "bob"
         ],
         "participant_public_keys": {
-          "alice": "e776a6bbfc8890113bd482ef96eef86996f427287fa1e92e82afa877ad7a1a44",
-          "bob": "7b2905aa22885456d4b7753ca35a31c3db8a55e8367782e3f55a95c30b59c385"
+          "alice": "15b7c2cbdfc59b8c3074953245beb052c64aa993b43a88de7f89e13ac84f3d89",
+          "bob": "8ae221c0711a024c7354db4dafe6142d4f0fa3d4b37853030076c816815434d1"
         },
         "required_signatures": 2
       },
@@ -252,8 +252,8 @@
         "eligibility": {
           "accepted_daa_score": 22,
           "accepted_order_index": 2,
-          "candidate_txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d",
-          "displaced_by": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+          "candidate_txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff",
+          "displaced_by": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
           "eligible_after_daa": 25,
           "observed_daa_score": 26,
           "state_number": 1,
@@ -267,7 +267,7 @@
         "eligibility": {
           "accepted_daa_score": 23,
           "accepted_order_index": 4,
-          "candidate_txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+          "candidate_txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
           "displaced_by": null,
           "eligible_after_daa": 26,
           "observed_daa_score": 26,
@@ -280,15 +280,15 @@
       }
     ],
     "funding": {
-      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "covenant_id": "5f9dcec76dcaec9def973a2a0433dc94326c84e1e2189f897cff654c2db42d2f",
       "expected_lane_id": "ed33cf9800000000000000000000000000000000",
       "fee_reserve": 0,
-      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
       "principal_by_participant": {
         "alice": 2968800000,
         "bob": 1979200000
       },
-      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
       "total_principal": 4948000000
     },
     "settlement_template": {
@@ -297,46 +297,46 @@
         "bob": 1979200000
       },
       "refund_after_daa": 120,
-      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
       "template_id": "live-state-2-settlement"
     },
     "status": "passed",
     "validation_layer": "typed-kurrent-fee-sponsored-displacement-model"
   },
   "monitor_scope": "fee-sponsored-displacement-evidence",
-  "monitor_start_accepted_id_merkle_root": "a48bafd35acf86bd62ff8daa2b2b17707e0588146ab4f33b72007e85df76ce18",
-  "monitor_start_block": "dd952a25ed86d1bf79c259882bc0bc749d33d211e8d1c8e1cca23348f7c01e34",
+  "monitor_start_accepted_id_merkle_root": "8e7896b51d705637bfb7aded3a4191b15769364afc7a4785950ce8073741aec8",
+  "monitor_start_block": "abc70a7605d130357bdec65c75bdc797a4e9d765b0ed3af4588c722816e8f7e3",
   "network_profile": "kaspa-simnet-toccata",
   "proof": {
     "inactivity_shortcut": "0000000000000000000000000000000000000000000000000000000000000000",
     "lane": {
       "blue_score": 24,
-      "tip": "043c41081bf3f5769ab7562343bc26b88cd34e82547cb1189557622006562802"
+      "tip": "679599d9c6b4dca6ee5e5217eaae76eea211c1a4be9f0ead25557bc53cdc6dfb"
     },
-    "parent_seq_commit": "88ec8985ccd61d1325332a9db929f855968de5e67bcf60e3431801c2b37f285e",
-    "payload_and_ctx_digest": "8e47be977cb6920f464a2933bfd244efc0999b3fcac193e6aba8538f623a3e08",
-    "smt_proof": "feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff010102897f1646a47f1383a3232fa2e13717bd233ad73c9724038470879cf4ef9078"
+    "parent_seq_commit": "914e6be6e367075ec5737bfc166c71b8720464c70282358ee3f1ffff35e88edb",
+    "payload_and_ctx_digest": "e32fc2a4ff351246f50a6b273d6791cfad6a70a6629285b88f4d97b14efb2418",
+    "smt_proof": "feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff01010bb4d1aec65a5e03aebd4c0c4a24a7610b00768b7cc5641d066dddedcf2b64a4"
   },
-  "proof_block_hash": "65d3f2d43cc1e1f998e49327fd256620ecbab41e76f10246ddf7ac5f58e62e7c",
+  "proof_block_hash": "faaa6a348148c4bd729cc6b899c26beea3da330c2f7d211b77799ff61f9ff7e9",
   "proof_header": {
-    "accepted_id_merkle_root": "6236a64033d572d1ca3efedc3c01c8a5846529041133416af246dd438c6f9f61",
+    "accepted_id_merkle_root": "1d634e07ec7c0cb0476ca8fcc6b9227a4a30ec69c3f02ef66c47260a8b5e90ca",
     "blue_score": 27,
     "daa_score": 26,
-    "timestamp": 1781589954428
+    "timestamp": 1782545183056
   },
   "settlement_distribution_hash": "52b362f4943b8657ac888128d4856d104476422e4b93f27b092fd40ae5ff9f3a",
   "sponsored_markers": {
     "higher": {
       "accepted_event": {
         "accepted_order_index": 4,
-        "accepting_chain_block_hash": "8060faf5f2f5b4e25de231265b01851f560dda017f63bc4cbed52c5d66a3f950",
-        "activity_leaf": "31b7f9faecc3eb4997a2b5ba22f02eccdae55c4dca9ac2188ef56fdc75da5124",
+        "accepting_chain_block_hash": "a1c2778f4506bdc802a3d03de2bcfaa44ef31072c2bc61987582aa4bb2a1a7a8",
+        "activity_leaf": "121dedeff48898014882cca4a74bceb66a6a6bd4e9a0abcd63ad0766408404f5",
         "blue_score": 24,
         "daa_score": 23,
         "kind": "higher_fee_sponsored_candidate",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "merge_index": 1,
-        "txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf",
+        "txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01",
         "version": 1
       },
       "observed_lane_id": "ed33cf9800000000000000000000000000000000",
@@ -344,44 +344,44 @@
         "channel_id": "channel-a",
         "domain": "KURRENT_FEE_SPONSORED_CANDIDATE_MARKER_V1",
         "fee_policy_hash": "1032e9298cb5c9df670ed5cc74dd6cbaf8362dd65eee4a5d9586cf6f672ca0ef",
-        "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+        "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "network_profile": "kaspa-simnet-toccata",
         "role": "higher_fee_sponsored_candidate",
         "settlement_distribution_hash": "52b362f4943b8657ac888128d4856d104476422e4b93f27b092fd40ae5ff9f3a",
-        "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
-        "state_header_hash": "3991c7a6e2643cc68e4cad8642c0f68a875d35faa98abb7b0d63b4bbc32184c1",
+        "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
+        "state_header_hash": "873845acf0278188be76538f64a8a242bc772f948fd5698fff4d46538e538dd7",
         "state_number": 2
       },
-      "payload_hash": "79a28c0b56f911a50ec208cd305b51c762f60f3d62d24f8d26652c3a0998af3e",
+      "payload_hash": "3de2f56a830211735f0417a5ae650b84506f5216e3b5852a6bf42b14ad5713b5",
       "raw_tx": {
         "path": "evidence/kurrent-live-fee-sponsored-higher-marker-tx.hex",
-        "sha256": "1536232ad61ad29c1e961c179c1a5b5fe0f01ee9e5d0361b0327e67078d63e63"
+        "sha256": "c1fee7a7468fd81b6d44416d6fd9281eeb967c48ae6ca20ee94f92833f291b89"
       },
       "role": "higher_fee_sponsored_candidate",
       "sponsor": {
         "sponsor_change_total": 5000000000,
         "sponsor_fee": 1000000,
         "sponsor_input_outpoints": [
-          "4342b2e19b52f79d3701224f780ee833e8c6e477634525a805b661f9f2a77a17:0"
+          "084be353a31fac9459df9767ec43c234a6abdc407569f2ad26d3df753029938d:0"
         ],
         "sponsor_input_total": 5001000000
       },
-      "state_header_hash": "3991c7a6e2643cc68e4cad8642c0f68a875d35faa98abb7b0d63b4bbc32184c1",
+      "state_header_hash": "873845acf0278188be76538f64a8a242bc772f948fd5698fff4d46538e538dd7",
       "state_number": 2,
-      "txid": "c085eb9ce4dede02375d77bb7bb983f5d0ce600386c4b338e99d9cfeffb59fdf"
+      "txid": "53e65e3c49e604d6c26e4c9309ee32298e15fc4e97372fb16d773b16567cef01"
     },
     "lower": {
       "accepted_event": {
         "accepted_order_index": 2,
-        "accepting_chain_block_hash": "2264e72164b635f8816798cc85a9876b1a7d27675efc09cdad7613ad3d6e774c",
-        "activity_leaf": "d83e72f92bb746214f316464551e893e7109b9d18256a49f02b3a0b758c50e5b",
+        "accepting_chain_block_hash": "1a6f00e2fcab3b52dd0aaae54591b5fd9f462b678d5bdec8e8943d13ebc5c706",
+        "activity_leaf": "8c2dc004d19f20946527a741db96a8cbdb4f9d4a264415076d8a000e2a9055e1",
         "blue_score": 23,
         "daa_score": 22,
         "kind": "lower_fee_sponsored_candidate",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "merge_index": 1,
-        "txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d",
+        "txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff",
         "version": 1
       },
       "observed_lane_id": "ed33cf9800000000000000000000000000000000",
@@ -389,32 +389,32 @@
         "channel_id": "channel-a",
         "domain": "KURRENT_FEE_SPONSORED_CANDIDATE_MARKER_V1",
         "fee_policy_hash": "1032e9298cb5c9df670ed5cc74dd6cbaf8362dd65eee4a5d9586cf6f672ca0ef",
-        "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+        "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "network_profile": "kaspa-simnet-toccata",
         "role": "lower_fee_sponsored_candidate",
         "settlement_distribution_hash": "52b362f4943b8657ac888128d4856d104476422e4b93f27b092fd40ae5ff9f3a",
-        "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
-        "state_header_hash": "a26809ae5e70fa0770306bd0997eab21c7c8e378b3520e242d89287a602a12d0",
+        "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
+        "state_header_hash": "2fbc6c59b611d8dd96e5a879db4fa7f38e73d38230efc441773b62646010e65a",
         "state_number": 1
       },
-      "payload_hash": "4415d139263dc6459a9a042daf9557f06efe9673ff9d76b1a61b96a053863e2a",
+      "payload_hash": "23e244d4222139a180a4b8403ffb86dd80fe850fe6a22c689bb1d5fcc76cdf78",
       "raw_tx": {
         "path": "evidence/kurrent-live-fee-sponsored-lower-marker-tx.hex",
-        "sha256": "2de48cbca6d54da4ded5e5dbffae6c61a9151dfc73751985a4332595b0aea5c0"
+        "sha256": "408716bb1e6fa0e2c963aad209671e0257e6801f91b62ffa530d6f8ef39fa95e"
       },
       "role": "lower_fee_sponsored_candidate",
       "sponsor": {
         "sponsor_change_total": 4999000000,
         "sponsor_fee": 2000000,
         "sponsor_input_outpoints": [
-          "0ddb0e7861206e97d4a70d93c0dbcd1467ab0a1818d241fa15c46abd8ab5faca:0"
+          "eb9190a845225448f1a5da057da08cf71f91a019d3768cb8360956963480538a:0"
         ],
         "sponsor_input_total": 5001000000
       },
-      "state_header_hash": "a26809ae5e70fa0770306bd0997eab21c7c8e378b3520e242d89287a602a12d0",
+      "state_header_hash": "2fbc6c59b611d8dd96e5a879db4fa7f38e73d38230efc441773b62646010e65a",
       "state_number": 1,
-      "txid": "bd2503ce34346d2595b852509257793fbaf6176c3dbe78b5a2f47121cc9dce1d"
+      "txid": "f8b0c845993a70cf55e644e2dde08738b9f59a053d128caeaccce0a570415bff"
     }
   },
   "status": "passed"

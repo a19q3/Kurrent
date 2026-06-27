@@ -3,102 +3,102 @@
     "higher": {
       "accepted_event": {
         "accepted_order_index": 6,
-        "accepting_chain_block_hash": "148b18c3de3052295fa685d7dfe1eae320e0be94381ef963369ce256274ed578",
-        "activity_leaf": "4fa277bf58e9d3e52fee9234d3e5cee71e9ae8fbb976b0f98c529c93395eb7c7",
+        "accepting_chain_block_hash": "0d03860db46a28005fd1da6f5ebc9939b2c51974f84a28bd47d0bd0ee6a07a66",
+        "activity_leaf": "da85cf43d53d1057bf48193ca9c7a671cb5297a19bde98917ae2f4946bc28eba",
         "blue_score": 18,
         "daa_score": 17,
         "kind": "higher_candidate",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "merge_index": 1,
-        "txid": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58",
+        "txid": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730",
         "version": 1
       },
       "observed_lane_id": "ed33cf9800000000000000000000000000000000",
       "payload": {
         "channel_id": "channel-a",
         "domain": "KURRENT_SETTLEMENT_CANDIDATE_MARKER_V1",
-        "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+        "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "network_profile": "kaspa-simnet-toccata",
         "role": "higher_candidate",
-        "state_header_hash": "03aaaf8c3da141901002097931ecd8bed493b06d86371002629b63a14ac94c1b",
+        "state_header_hash": "71f3ded5e9ec5605d8da710e918c69629fa55a8770fd5c97fd04efb4c47085cf",
         "state_number": 2
       },
-      "payload_hash": "2e82b3aa2dea2db0a2273c737a20327142dd0d7fb87935333f78a5ea3f231954",
+      "payload_hash": "9e9cb1617863fbdf197f6f397f7746599b94c24976c920d8bfd49d3f775f8ed5",
       "raw_tx": {
         "path": "evidence/kurrent-live-settlement-candidate-higher-marker-tx.hex",
-        "sha256": "47278353fbbf54cd863b7b19d598908109a3881d448c265a57b09be112de2f65"
+        "sha256": "97029ab6dd612a062251c3d97d9c61acb48837e42060e22aef4f746a7cd1fb09"
       },
       "role": "higher_candidate",
-      "state_header_hash": "03aaaf8c3da141901002097931ecd8bed493b06d86371002629b63a14ac94c1b",
+      "state_header_hash": "71f3ded5e9ec5605d8da710e918c69629fa55a8770fd5c97fd04efb4c47085cf",
       "state_number": 2,
-      "txid": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58"
+      "txid": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730"
     },
     "lower": {
       "accepted_event": {
         "accepted_order_index": 2,
-        "accepting_chain_block_hash": "38dc3e29ed5a6bb590c135c86e7acc03e68b9de8cc984dfba547bfdc4999dd09",
-        "activity_leaf": "e1d579dd3cd8ebf5953fc439bd133d7633703575522cbb1d38a59980a2a09681",
+        "accepting_chain_block_hash": "6731e2ce8925d36437920c2df0ba7cc24d1f4ea35d0adc4e735cbbb45643aaa4",
+        "activity_leaf": "66d576351673d0d7d0f1f7958069413948466fd203a6dda8b430fe5386ced63c",
         "blue_score": 16,
         "daa_score": 15,
         "kind": "lower_candidate",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "merge_index": 1,
-        "txid": "30cf979e05ad72bb3cbfea297def9e42672b9b91c3c65a9d5df162457f34a256",
+        "txid": "2e0b7838099772438c3e4944cd9d4399f3ee72a579a84a6947cecf16ebe06783",
         "version": 1
       },
       "observed_lane_id": "ed33cf9800000000000000000000000000000000",
       "payload": {
         "channel_id": "channel-a",
         "domain": "KURRENT_SETTLEMENT_CANDIDATE_MARKER_V1",
-        "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+        "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
         "lane_id": "ed33cf9800000000000000000000000000000000",
         "network_profile": "kaspa-simnet-toccata",
         "role": "lower_candidate",
-        "state_header_hash": "accd38d76409b84ab1705ccfe3a9397e4fcb1f708103d48420dafee3d645d235",
+        "state_header_hash": "4e73facc9384cfd9ef6ee7777a9c66ce990867949845291f737d2bc786542aab",
         "state_number": 1
       },
-      "payload_hash": "5edb36fc1a83725c32253dbe7a104f03298c3a933facb9faebb8a18f98e33f55",
+      "payload_hash": "3a3426d243da3c9f2e527c5ef07d9445c35fbee04a3103b0ffab3dc37bf95bd6",
       "raw_tx": {
         "path": "evidence/kurrent-live-settlement-candidate-lower-marker-tx.hex",
-        "sha256": "7e5c0ca2f25801f999df4ed0d0ad5afad974c64022e6bb4b1fd98683ecfc1db2"
+        "sha256": "65b3ad3befd7223f63b7127a8d69a1916ed297be53a65e951c2584e09386c1ff"
       },
       "role": "lower_candidate",
-      "state_header_hash": "accd38d76409b84ab1705ccfe3a9397e4fcb1f708103d48420dafee3d645d235",
+      "state_header_hash": "4e73facc9384cfd9ef6ee7777a9c66ce990867949845291f737d2bc786542aab",
       "state_number": 1,
-      "txid": "30cf979e05ad72bb3cbfea297def9e42672b9b91c3c65a9d5df162457f34a256"
+      "txid": "2e0b7838099772438c3e4944cd9d4399f3ee72a579a84a6947cecf16ebe06783"
     },
     "wrong_lane": {
       "absent_from_expected_lane_activity": true,
       "accepted_observation": {
         "accepted_order_index": 4,
-        "accepting_chain_block_hash": "c539d7c841b68b257c4013d236fd278cfc086ecd4eb88a698a397b8262758299",
+        "accepting_chain_block_hash": "61961eda4adc9d7ac6ac258ad775d7f895e221f6520b2799f5f8a42e8cd79041",
         "blue_score": 17,
         "daa_score": 16,
         "ignored_reason": "wrong lane",
         "lane_id": "3749230300000000000000000000000000000000",
         "merge_index": 1,
-        "txid": "f020f0091e678537f873d0d0a704afcb6b1fb7dc9b39a34d06bd28e55c6d05a7",
+        "txid": "eea49ed603ef31c15c13f9caa949f19c9d1e4699bfe8f9cb93dcfa340cf1b755",
         "version": 1
       },
       "observed_lane_id": "3749230300000000000000000000000000000000",
       "payload": {
         "channel_id": "channel-a",
         "domain": "KURRENT_SETTLEMENT_CANDIDATE_MARKER_V1",
-        "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+        "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
         "lane_id": "3749230300000000000000000000000000000000",
         "network_profile": "kaspa-simnet-toccata",
         "role": "wrong_lane_candidate",
-        "state_header_hash": "03aaaf8c3da141901002097931ecd8bed493b06d86371002629b63a14ac94c1b",
+        "state_header_hash": "71f3ded5e9ec5605d8da710e918c69629fa55a8770fd5c97fd04efb4c47085cf",
         "state_number": 2
       },
-      "payload_hash": "487018c3ad252043c50fc65911e53cb8e049b220f33c83305eec6af90ec9b557",
+      "payload_hash": "99a02fa5c9df00321a6e358818ed60849bebcc0d33d3f419cdf348f0709f307d",
       "raw_tx": {
         "path": "evidence/kurrent-live-settlement-candidate-wrong-lane-marker-tx.hex",
-        "sha256": "3becb886e5023cb624550a96ec52657c0878bfa0812e9bfe4678cfae4955611d"
+        "sha256": "44facca308020121a5040df227289171cd47ece6aef323005dae369f276418c3"
       },
       "status": "ignored_wrong_lane",
-      "txid": "f020f0091e678537f873d0d0a704afcb6b1fb7dc9b39a34d06bd28e55c6d05a7"
+      "txid": "eea49ed603ef31c15c13f9caa949f19c9d1e4699bfe8f9cb93dcfa340cf1b755"
     }
   },
   "claim_boundary": "This local-devnet harness demonstrates settlement eligibility over lane-proven ordering; it does not specify production finality, watchtower economics, fee policy, or a consensus tie-breaker.",
@@ -106,85 +106,85 @@
   "expected_lane_id": "ed33cf9800000000000000000000000000000000",
   "initial_lane": {
     "blue_score": 14,
-    "tip": "f60ad28cef38870576c6cf6b6ff93773bcda38f1191c025402f8ea60107d93bc"
+    "tip": "27d279f3d7013afcef69ddace26ec31a9f21ce87ef5e952c86f44327a5a17c61"
   },
   "lane_activity_blocks": [
     {
-      "accepted_id_merkle_root": "80424a4760392e0945ff3047adec9bcd31208bb373cdfea841acbb18625071de",
+      "accepted_id_merkle_root": "3bd6a5af3859ed5649bd8116315a9d618b94d8aa705badcfbb3c7f2d3db67be1",
       "accepted_order_start": 1,
-      "activity_digest": "e1d579dd3cd8ebf5953fc439bd133d7633703575522cbb1d38a59980a2a09681",
+      "activity_digest": "66d576351673d0d7d0f1f7958069413948466fd203a6dda8b430fe5386ced63c",
       "blue_score": 16,
-      "chain_block_hash": "38dc3e29ed5a6bb590c135c86e7acc03e68b9de8cc984dfba547bfdc4999dd09",
-      "chain_block_timestamp": 1781589954101,
+      "chain_block_hash": "6731e2ce8925d36437920c2df0ba7cc24d1f4ea35d0adc4e735cbbb45643aaa4",
+      "chain_block_timestamp": 1782545182522,
       "daa_score": 15,
       "events": [
         {
           "accepted_order_index": 2,
-          "accepting_chain_block_hash": "38dc3e29ed5a6bb590c135c86e7acc03e68b9de8cc984dfba547bfdc4999dd09",
-          "activity_leaf": "e1d579dd3cd8ebf5953fc439bd133d7633703575522cbb1d38a59980a2a09681",
+          "accepting_chain_block_hash": "6731e2ce8925d36437920c2df0ba7cc24d1f4ea35d0adc4e735cbbb45643aaa4",
+          "activity_leaf": "66d576351673d0d7d0f1f7958069413948466fd203a6dda8b430fe5386ced63c",
           "blue_score": 16,
           "daa_score": 15,
           "kind": "lower_candidate",
           "lane_id": "ed33cf9800000000000000000000000000000000",
           "merge_index": 1,
-          "txid": "30cf979e05ad72bb3cbfea297def9e42672b9b91c3c65a9d5df162457f34a256",
+          "txid": "2e0b7838099772438c3e4944cd9d4399f3ee72a579a84a6947cecf16ebe06783",
           "version": 1
         }
       ],
-      "lane_tip_after_block": "d2514365e920bb069bc7e977884f4bc222dea464a22fe767a75dcdbb414c5873",
-      "parent_seq_commit": "61994f2a72e1e8af49456f259118967460860a429f9d60b2d1e451c2bba60c94",
-      "timestamp": 1781589954069
+      "lane_tip_after_block": "bedb8c68004fd8c7a92186949f994fea10830b852235029228fa4ddc6b726825",
+      "parent_seq_commit": "87fb4b3ece3103102132225e14fb4f682b50915cf3683fd7b552110d02234f62",
+      "timestamp": 1782545182449
     },
     {
-      "accepted_id_merkle_root": "31f0b05e7814c5430dc80b4e21d0a2ab855a13e95d34379dc58c6746204d4cb5",
+      "accepted_id_merkle_root": "91fc7f559924a5ac6732c4181c6b162956f7edb05c1f14c70e438a1042a26201",
       "accepted_order_start": 5,
-      "activity_digest": "4fa277bf58e9d3e52fee9234d3e5cee71e9ae8fbb976b0f98c529c93395eb7c7",
+      "activity_digest": "da85cf43d53d1057bf48193ca9c7a671cb5297a19bde98917ae2f4946bc28eba",
       "blue_score": 18,
-      "chain_block_hash": "148b18c3de3052295fa685d7dfe1eae320e0be94381ef963369ce256274ed578",
-      "chain_block_timestamp": 1781589954162,
+      "chain_block_hash": "0d03860db46a28005fd1da6f5ebc9939b2c51974f84a28bd47d0bd0ee6a07a66",
+      "chain_block_timestamp": 1782545182643,
       "daa_score": 17,
       "events": [
         {
           "accepted_order_index": 6,
-          "accepting_chain_block_hash": "148b18c3de3052295fa685d7dfe1eae320e0be94381ef963369ce256274ed578",
-          "activity_leaf": "4fa277bf58e9d3e52fee9234d3e5cee71e9ae8fbb976b0f98c529c93395eb7c7",
+          "accepting_chain_block_hash": "0d03860db46a28005fd1da6f5ebc9939b2c51974f84a28bd47d0bd0ee6a07a66",
+          "activity_leaf": "da85cf43d53d1057bf48193ca9c7a671cb5297a19bde98917ae2f4946bc28eba",
           "blue_score": 18,
           "daa_score": 17,
           "kind": "higher_candidate",
           "lane_id": "ed33cf9800000000000000000000000000000000",
           "merge_index": 1,
-          "txid": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58",
+          "txid": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730",
           "version": 1
         }
       ],
-      "lane_tip_after_block": "879cb4599a01e7a5b7afccb0f6ff57896b4a057c43964bbdac54da253e78da9c",
-      "parent_seq_commit": "3aefaea1801746f385616e6c1cd4ec5159d28574e06b9f0f249091c0a3709100",
-      "timestamp": 1781589954133
+      "lane_tip_after_block": "d1a4ca82a74675abd3679620e50c1669cdec2c1799782a7db63fc99d11213af1",
+      "parent_seq_commit": "207a4ff066996a1f1bcc6f52ee93db6290d76ccd50df72e852794c562036e961",
+      "timestamp": 1782545182595
     }
   ],
   "lane_events": [
     {
       "accepted_order_index": 2,
-      "accepting_chain_block_hash": "38dc3e29ed5a6bb590c135c86e7acc03e68b9de8cc984dfba547bfdc4999dd09",
-      "activity_leaf": "e1d579dd3cd8ebf5953fc439bd133d7633703575522cbb1d38a59980a2a09681",
+      "accepting_chain_block_hash": "6731e2ce8925d36437920c2df0ba7cc24d1f4ea35d0adc4e735cbbb45643aaa4",
+      "activity_leaf": "66d576351673d0d7d0f1f7958069413948466fd203a6dda8b430fe5386ced63c",
       "blue_score": 16,
       "daa_score": 15,
       "kind": "lower_candidate",
       "lane_id": "ed33cf9800000000000000000000000000000000",
       "merge_index": 1,
-      "txid": "30cf979e05ad72bb3cbfea297def9e42672b9b91c3c65a9d5df162457f34a256",
+      "txid": "2e0b7838099772438c3e4944cd9d4399f3ee72a579a84a6947cecf16ebe06783",
       "version": 1
     },
     {
       "accepted_order_index": 6,
-      "accepting_chain_block_hash": "148b18c3de3052295fa685d7dfe1eae320e0be94381ef963369ce256274ed578",
-      "activity_leaf": "4fa277bf58e9d3e52fee9234d3e5cee71e9ae8fbb976b0f98c529c93395eb7c7",
+      "accepting_chain_block_hash": "0d03860db46a28005fd1da6f5ebc9939b2c51974f84a28bd47d0bd0ee6a07a66",
+      "activity_leaf": "da85cf43d53d1057bf48193ca9c7a671cb5297a19bde98917ae2f4946bc28eba",
       "blue_score": 18,
       "daa_score": 17,
       "kind": "higher_candidate",
       "lane_id": "ed33cf9800000000000000000000000000000000",
       "merge_index": 1,
-      "txid": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58",
+      "txid": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730",
       "version": 1
     }
   ],
@@ -194,16 +194,16 @@
       {
         "evidence": {
           "accepted_order_index": 2,
-          "accepting_chain_block_hash": "38dc3e29ed5a6bb590c135c86e7acc03e68b9de8cc984dfba547bfdc4999dd09",
+          "accepting_chain_block_hash": "6731e2ce8925d36437920c2df0ba7cc24d1f4ea35d0adc4e735cbbb45643aaa4",
           "blue_score": 16,
-          "candidate_txid": "30cf979e05ad72bb3cbfea297def9e42672b9b91c3c65a9d5df162457f34a256",
+          "candidate_txid": "2e0b7838099772438c3e4944cd9d4399f3ee72a579a84a6947cecf16ebe06783",
           "channel_id": "channel-a",
           "daa_score": 15,
           "factory_id": null,
-          "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+          "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
           "lane_id": "ed33cf9800000000000000000000000000000000",
           "network_profile": "kaspa-simnet-toccata",
-          "state_header_hash": "accd38d76409b84ab1705ccfe3a9397e4fcb1f708103d48420dafee3d645d235",
+          "state_header_hash": "4e73facc9384cfd9ef6ee7777a9c66ce990867949845291f737d2bc786542aab",
           "state_number": 1,
           "virtual_channel_id": null
         },
@@ -215,41 +215,41 @@
           "header": {
             "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
             "channel_id": "channel-a",
-            "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+            "covenant_id": "5f9dcec76dcaec9def973a2a0433dc94326c84e1e2189f897cff654c2db42d2f",
             "domain_separator": "KURRENT_STATE_V1",
             "expected_lane_id": "ed33cf9800000000000000000000000000000000",
             "factory_id": null,
-            "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+            "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
             "genesis_or_devnet_id": "in-process-simnet",
             "network_profile": "kaspa-simnet-toccata",
             "new_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
             "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
             "previous_state_commitment": "6ceb50b33e95381a2826908984eeb9c2705a7707562d4bdabaf60e7ce17b94ba",
             "protocol_version": 1,
-            "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
-            "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+            "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
+            "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
             "state_number": 1,
             "virtual_channel_id": null
           },
           "participant_signatures": {
-            "alice": "34f1d122d2b0933a372e297553475503784456dcb470b9f8dfcc05761abcf8d1499723e4b3919fd83520e7ef9d4e2c039884426b1a8bc672af15c49ad313ca8d",
-            "bob": "675ce87b4ed85ca771e43660daf52aed0a03630ffc88d7f9c977e5709e8b6afb557d6b34620dd9b0ccf7ea5d403838b0df5ad40cc995b30ea69ebeab4b7bf2ef"
+            "alice": "56240d534bbf1cefeaf1e6c580a6661c3886fbfb4d2501de909c218c6969998a15fc9c5f09cfba2ff5a1f055612a27f80ffd8a7cecbb6f4fd0fc65fc0b7cd391",
+            "bob": "13b1e0265ddbebdd25dc63cc915af870931b6f2c629ad341598a55e76500f7894af4669541f5af22cd8a194470076e4c6a23d10149cdb69557b64355d394a25c"
           }
         }
       },
       {
         "evidence": {
           "accepted_order_index": 6,
-          "accepting_chain_block_hash": "148b18c3de3052295fa685d7dfe1eae320e0be94381ef963369ce256274ed578",
+          "accepting_chain_block_hash": "0d03860db46a28005fd1da6f5ebc9939b2c51974f84a28bd47d0bd0ee6a07a66",
           "blue_score": 18,
-          "candidate_txid": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58",
+          "candidate_txid": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730",
           "channel_id": "channel-a",
           "daa_score": 17,
           "factory_id": null,
-          "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+          "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
           "lane_id": "ed33cf9800000000000000000000000000000000",
           "network_profile": "kaspa-simnet-toccata",
-          "state_header_hash": "03aaaf8c3da141901002097931ecd8bed493b06d86371002629b63a14ac94c1b",
+          "state_header_hash": "71f3ded5e9ec5605d8da710e918c69629fa55a8770fd5c97fd04efb4c47085cf",
           "state_number": 2,
           "virtual_channel_id": null
         },
@@ -261,25 +261,25 @@
           "header": {
             "challenge_policy_hash": "229a96853ca76a54060644f203b7378c0c01688a048f27144f516aa253b326ff",
             "channel_id": "channel-a",
-            "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+            "covenant_id": "5f9dcec76dcaec9def973a2a0433dc94326c84e1e2189f897cff654c2db42d2f",
             "domain_separator": "KURRENT_STATE_V1",
             "expected_lane_id": "ed33cf9800000000000000000000000000000000",
             "factory_id": null,
-            "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+            "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
             "genesis_or_devnet_id": "in-process-simnet",
             "network_profile": "kaspa-simnet-toccata",
             "new_state_commitment": "9155bfc8e64f41e73a03d9123bbf1502b2026eb537edf0ad29116caeba757d5d",
             "participant_set_hash": "12df2e7d95134ba3cfdd1430cc8245d9d75e34d24bc5e6c8eab5fa7f7000e605",
             "previous_state_commitment": "1918941fe8c701746ecfe74354f34acee79223a4ef4039cac1e936949e4c1d10",
             "protocol_version": 1,
-            "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
-            "settlement_template_hash": "62dc70d50b4d9de60dfea8df7c67079c9933c6d8105e4a4f9f8bfc7dccaf3464",
+            "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
+            "settlement_template_hash": "3599a63f2ffea84fb601e85d3908d76610fe2bf3acc87d47b792f03644a9a997",
             "state_number": 2,
             "virtual_channel_id": null
           },
           "participant_signatures": {
-            "alice": "878538fa7d731eb101f01f3a378c1f55fa6a63a0c682ac95e3c2c2b4aec87697972e050424a10f5880fd10c68ebd501fc4215c11626866ea06e500086ca8f5fd",
-            "bob": "b0f2afddb467b9714d184b72b387f16ef3860a4a640579bdc736f94d8bba0d98dc2ca05207860b99621ade2c00ae411beca1841e0f9b264b2d0db0dfff9d5730"
+            "alice": "67f9ed636f841b7b459aba1a1d05edcc898f6bd7a97acf495c10adb4aba571867234fc26d1b4e12ea646f6015a48f2fa44975a70c0c3f902d10c6bfa8ae8005b",
+            "bob": "995da35f94a846aa5412f226c7413fd28cbf189f91ba6d92a6d6e5d51d3c58028590405a91b41f1fbe488483e5d58f78864007aa8633c426cb64557a0de4c0db"
           }
         }
       }
@@ -291,8 +291,8 @@
           "bob"
         ],
         "participant_public_keys": {
-          "alice": "e776a6bbfc8890113bd482ef96eef86996f427287fa1e92e82afa877ad7a1a44",
-          "bob": "7b2905aa22885456d4b7753ca35a31c3db8a55e8367782e3f55a95c30b59c385"
+          "alice": "15b7c2cbdfc59b8c3074953245beb052c64aa993b43a88de7f89e13ac84f3d89",
+          "bob": "8ae221c0711a024c7354db4dafe6142d4f0fa3d4b37853030076c816815434d1"
         },
         "required_signatures": 2
       },
@@ -316,8 +316,8 @@
       {
         "accepted_daa_score": 15,
         "accepted_order_index": 2,
-        "candidate_txid": "30cf979e05ad72bb3cbfea297def9e42672b9b91c3c65a9d5df162457f34a256",
-        "displaced_by": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58",
+        "candidate_txid": "2e0b7838099772438c3e4944cd9d4399f3ee72a579a84a6947cecf16ebe06783",
+        "displaced_by": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730",
         "eligible_after_daa": 18,
         "observed_daa_score": 20,
         "state_number": 1,
@@ -326,7 +326,7 @@
       {
         "accepted_daa_score": 17,
         "accepted_order_index": 6,
-        "candidate_txid": "0a5a41e3008292515643f33c11697a7fa8fc95b6adc518d404c79d81ab9a9a58",
+        "candidate_txid": "da6041d85b15e7acbc57c6ab44a2a6ffca6b0590cbf3d189cece013fddd45730",
         "displaced_by": null,
         "eligible_after_daa": 20,
         "observed_daa_score": 20,
@@ -335,15 +335,15 @@
       }
     ],
     "funding": {
-      "covenant_id": "c16216421acacbf30d38a16af105d129e77ef3c22469db8e2f09e47274216b5b",
+      "covenant_id": "5f9dcec76dcaec9def973a2a0433dc94326c84e1e2189f897cff654c2db42d2f",
       "expected_lane_id": "ed33cf9800000000000000000000000000000000",
       "fee_reserve": 0,
-      "funding_outpoint": "dea5f128848600b3a4d6dffaa5dc3e47207c107f8b902fcb534dbc58e84544c8:0",
+      "funding_outpoint": "a33a04ba3b162a018e3dac2f133aa68f10ccaa1f54b56966f01425e057f38695:0",
       "principal_by_participant": {
         "alice": 2968800000,
         "bob": 1979200000
       },
-      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
       "total_principal": 4948000000
     },
     "settlement_template": {
@@ -352,15 +352,15 @@
         "bob": 1979200000
       },
       "refund_after_daa": 120,
-      "script_covenant_hash": "993b160ea9b4883d5917b5d3afdb26d9383cbbcfa21b40073b0ae2fdad7f7472",
+      "script_covenant_hash": "153fe7bc1aebec6bea75ad1f7bc4fe92da80d7bb34e272405ecfb459103d6ee6",
       "template_id": "live-state-2-settlement"
     },
     "status": "passed",
     "validation_layer": "typed-kurrent-settlement-eligibility-model"
   },
   "monitor_scope": "state-channel-settlement-eligibility-evidence",
-  "monitor_start_accepted_id_merkle_root": "7876dc630fe70937b0a0bc206770243eda4c9a9d27029cfdb3eef71f05650837",
-  "monitor_start_block": "6732c1b40957d94d78c35f6d3ee560d7f4f0fbe5fb20466b17778693b9d076fa",
+  "monitor_start_accepted_id_merkle_root": "e58dd9b69eda541ceac15f4385f893667ae134522919db2e6d72bbdfa0ce263e",
+  "monitor_start_block": "f0316a423aa94c080409f8f354e8a173c1812012fa9605896e51c2ee5fc55f9c",
   "network_profile": "kaspa-simnet-toccata",
   "policy": {
     "response_window_daa": 3
@@ -369,18 +369,18 @@
     "inactivity_shortcut": "0000000000000000000000000000000000000000000000000000000000000000",
     "lane": {
       "blue_score": 18,
-      "tip": "879cb4599a01e7a5b7afccb0f6ff57896b4a057c43964bbdac54da253e78da9c"
+      "tip": "d1a4ca82a74675abd3679620e50c1669cdec2c1799782a7db63fc99d11213af1"
     },
-    "parent_seq_commit": "02d2555fb4fdd36a1cda46994c3fb8c77cea6046a78777e8ff5c45c51cb92e5a",
-    "payload_and_ctx_digest": "7feeb53618085d09d5966cbdebe8984b5508858f9010c52f85c6e256a8930f0f",
-    "smt_proof": "feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff010136c201ba8dcc8b32a05125650ede0b48d0c96ca7da4dc162b7c7b49fa2c064da"
+    "parent_seq_commit": "9dc373fb50eccfe30b49131093e1f44f1550473ac2cc05efc3ba82b83faf563d",
+    "payload_and_ctx_digest": "8fee85a79231cb85c3b1fcf49148dc4921ab62d6381fa7fd5b5bb2d685bb2c5e",
+    "smt_proof": "feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0101dcb2caa5bb98b82aa261398593e6ee2aa668cf0cb3f8aa6edfc2320ae17bc1cc"
   },
-  "proof_block_hash": "dd952a25ed86d1bf79c259882bc0bc749d33d211e8d1c8e1cca23348f7c01e34",
+  "proof_block_hash": "abc70a7605d130357bdec65c75bdc797a4e9d765b0ed3af4588c722816e8f7e3",
   "proof_header": {
-    "accepted_id_merkle_root": "a48bafd35acf86bd62ff8daa2b2b17707e0588146ab4f33b72007e85df76ce18",
+    "accepted_id_merkle_root": "8e7896b51d705637bfb7aded3a4191b15769364afc7a4785950ce8073741aec8",
     "blue_score": 21,
     "daa_score": 20,
-    "timestamp": 1781589954243
+    "timestamp": 1782545182751
   },
   "status": "passed"
 }

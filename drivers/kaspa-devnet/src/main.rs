@@ -38,11 +38,11 @@ use kurrent::{
     validate_materialisation, AccessManifest, ChallengePolicy, ChannelReceipt, ClaimScope,
     FactoryState, FeeSponsoredSettlementCandidate, FeeSponsoredSettlementDecision, FundingState,
     KurrentChannelConfig, LatestStateHeader, LnSwapEvidence, MaterialisationPlan,
-    SettlementCandidateEvidence, SettlementEligibilityCandidate, SettlementEligibilityDecision,
-    SettlementEligibilityPolicy, SettlementEligibilityStatus, SettlementFeePolicy,
-    SettlementRegistry, SettlementSponsorEvidence, SettlementTemplate, StateUpdate, TouchedLeaves,
-    VirtualChannelState, DOMAIN_CHANNEL_RECEIPT, DOMAIN_FACTORY_MATERIALISATION,
-    DOMAIN_SETTLEMENT_TEMPLATE, DOMAIN_STATE,
+    SameNumberConflictRule, SettlementCandidateEvidence, SettlementEligibilityCandidate,
+    SettlementEligibilityDecision, SettlementEligibilityPolicy, SettlementEligibilityStatus,
+    SettlementFeePolicy, SettlementRegistry, SettlementSponsorEvidence, SettlementTemplate,
+    StateUpdate, TouchedLeaves, VirtualChannelState, DOMAIN_CHANNEL_RECEIPT,
+    DOMAIN_FACTORY_MATERIALISATION, DOMAIN_SETTLEMENT_TEMPLATE, DOMAIN_STATE,
 };
 use secp256k1::{rand::thread_rng, Keypair, Message};
 use serde::{de::DeserializeOwned, Serialize};
@@ -894,7 +894,7 @@ fn validate_live_state_model(
         challenge_policy: ChallengePolicy {
             mode: "latest-state".to_string(),
             challenge_window_daa: 120,
-            same_number_conflict_rule: "reject-conflict".to_string(),
+            same_number_conflict_rule: SameNumberConflictRule::RejectConflict,
         },
         access_manifest: AccessManifest {
             authorised_participants: participants.clone(),

@@ -3137,7 +3137,6 @@ dependencies = [
  "blake2b_simd",
  "blake3",
  "borsh",
- "cc",
  "cfg-if",
  "faster-hex",
  "hexplay",
@@ -3376,6 +3375,7 @@ dependencies = [
 name = "kurrent"
 version = "0.1.0"
 dependencies = [
+ "blake2",
  "hex",
  "secp256k1",
  "serde",

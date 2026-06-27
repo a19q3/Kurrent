@@ -13,6 +13,10 @@ path = "src/lib.rs"
 name = "kurrentctl"
 path = "src/bin/kurrentctl.rs"
 
+[[bin]]
+name = "run-devnet-tests"
+path = "src/bin/run_devnet_tests.rs"
+
 [dependencies]
 blake2 = "0.10"
 hex = "0.4"

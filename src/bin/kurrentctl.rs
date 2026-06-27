@@ -20,10 +20,15 @@ use serde_json::{json, Value};
 use std::{
     collections::{BTreeMap, BTreeSet},
     env, fs,
+    net::TcpStream,
     path::{Path, PathBuf},
     process::{Command, ExitCode, Stdio},
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+
+const ADVERSARIAL_MODEL_SOAK_EVIDENCE: &str = "evidence/production/adversarial-model-soak.json";
+const LEGACY_ADVERSARIAL_MEMPOOL_SOAK_EVIDENCE: &str =
+    "evidence/production/adversarial-mempool-soak.json";
 
 const EXIT_TOOLING_BLOCKED: u8 = 10;
 const EXIT_KASPA_FLOW: u8 = 11;
@@ -33,6 +38,7 @@ const EXIT_KASPA_TO_LN_FLOW: u8 = 14;
 const EXIT_REFUND_FLOW: u8 = 15;
 const EXIT_EVIDENCE: u8 = 16;
 const EXIT_PRODUCTION_READINESS: u8 = 17;
+const PRESENTATION_WIDTH: usize = 88;
 
 fn main() -> ExitCode {
     match run() {
@@ -71,6 +77,7 @@ fn run() -> Result<u8, String> {
             Ok(if status == "passed" { 0 } else { 1 })
         }
         "verify-evidence" => verify_evidence(),
+        "verify-presentation-reality" => verify_presentation_reality(),
         "verify-production-readiness" => verify_production_readiness(),
         "prepare-devnet-tools" => prepare_devnet_tools(),
         "run-kaspa-devnet" => run_kaspa_devnet(),
@@ -95,7 +102,7 @@ fn run() -> Result<u8, String> {
 
 fn print_help() {
     println!(
-        "kurrentctl commands: detect-tools, tool-path, write-acceptance-report, verify-evidence, verify-production-readiness, prepare-devnet-tools, run-kaspa-devnet, run-ln-devnet, run-state-channel-flow, run-factory-flow, run-ln-to-kaspa-flow, run-kaspa-to-ln-flow, run-refund-flow, run-semantic-transaction-verifier, run-adversarial-soak, write-production-target-profile, prepare-security-review-package, check"
+        "kurrentctl commands: detect-tools, tool-path, write-acceptance-report, verify-evidence, verify-presentation-reality, verify-production-readiness, prepare-devnet-tools, run-kaspa-devnet, run-ln-devnet, run-state-channel-flow, run-factory-flow, run-ln-to-kaspa-flow, run-kaspa-to-ln-flow, run-refund-flow, run-semantic-transaction-verifier, run-adversarial-soak, write-production-target-profile, prepare-security-review-package, check"
     );
 }
 
@@ -196,16 +203,55 @@ fn parent_dir() -> Result<PathBuf, String> {
 }
 
 fn known_bin_dirs() -> Vec<PathBuf> {
-    let parent = parent_dir().unwrap_or_else(|_| PathBuf::from("/Users/arthur/Documents"));
-    vec![
-        PathBuf::from("/Users/arthur/go/bin"),
-        parent.join("rusty-kaspa/target/release"),
-        parent.join("rusty-kaspa/target/debug"),
-        parent.join("rusty-kaspa-toccata/target/release"),
-        parent.join("rusty-kaspa-toccata/target/debug"),
-        PathBuf::from("/Users/arthur/RustroverProjects/rusty-kaspa/target/release"),
-        PathBuf::from("/Users/arthur/RustroverProjects/rusty-kaspa/target/debug"),
-    ]
+    let parent = parent_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let mut dirs = env_path_list("KURRENT_BIN_DIRS");
+    for var in [
+        "KURRENT_LND_BIN_DIR",
+        "LND_BIN_DIR",
+        "KURRENT_KASPA_BIN_DIR",
+        "KASPA_BIN_DIR",
+    ] {
+        if let Some(path) = env_path(var) {
+            dirs.push(path);
+        }
+    }
+    if let Some(home) = env_path("HOME") {
+        dirs.push(home.join("go/bin"));
+        dirs.push(home.join(".cargo/bin"));
+    }
+    for repo in kaspa_repo_candidates(&parent) {
+        dirs.push(repo.join("target/release"));
+        dirs.push(repo.join("target/debug"));
+    }
+    dirs
+}
+
+fn env_path(name: &str) -> Option<PathBuf> {
+    env::var_os(name)
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+}
+
+fn env_path_list(name: &str) -> Vec<PathBuf> {
+    env::var_os(name)
+        .map(|paths| env::split_paths(&paths).collect())
+        .unwrap_or_default()
+}
+
+fn kaspa_repo_candidates(parent: &Path) -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+    for var in ["KURRENT_KASPA_REPO", "RUSTY_KASPA_REPO", "KASPA_REPO"] {
+        if let Some(path) = env_path(var) {
+            candidates.push(path);
+        }
+    }
+    candidates.extend([
+        parent.join("rusty-kaspa"),
+        parent.join("rusty-kaspa-toccata"),
+        parent.join("kaspa"),
+        parent.join("Kaspa"),
+    ]);
+    candidates
 }
 
 fn path_entries() -> Vec<PathBuf> {
@@ -319,7 +365,7 @@ fn first_git_dir(candidates: &[PathBuf]) -> Option<PathBuf> {
 }
 
 fn detection_report() -> DetectionReport {
-    let parent = parent_dir().unwrap_or_else(|_| PathBuf::from("/Users/arthur/Documents"));
+    let parent = parent_dir().unwrap_or_else(|_| PathBuf::from("."));
     let commands = [
         "kaspad",
         "kaspa-node",
@@ -342,15 +388,8 @@ fn detection_report() -> DetectionReport {
         .map(|t| (t.name.clone(), t.path.clone()))
         .collect();
 
-    let parent_repo = first_git_dir(&[
-        parent.join("rusty-kaspa"),
-        parent.join("rusty-kaspa-toccata"),
-        parent.join("kaspa"),
-        parent.join("Kaspa"),
-    ]);
-    let selected_repo = parent_repo
-        .clone()
-        .or_else(|| first_git_dir(&[PathBuf::from("/Users/arthur/RustroverProjects/rusty-kaspa")]));
+    let parent_repo = first_git_dir(&kaspa_repo_candidates(&parent));
+    let selected_repo = parent_repo.clone();
     let lnd_repo = first_git_dir(&[parent.join("lnd")]);
 
     let kaspa_node_available = tool_paths.get("kaspad").and_then(Clone::clone).is_some()
@@ -381,10 +420,10 @@ fn detection_report() -> DetectionReport {
 
     let mut blockers = Vec::new();
     if parent_repo.is_none() {
-        blockers.push(
-            "No Kaspa source checkout was found in the parent folder /Users/arthur/Documents."
-                .to_string(),
-        );
+        blockers.push(format!(
+            "No Kaspa source checkout was found next to the repository or via KURRENT_KASPA_REPO/RUSTY_KASPA_REPO/KASPA_REPO; searched parent folder {}.",
+            parent.display()
+        ));
     }
     if selected_repo.is_none() {
         blockers.push(
@@ -476,6 +515,41 @@ fn flow_evidence_files() -> [(&'static str, &'static str); 8] {
     ]
 }
 
+fn acceptance_source_artifact_paths() -> [&'static str; 23] {
+    [
+        "Cargo.toml",
+        "Cargo.lock",
+        "README.md",
+        "src/lib.rs",
+        "src/client.rs",
+        "src/bin/kurrentctl.rs",
+        "src/bin/run_devnet_tests.rs",
+        "tests/protocol_model.rs",
+        "tests/normative_construction.rs",
+        "drivers/kaspa-devnet/Cargo.toml",
+        "drivers/kaspa-devnet/Cargo.lock",
+        "drivers/kaspa-devnet/src/main.rs",
+        "docs/KURRENT_THESIS.tex",
+        "docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md",
+        "docs/KURRENT_SECURITY_ASSUMPTIONS.md",
+        "docs/KURRENT_PRODUCTION_ACCEPTANCE.md",
+        "docs/PRODUCTION_SECURITY_REVIEW.md",
+        "docs/PRODUCTION_KEY_MANAGEMENT.md",
+        "docs/PRODUCTION_MONITORING.md",
+        "docs/PRODUCTION_RECOVERY.md",
+        "docs/PRODUCTION_ROLLOUT.md",
+        "scripts/check.sh",
+        "scripts/verify-evidence.sh",
+    ]
+}
+
+fn acceptance_source_artifacts(root: &Path) -> Result<Vec<EvidenceFile>, String> {
+    acceptance_source_artifact_paths()
+        .into_iter()
+        .map(|relative| file_evidence(&root.join(relative)))
+        .collect()
+}
+
 fn evidence_file_from_value(record: &Value) -> Result<EvidenceFile, String> {
     let path = record
         .get("path")
@@ -534,7 +608,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
                 if status == "passed" {
                     "missing"
                 } else {
-                    "not_executed"
+                    "blocked_before_execution"
                 }
                 .to_string(),
             );
@@ -545,7 +619,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
         if status == "passed" {
             "passed"
         } else {
-            "not_executed"
+            "blocked_before_execution"
         }
         .to_string(),
     );
@@ -570,7 +644,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
     };
     let mut command_transcript_paths = Vec::new();
     for path in [
-        "kaspa-simnet-probe.log",
+        "kaspa-simnet-probe.json",
         "ln-alice.log",
         "ln-bob.log",
         "kaspa-txscript-covenants.stdout.log",
@@ -810,6 +884,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
         script_paths_and_hashes,
         witness_paths_and_hashes,
         flow_evidence_paths_and_hashes,
+        source_artifact_hashes: acceptance_source_artifacts(&root()?)?,
         settlement_template_hashes,
         channel_receipt_hashes,
         command_transcript_paths,
@@ -897,6 +972,11 @@ fn verify_evidence() -> Result<u8, String> {
         }
     }
 
+    if let Err(err) = verify_source_artifact_hashes(&root, &report.source_artifact_hashes) {
+        eprintln!("{err}");
+        return Ok(EXIT_EVIDENCE);
+    }
+
     for (bucket, mode) in [
         (
             "raw_transaction_paths_and_hashes",
@@ -951,7 +1031,963 @@ fn verify_evidence() -> Result<u8, String> {
             return Ok(EXIT_EVIDENCE);
         }
     }
+    if let Err(err) = verify_command_transcript_content(&root, &report.command_transcript_paths) {
+        eprintln!("{err}");
+        return Ok(EXIT_EVIDENCE);
+    }
+    if let Err(err) = verify_state_channel_evidence_links(&root, &report) {
+        eprintln!("{err}");
+        return Ok(EXIT_EVIDENCE);
+    }
+    let presentation = verify_presentation_reality()?;
+    if presentation != 0 {
+        return Ok(presentation);
+    }
     Ok(0)
+}
+
+fn verify_source_artifact_hashes(root: &Path, records: &[EvidenceFile]) -> Result<(), String> {
+    if records.is_empty() {
+        return Err("missing evidence bucket: source_artifact_hashes".to_string());
+    }
+    for record in records {
+        verify_file_hash_record(root, "source_artifact_hashes", record, HashMode::FileBytes)?;
+    }
+    Ok(())
+}
+
+fn verify_state_channel_evidence_links(
+    root: &Path,
+    report: &AcceptanceReport,
+) -> Result<(), String> {
+    let path = resolve_record_path(root, "evidence/kurrent-live-state-channel-evidence.json");
+    let value: Value = serde_json::from_slice(&fs::read(&path).map_err(|e| {
+        format!(
+            "failed to read state-channel evidence {}: {e}",
+            path.display()
+        )
+    })?)
+    .map_err(|e| {
+        format!(
+            "failed to parse state-channel evidence {}: {e}",
+            path.display()
+        )
+    })?;
+    verify_state_channel_evidence_value_links(&value)?;
+
+    let settlement_template_hash = required_json_str(&value, "/settlement_template/hash")?;
+    if !report
+        .settlement_template_hashes
+        .iter()
+        .any(|hash| hash == settlement_template_hash)
+    {
+        return Err(format!(
+            "acceptance report omits live settlement template hash: {settlement_template_hash}"
+        ));
+    }
+
+    let channel_receipt_hash = required_json_str(&value, "/channel_receipt/hash")?;
+    if !report
+        .channel_receipt_hashes
+        .iter()
+        .any(|hash| hash == channel_receipt_hash)
+    {
+        return Err(format!(
+            "acceptance report omits live channel receipt hash: {channel_receipt_hash}"
+        ));
+    }
+    Ok(())
+}
+
+fn verify_state_channel_evidence_value_links(value: &Value) -> Result<(), String> {
+    let settlement_template_hash = required_json_str(value, "/settlement_template/hash")?;
+    let receipt_template_hash =
+        required_json_str(value, "/channel_receipt/scope/settlement_template_hash")?;
+    let state_header_template_hash =
+        required_json_str(value, "/state_header/header/settlement_template_hash")?;
+    if settlement_template_hash != receipt_template_hash
+        || settlement_template_hash != state_header_template_hash
+    {
+        return Err(format!(
+            "state-channel evidence settlement_template_hash mismatch: template={settlement_template_hash}, receipt={receipt_template_hash}, state_header={state_header_template_hash}"
+        ));
+    }
+
+    let receipt_state = required_json_u64(value, "/channel_receipt/scope/state_number")?;
+    let header_state = required_json_u64(value, "/state_header/header/state_number")?;
+    let settlement_state = required_json_u64(value, "/settlement/state_number")?;
+    if receipt_state != header_state || receipt_state != settlement_state {
+        return Err(format!(
+            "state-channel evidence state_number mismatch: receipt={receipt_state}, state_header={header_state}, settlement={settlement_state}"
+        ));
+    }
+
+    if let (Ok(model_receipt_hash), Ok(model_header_hash)) = (
+        required_json_str(value, "/model_validation/receipt/settlement_template_hash"),
+        required_json_str(
+            value,
+            "/model_validation/latest_state_header/settlement_template_hash",
+        ),
+    ) {
+        if model_receipt_hash != model_header_hash {
+            return Err(format!(
+                "model_validation settlement_template_hash mismatch: receipt={model_receipt_hash}, latest_state_header={model_header_hash}"
+            ));
+        }
+    }
+
+    if let (Ok(model_receipt_state), Ok(model_header_state)) = (
+        required_json_u64(value, "/model_validation/receipt/state_number"),
+        required_json_u64(value, "/model_validation/latest_state_header/state_number"),
+    ) {
+        if model_receipt_state != model_header_state {
+            return Err(format!(
+                "model_validation state_number mismatch: receipt={model_receipt_state}, latest_state_header={model_header_state}"
+            ));
+        }
+    }
+
+    Ok(())
+}
+
+fn required_json_str<'a>(value: &'a Value, path: &str) -> Result<&'a str, String> {
+    json_pointer_str(value, path).ok_or_else(|| format!("missing string field: {path}"))
+}
+
+fn required_json_u64(value: &Value, path: &str) -> Result<u64, String> {
+    value
+        .pointer(path)
+        .and_then(Value::as_u64)
+        .ok_or_else(|| format!("missing u64 field: {path}"))
+}
+
+fn verify_presentation_reality() -> Result<u8, String> {
+    let root = root()?;
+    let production_dir = evidence_dir()?.join("production");
+    fs::create_dir_all(&production_dir)
+        .map_err(|e| format!("failed to create {}: {e}", production_dir.display()))?;
+
+    let mut checks = Vec::new();
+    let mut blockers = Vec::new();
+
+    let tools = load_presentation_json(
+        &root,
+        "evidence/tool-detection.json",
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &tools {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "tool_detection_status",
+            value.get("status").and_then(Value::as_str) == Some("ready"),
+            "local tool detection reports ready",
+        );
+        for name in [
+            "kaspad",
+            "kaspa-cli",
+            "bitcoind",
+            "bitcoin-cli",
+            "lnd",
+            "lncli",
+        ] {
+            let pointer = format!("/tool_paths/{name}");
+            let path = json_pointer_str(value, &pointer).unwrap_or("");
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                &format!("tool_path_{name}"),
+                !path.is_empty() && Path::new(path).exists(),
+                format!("{name} resolves to an existing local executable path"),
+            );
+        }
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "selected_kaspa_source_repo",
+            json_pointer_str(value, "/selected_kaspa_repo/path")
+                .is_some_and(|path| Path::new(path).join("Cargo.toml").is_file()),
+            "selected Kaspa source repository is present locally",
+        );
+    }
+
+    let kaspa = load_presentation_json(
+        &root,
+        "evidence/kaspa-simnet-probe.json",
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &kaspa {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "kaspa_probe_status",
+            value.get("status").and_then(Value::as_str) == Some("passed"),
+            "Kaspa simnet probe completed successfully",
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "kaspa_daemon_identity",
+            value.get("daemon").and_then(Value::as_str) == Some("kaspad")
+                && value.get("network").and_then(Value::as_str) == Some("simnet"),
+            "probe identifies a local kaspad simnet daemon",
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "kaspa_utxo_index_and_mining",
+            value
+                .get("utxoindex")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+                && value
+                    .get("unsynchronised_mining")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false),
+            "UTXO index and unsynchronised local mining are enabled",
+        );
+        let has_daemon_transcript = value
+            .get("stdout_bytes")
+            .and_then(Value::as_u64)
+            .is_some_and(|bytes| bytes > 0)
+            && value
+                .get("stdout_excerpt")
+                .and_then(Value::as_array)
+                .is_some_and(|lines| {
+                    lines.iter().filter_map(Value::as_str).any(|line| {
+                        line.contains("kaspad v") || line.contains("Utxoindex Data directory")
+                    })
+                });
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "kaspa_daemon_transcript",
+            has_daemon_transcript,
+            "probe captured kaspad startup transcript evidence",
+        );
+    }
+
+    let ln = load_presentation_json(
+        &root,
+        "evidence/ln-devnet-evidence.json",
+        &mut checks,
+        &mut blockers,
+    );
+    let mut ln_payment_hash = None;
+    if let Some(value) = &ln {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "ln_devnet_status",
+            value.get("status").and_then(Value::as_str) == Some("passed"),
+            "Bitcoin regtest plus Alice/Bob LND workflow completed successfully",
+        );
+        let alice = json_pointer_str(value, "/alice/identity_pubkey").unwrap_or("");
+        let bob = json_pointer_str(value, "/bob/identity_pubkey").unwrap_or("");
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "ln_peer_identities",
+            is_hex_len(alice, 66) && is_hex_len(bob, 66) && alice != bob,
+            "Alice and Bob expose distinct compressed secp256k1 identity keys",
+        );
+        let preimage = json_pointer_str(value, "/invoice/preimage").unwrap_or("");
+        let payment_hash = json_pointer_str(value, "/invoice/payment_hash").unwrap_or("");
+        let preimage_hash_matches = hex::decode(preimage)
+            .map(|bytes| sha256_hex(&bytes) == payment_hash)
+            .unwrap_or(false);
+        if preimage_hash_matches {
+            ln_payment_hash = Some(payment_hash.to_string());
+        }
+        let preimage_source = json_pointer_str(value, "/invoice/preimage_source");
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "ln_invoice_preimage_source",
+            preimage_source.is_none()
+                || preimage_source == Some("deterministic_test_vector_supplied_to_lnd_addinvoice"),
+            match preimage_source {
+                Some(_) => {
+                    "LN evidence declares a deterministic local-devnet preimage supplied to real LND addinvoice"
+                }
+                None => {
+                    "legacy LN evidence omits preimage-source metadata; the preimage/payment-hash binding remains the blocking check"
+                }
+            },
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "ln_invoice_preimage_hash",
+            is_hex_len(preimage, 64) && is_hex_len(payment_hash, 64) && preimage_hash_matches,
+            "deterministic invoice preimage hashes to the recorded Lightning payment hash",
+        );
+
+        if let Some(payment_path) = json_pointer_str(value, "/invoice/payment_path") {
+            if let Some(payment) =
+                load_presentation_json(&root, payment_path, &mut checks, &mut blockers)
+            {
+                record_presentation_check(
+                    &mut checks,
+                    &mut blockers,
+                    "ln_invoice_payment_status",
+                    payment.get("status").and_then(Value::as_str) == Some("SUCCEEDED")
+                        && payment.get("payment_hash").and_then(Value::as_str)
+                            == Some(payment_hash)
+                        && payment.get("payment_preimage").and_then(Value::as_str)
+                            == Some(preimage),
+                    "lncli payment evidence shows the invoice payment succeeded with the same hash and preimage",
+                );
+            }
+        }
+
+        let alice_channels = json_pointer_str(value, "/channel/alice_channels_path")
+            .and_then(|path| load_presentation_json(&root, path, &mut checks, &mut blockers));
+        let bob_channels = json_pointer_str(value, "/channel/bob_channels_path")
+            .and_then(|path| load_presentation_json(&root, path, &mut checks, &mut blockers));
+        if let (Some(alice_channels), Some(bob_channels)) = (&alice_channels, &bob_channels) {
+            let alice_channel = alice_channels.pointer("/channels/0");
+            let bob_channel = bob_channels.pointer("/channels/0");
+            let channels_match = alice_channel
+                .and_then(|channel| channel.get("active"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+                && bob_channel
+                    .and_then(|channel| channel.get("active"))
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false)
+                && alice_channel
+                    .and_then(|channel| channel.get("chan_id"))
+                    .and_then(Value::as_str)
+                    == bob_channel
+                        .and_then(|channel| channel.get("chan_id"))
+                        .and_then(Value::as_str)
+                && alice_channel
+                    .and_then(|channel| channel.get("channel_point"))
+                    .and_then(Value::as_str)
+                    == bob_channel
+                        .and_then(|channel| channel.get("channel_point"))
+                        .and_then(Value::as_str)
+                && alice_channel
+                    .and_then(|channel| channel.get("remote_pubkey"))
+                    .and_then(Value::as_str)
+                    == Some(bob)
+                && bob_channel
+                    .and_then(|channel| channel.get("remote_pubkey"))
+                    .and_then(Value::as_str)
+                    == Some(alice);
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                "ln_bidirectional_channel_state",
+                channels_match,
+                "Alice and Bob list the same active channel with reciprocal remote pubkeys",
+            );
+        }
+    }
+
+    let state = load_presentation_json(
+        &root,
+        "evidence/kurrent-live-state-channel-evidence.json",
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &state {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "state_channel_status",
+            value.get("status").and_then(Value::as_str) == Some("passed"),
+            "latest-state Kaspa flow completed successfully",
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "state_channel_transition",
+            value
+                .pointer("/state_update/from_state")
+                .and_then(Value::as_u64)
+                == Some(1)
+                && value
+                    .pointer("/state_update/to_state")
+                    .and_then(Value::as_u64)
+                    == Some(2)
+                && value
+                    .pointer("/settlement/state_number")
+                    .and_then(Value::as_u64)
+                    == Some(2),
+            "state update advances from state 1 to state 2 and settlement uses state 2",
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "stale_state_rejected",
+            json_pointer_str(value, "/stale_state_rejection/status") == Some("rejected")
+                && json_pointer_str(value, "/stale_state_rejection/node_error")
+                    .is_some_and(|err| err.contains("Rejected transaction")),
+            "stale state submission is rejected by the Kaspa-side validation path",
+        );
+        for (pointer, id) in [
+            ("/funding/raw_tx", "state_funding_raw_tx"),
+            ("/state_update/raw_tx", "state_update_raw_tx"),
+            ("/state_update/witness", "state_update_witness"),
+            (
+                "/stale_state_rejection/attempted_tx",
+                "stale_rejected_raw_tx",
+            ),
+            ("/stale_state_rejection/witness", "stale_rejected_witness"),
+            ("/settlement/raw_tx", "state_settlement_raw_tx"),
+            ("/settlement/witness", "state_settlement_witness"),
+            ("/settlement/state_1_redeem_script", "state_1_redeem_script"),
+            ("/settlement/state_2_redeem_script", "state_2_redeem_script"),
+        ] {
+            record_hex_evidence(&root, value, pointer, id, &mut checks, &mut blockers);
+        }
+    }
+
+    verify_hashlock_reality(
+        &root,
+        "evidence/kurrent-live-ln-to-kaspa-evidence.json",
+        "ln-to-kaspa",
+        ln_payment_hash.as_deref(),
+        &mut checks,
+        &mut blockers,
+    );
+    verify_hashlock_reality(
+        &root,
+        "evidence/kurrent-live-kaspa-to-ln-evidence.json",
+        "kaspa-to-ln",
+        ln_payment_hash.as_deref(),
+        &mut checks,
+        &mut blockers,
+    );
+
+    let refund = load_presentation_json(
+        &root,
+        "evidence/kurrent-live-refund-evidence.json",
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &refund {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "refund_status",
+            value.get("status").and_then(Value::as_str) == Some("passed"),
+            "refund timeout workflow completed successfully",
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "early_refund_rejected",
+            json_pointer_str(value, "/early_refund_rejection/status") == Some("rejected")
+                && json_pointer_str(value, "/early_refund_rejection/node_error")
+                    .is_some_and(|err| err.contains("sequence locks")),
+            "early refund is rejected before timeout maturity",
+        );
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "mature_refund_txid",
+            json_pointer_str(value, "/refund/txid").is_some_and(|txid| is_hex_len(txid, 64)),
+            "mature refund records a concrete Kaspa transaction id",
+        );
+        for (pointer, id) in [
+            ("/funding/raw_tx", "refund_funding_raw_tx"),
+            (
+                "/early_refund_rejection/attempted_tx",
+                "early_refund_rejected_raw_tx",
+            ),
+            (
+                "/early_refund_rejection/witness",
+                "early_refund_rejected_witness",
+            ),
+            ("/refund/raw_tx", "refund_raw_tx"),
+            ("/refund/redeem_script", "refund_redeem_script"),
+            ("/refund/witness", "refund_witness"),
+        ] {
+            record_hex_evidence(&root, value, pointer, id, &mut checks, &mut blockers);
+        }
+    }
+
+    let acceptance = load_presentation_json(
+        &root,
+        "evidence/kurrent-acceptance.json",
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &acceptance {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "acceptance_status",
+            value.get("status").and_then(Value::as_str) == Some("passed")
+                && value
+                    .get("blockers")
+                    .and_then(Value::as_array)
+                    .is_some_and(Vec::is_empty),
+            "aggregate acceptance report is passed and blocker-free",
+        );
+        let required_flows = [
+            "kaspa_state_channel_flow",
+            "kaspa_factory_flow",
+            "ln_to_kaspa_atomic_settlement",
+            "kaspa_to_ln_atomic_settlement",
+            "refund_timeout_flow",
+            "evidence_verifier_flow",
+        ];
+        for flow in required_flows {
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                &format!("acceptance_flow_{flow}"),
+                json_pointer_str(value, &format!("/flows/{flow}")) == Some("passed"),
+                format!("{flow} is passed in the aggregate acceptance report"),
+            );
+        }
+        let no_superficial_flow_statuses = value
+            .get("flows")
+            .and_then(Value::as_object)
+            .is_some_and(|flows| {
+                flows.values().filter_map(Value::as_str).all(|status| {
+                    !matches!(
+                        status,
+                        "missing" | "unknown" | "not_executed" | "blocked_before_execution"
+                    )
+                })
+            });
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "acceptance_has_no_superficial_statuses",
+            no_superficial_flow_statuses,
+            "aggregate flow statuses contain no missing or unexecuted markers",
+        );
+        for (key, id) in [
+            (
+                "raw_transaction_paths_and_hashes",
+                "acceptance_raw_tx_records",
+            ),
+            ("script_paths_and_hashes", "acceptance_script_records"),
+            ("witness_paths_and_hashes", "acceptance_witness_records"),
+        ] {
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                id,
+                value
+                    .get(key)
+                    .and_then(Value::as_array)
+                    .is_some_and(|items| !items.is_empty()),
+                format!("{key} is populated in aggregate acceptance"),
+            );
+        }
+        let command_transcript_paths = value
+            .get("command_transcript_paths")
+            .and_then(Value::as_array)
+            .map(|items| {
+                items
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        let command_transcript_check =
+            verify_command_transcript_content(&root, &command_transcript_paths);
+        let (passed, details) = match command_transcript_check {
+            Ok(()) => (
+                true,
+                "command transcripts are present and contain expected daemon/driver markers"
+                    .to_string(),
+            ),
+            Err(err) => (false, err),
+        };
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "acceptance_command_transcripts",
+            passed,
+            details,
+        );
+    }
+
+    let semantic = load_presentation_json(
+        &root,
+        "evidence/production/semantic-transaction-verifier.json",
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &semantic {
+        let checks_all_pass = value
+            .get("checks")
+            .and_then(Value::as_array)
+            .is_some_and(|items| {
+                items.len() >= 7
+                    && items
+                        .iter()
+                        .all(|item| item.get("status").and_then(Value::as_str) == Some("passed"))
+            });
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "semantic_transaction_verifier_depth",
+            value.get("status").and_then(Value::as_str) == Some("passed")
+                && value
+                    .get("verified_hex_records")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|count| count > 0)
+                && value
+                    .get("decoded_transactions")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|count| count > 0)
+                && checks_all_pass,
+            "semantic verifier decoded transactions, verified hex records, and passed all semantic checks",
+        );
+    }
+
+    let adversarial = load_presentation_json(
+        &root,
+        ADVERSARIAL_MODEL_SOAK_EVIDENCE,
+        &mut checks,
+        &mut blockers,
+    );
+    if let Some(value) = &adversarial {
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "adversarial_soak_depth",
+            value.get("status").and_then(Value::as_str) == Some("passed")
+                && value
+                    .get("iterations")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|iterations| iterations >= 64)
+                && value
+                    .get("scenario_count")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|count| count >= 5)
+                && value
+                    .get("check_count")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|count| count > 0)
+                && value
+                    .get("evidence_files")
+                    .and_then(Value::as_array)
+                    .is_some_and(|files| !files.is_empty()),
+            "adversarial soak ran multiple hostile scenarios with recorded evidence files",
+        );
+    }
+
+    let passed = checks
+        .iter()
+        .filter(|check| check.get("status").and_then(Value::as_str) == Some("passed"))
+        .count();
+    let failed = checks.len().saturating_sub(passed);
+    let status = if failed == 0 { "passed" } else { "failed" };
+    let report = json!({
+        "status": status,
+        "generated_at": timestamp(),
+        "scope": "presentation reality gate for local devnet evidence",
+        "summary": {
+            "total": checks.len(),
+            "passed": passed,
+            "failed": failed
+        },
+        "checks": checks,
+        "blockers": blockers
+    });
+    let path = production_dir.join("presentation-reality.json");
+    write_json_file(&path, &report)?;
+
+    if failed == 0 {
+        println!(
+            "presentation reality verified: {passed} checks passed; report={}",
+            path.display()
+        );
+        Ok(0)
+    } else {
+        if let Some(blockers) = report.get("blockers").and_then(Value::as_array) {
+            for blocker in blockers.iter().filter_map(Value::as_str) {
+                eprintln!("blocked: {blocker}");
+            }
+        }
+        Ok(EXIT_EVIDENCE)
+    }
+}
+
+fn verify_hashlock_reality(
+    root: &Path,
+    evidence_path: &str,
+    expected_flow: &str,
+    ln_payment_hash: Option<&str>,
+    checks: &mut Vec<Value>,
+    blockers: &mut Vec<String>,
+) {
+    let Some(value) = load_presentation_json(root, evidence_path, checks, blockers) else {
+        return;
+    };
+    let id_prefix = expected_flow.replace('-', "_");
+    record_presentation_check(
+        checks,
+        blockers,
+        &format!("{id_prefix}_status"),
+        value.get("status").and_then(Value::as_str) == Some("passed")
+            && value.get("flow").and_then(Value::as_str) == Some(expected_flow),
+        format!("{expected_flow} hashlock flow completed successfully"),
+    );
+    record_presentation_check(
+        checks,
+        blockers,
+        &format!("{id_prefix}_preimage_binding"),
+        ln_payment_hash.is_some()
+            && value.get("preimage_sha256").and_then(Value::as_str) == ln_payment_hash,
+        format!("{expected_flow} Kaspa-side preimage hash matches the Lightning payment hash"),
+    );
+    record_presentation_check(
+        checks,
+        blockers,
+        &format!("{id_prefix}_txids"),
+        json_pointer_str(&value, "/funding/txid").is_some_and(|txid| is_hex_len(txid, 64))
+            && json_pointer_str(&value, "/settlement/txid")
+                .is_some_and(|txid| is_hex_len(txid, 64)),
+        format!("{expected_flow} records concrete funding and settlement txids"),
+    );
+    for (pointer, suffix) in [
+        ("/funding/raw_tx", "funding_raw_tx"),
+        ("/settlement/raw_tx", "settlement_raw_tx"),
+        ("/settlement/redeem_script", "settlement_redeem_script"),
+        ("/settlement/witness", "settlement_witness"),
+    ] {
+        record_hex_evidence(
+            root,
+            &value,
+            pointer,
+            &format!("{id_prefix}_{suffix}"),
+            checks,
+            blockers,
+        );
+    }
+}
+
+fn load_presentation_json(
+    root: &Path,
+    relative_path: &str,
+    checks: &mut Vec<Value>,
+    blockers: &mut Vec<String>,
+) -> Option<Value> {
+    let path = resolve_record_path(root, relative_path);
+    let id = format!("evidence_file_{}", check_id_fragment(relative_path));
+    match read_json_value(&path) {
+        Ok(value) => {
+            record_presentation_check(
+                checks,
+                blockers,
+                &id,
+                true,
+                format!("{relative_path} exists and parses as JSON"),
+            );
+            Some(value)
+        }
+        Err(err) => {
+            record_presentation_check(checks, blockers, &id, false, err);
+            None
+        }
+    }
+}
+
+fn read_json_value(path: &Path) -> Result<Value, String> {
+    let bytes = fs::read(path).map_err(|e| format!("failed to read {}: {e}", path.display()))?;
+    serde_json::from_slice(&bytes)
+        .map_err(|e| format!("failed to parse JSON {}: {e}", path.display()))
+}
+
+fn record_hex_evidence(
+    root: &Path,
+    value: &Value,
+    pointer: &str,
+    id: &str,
+    checks: &mut Vec<Value>,
+    blockers: &mut Vec<String>,
+) {
+    let result = evidence_file_from_pointer(value, pointer)
+        .and_then(|record| verify_file_hash_record(root, id, &record, HashMode::HexDecodedBytes));
+    match result {
+        Ok(()) => record_presentation_check(
+            checks,
+            blockers,
+            id,
+            true,
+            "hex artefact exists, decodes, and matches its recorded SHA-256",
+        ),
+        Err(err) => record_presentation_check(checks, blockers, id, false, err),
+    }
+}
+
+fn evidence_file_from_pointer(value: &Value, pointer: &str) -> Result<EvidenceFile, String> {
+    let record = value
+        .pointer(pointer)
+        .ok_or_else(|| format!("missing evidence record at {pointer}"))?;
+    let path = record
+        .get("path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("missing path in evidence record at {pointer}"))?;
+    let sha256 = record
+        .get("sha256")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("missing sha256 in evidence record at {pointer}"))?;
+    Ok(EvidenceFile {
+        path: path.to_string(),
+        sha256: sha256.to_string(),
+    })
+}
+
+fn record_presentation_check(
+    checks: &mut Vec<Value>,
+    blockers: &mut Vec<String>,
+    id: &str,
+    passed: bool,
+    details: impl Into<String>,
+) {
+    let details = details.into();
+    let status = if passed { "passed" } else { "failed" };
+    checks.push(json!({
+        "id": id,
+        "status": status,
+        "details": details,
+    }));
+    if !passed {
+        blockers.push(format!("{id}: {details}"));
+    }
+}
+
+fn json_pointer_str<'a>(value: &'a Value, path: &str) -> Option<&'a str> {
+    value.pointer(path).and_then(Value::as_str)
+}
+
+fn is_hex_len(value: &str, len: usize) -> bool {
+    value.len() == len && value.as_bytes().iter().all(u8::is_ascii_hexdigit)
+}
+
+fn required_command_transcript_paths() -> [&'static str; 5] {
+    [
+        "evidence/ln-alice.log",
+        "evidence/ln-bob.log",
+        "evidence/kaspa-txscript-covenants.stdout.log",
+        "evidence/kaspa-daemon-compute-budget-relay.stdout.log",
+        "evidence/kurrent-live-state-channel-driver.stderr.log",
+    ]
+}
+
+fn verify_command_transcript_content(root: &Path, paths: &[String]) -> Result<(), String> {
+    if paths.is_empty() {
+        return Err("command_transcript_paths is empty".to_string());
+    }
+    for required in required_command_transcript_paths() {
+        if !paths.iter().any(|path| path == required) {
+            return Err(format!("command_transcript_paths is missing {required}"));
+        }
+    }
+    verify_lnd_transcript(root, "evidence/ln-alice.log", "Alice")?;
+    verify_lnd_transcript(root, "evidence/ln-bob.log", "Bob")?;
+    verify_kaspa_covenant_transcript(root)?;
+    verify_kaspa_daemon_transcript(root)?;
+    verify_kurrent_driver_transcript(root)
+}
+
+fn verify_lnd_transcript(root: &Path, path: &str, node: &str) -> Result<(), String> {
+    let text = read_transcript_text(root, path)?;
+    for needle in [
+        "RPC server listening",
+        "gRPC proxy started",
+        "Server listening",
+        "Updating backup file",
+    ] {
+        if !text.contains(needle) {
+            return Err(format!(
+                "{node} LND transcript {path} is missing marker: {needle}"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn verify_kaspa_covenant_transcript(root: &Path) -> Result<(), String> {
+    let path = "evidence/kaspa-txscript-covenants.stdout.log";
+    let text = read_transcript_text(root, path)?;
+    for needle in [
+        "[COVENANT] Counter payload covenant",
+        "[COVENANT] Expected failure: VerifyError",
+        "[COVENANT] Example complete",
+    ] {
+        if !text.contains(needle) {
+            return Err(format!(
+                "Kaspa covenant transcript {path} is missing marker: {needle}"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn verify_kaspa_daemon_transcript(root: &Path) -> Result<(), String> {
+    let path = "evidence/kaspa-daemon-compute-budget-relay.stdout.log";
+    let text = read_transcript_text(root, path)?;
+    for needle in [
+        "kaspad v",
+        "Utxoindex Data directory",
+        "GRPC Server starting",
+        "daemon_compute_budget_relay_test ... ok",
+    ] {
+        if !text.contains(needle) {
+            return Err(format!(
+                "Kaspa daemon transcript {path} is missing marker: {needle}"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn verify_kurrent_driver_transcript(root: &Path) -> Result<(), String> {
+    let path = "evidence/kurrent-live-state-channel-driver.stderr.log";
+    let text = read_transcript_text(root, path)?;
+    if text.contains("kurrent-kaspa-devnet-driver evidence") {
+        Ok(())
+    } else {
+        Err(format!(
+            "Kurrent driver transcript {path} is missing driver execution marker"
+        ))
+    }
+}
+
+fn read_transcript_text(root: &Path, path: &str) -> Result<String, String> {
+    let record_path = resolve_record_path(root, path);
+    if !record_path.is_file() {
+        return Err(format!("missing transcript file: {path}"));
+    }
+    let text = fs::read_to_string(&record_path).map_err(|e| {
+        format!(
+            "failed to read transcript file {}: {e}",
+            record_path.display()
+        )
+    })?;
+    if text.trim().is_empty() {
+        return Err(format!("empty transcript file: {path}"));
+    }
+    Ok(text)
+}
+
+fn check_id_fragment(value: &str) -> String {
+    value
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() {
+                ch.to_ascii_lowercase()
+            } else {
+                '_'
+            }
+        })
+        .collect()
 }
 
 fn production_readiness_requirements() -> [(&'static str, &'static str, &'static str); 8] {
@@ -967,9 +2003,9 @@ fn production_readiness_requirements() -> [(&'static str, &'static str, &'static
             "evidence/production/semantic-transaction-verifier.json",
         ),
         (
-            "adversarial_mempool_soak",
-            "Deterministic adversarial mempool, alternate-history, stale-state, refund-race, swap-replay, and evidence-tamper soak evidence.",
-            "evidence/production/adversarial-mempool-soak.json",
+            "adversarial_model_soak",
+            "Deterministic adversarial model soak covering registry conflict, alternate-history, stale-state, fee-sponsor, factory, swap, refund, and evidence-tamper cases.",
+            ADVERSARIAL_MODEL_SOAK_EVIDENCE,
         ),
         (
             "key_management_recovery",
@@ -1066,7 +2102,7 @@ fn production_json_evidence_satisfies(id: &str, value: &Value) -> bool {
                     .and_then(Value::as_u64)
                     .is_some_and(|transactions| transactions > 0)
         }
-        "adversarial_mempool_soak" => {
+        "adversarial_model_soak" => {
             value
                 .get("deterministic_seed")
                 .and_then(Value::as_str)
@@ -1136,7 +2172,7 @@ fn security_review_required_scopes() -> [&'static str; 8] {
     ]
 }
 
-fn security_review_required_artifact_paths() -> [(&'static str, &'static str); 17] {
+fn security_review_required_artifact_paths() -> [(&'static str, &'static str); 18] {
     [
         ("cargo_manifest", "Cargo.toml"),
         ("cargo_lock", "Cargo.lock"),
@@ -1156,6 +2192,10 @@ fn security_review_required_artifact_paths() -> [(&'static str, &'static str); 1
         (
             "production_security_review_brief",
             "docs/PRODUCTION_SECURITY_REVIEW.md",
+        ),
+        (
+            "factory_commitment_design_boundary",
+            "docs/KURRENT_FACTORY_COMMITMENT_DESIGN.md",
         ),
         (
             "key_management_runbook",
@@ -1184,10 +2224,9 @@ fn security_review_required_artifacts() -> Result<Vec<SecurityReviewArtifact>, S
             sha256: evidence.sha256,
         });
     }
-    let adversarial =
-        file_evidence(&root.join("evidence/production/adversarial-mempool-soak.json"))?;
+    let adversarial = file_evidence(&root.join(ADVERSARIAL_MODEL_SOAK_EVIDENCE))?;
     artifacts.push(SecurityReviewArtifact {
-        id: "adversarial_soak".to_string(),
+        id: "adversarial_model_soak".to_string(),
         path: adversarial.path,
         sha256: adversarial.sha256,
     });
@@ -1512,11 +2551,11 @@ fn run_kaspa_devnet() -> Result<u8, String> {
         write_acceptance_report("failed/blocked", "kaspa_node_missing")?;
         return Ok(EXIT_TOOLING_BLOCKED);
     };
-    let log_path = evidence_dir()?.join("kaspa-simnet-probe.log");
+    let evidence = evidence_dir()?;
+    let evidence_path = evidence.join("kaspa-simnet-probe.json");
+    let _ = fs::remove_file(evidence.join("kaspa-simnet-probe.log"));
     let appdir = root()?.join(".kurrent-devnet/kaspa-simnet");
     fs::create_dir_all(&appdir).map_err(|e| e.to_string())?;
-    let log_file = fs::File::create(&log_path).map_err(|e| e.to_string())?;
-    let err_file = log_file.try_clone().map_err(|e| e.to_string())?;
     let mut child = Command::new(kaspad)
         .arg("--simnet")
         .arg("--utxoindex")
@@ -1528,21 +2567,142 @@ fn run_kaspa_devnet() -> Result<u8, String> {
         .arg(format!("--appdir={}", appdir.display()))
         .arg("--rpclisten=127.0.0.1:16210")
         .arg("--listen=127.0.0.1:16211")
-        .stdout(Stdio::from(log_file))
-        .stderr(Stdio::from(err_file))
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .map_err(|e| format!("failed to start kaspad probe: {e}"))?;
     std::thread::sleep(std::time::Duration::from_secs(5));
     let running = child.try_wait().map_err(|e| e.to_string())?.is_none();
-    let _ = child.kill();
-    let _ = child.wait();
     if running {
-        println!("kaspad simnet probe started; log: {}", log_path.display());
+        let _ = child.kill();
+    }
+    let output = child
+        .wait_with_output()
+        .map_err(|e| format!("failed to collect kaspad probe output: {e}"))?;
+    let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+    let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+    let probe = json!({
+        "status": if running { "passed" } else { "failed" },
+        "daemon": "kaspad",
+        "network": "simnet",
+        "utxoindex": true,
+        "unsynchronised_mining": true,
+        "appdir": appdir.display().to_string(),
+        "rpc_listen": "127.0.0.1:16210",
+        "p2p_listen": "127.0.0.1:16211",
+        "stdout_bytes": output.stdout.len(),
+        "stderr_bytes": output.stderr.len(),
+        "stdout_excerpt": excerpt_lines(&stdout, 40),
+        "stderr_excerpt": excerpt_lines(&stderr, 40),
+    });
+    write_json_file(&evidence_path, &probe)?;
+    if running {
+        print_fixed_width(
+            "kaspad simnet probe passed: real local daemon accepted simnet startup flags.",
+        );
+        print_transcript_excerpt("kaspad stdout", &stdout);
+        print_transcript_excerpt("kaspad stderr", &stderr);
+        print_fixed_width(&format!(
+            "structured probe evidence: {}",
+            evidence_path.display()
+        ));
         Ok(0)
     } else {
+        print_transcript_excerpt("kaspad stdout", &stdout);
+        print_transcript_excerpt("kaspad stderr", &stderr);
         write_acceptance_report("failed/blocked", "kaspa_devnet_probe_failed")?;
         Ok(EXIT_KASPA_FLOW)
     }
+}
+
+fn excerpt_lines(text: &str, limit: usize) -> Vec<String> {
+    text.lines().take(limit).map(ToString::to_string).collect()
+}
+
+fn print_transcript_excerpt(label: &str, text: &str) {
+    if text.trim().is_empty() {
+        return;
+    }
+    print_fixed_width(&format!("{label} transcript excerpt:"));
+    for line in text.lines().take(20) {
+        print_fixed_width(&format!("  {line}"));
+    }
+    let total = text.lines().count();
+    if total > 20 {
+        print_fixed_width(&format!(
+            "  ... {} more lines kept in structured evidence",
+            total - 20
+        ));
+    }
+}
+
+fn print_fixed_width(text: &str) {
+    for line in wrap_fixed_width(text, PRESENTATION_WIDTH) {
+        println!("{line}");
+    }
+}
+
+fn wrap_fixed_width(line: &str, width: usize) -> Vec<String> {
+    let width = width.max(20);
+    let trimmed = line.trim();
+    if trimmed.is_empty() {
+        return vec![String::new()];
+    }
+    let indent = line
+        .chars()
+        .take_while(|ch| ch.is_whitespace())
+        .take(width / 3)
+        .collect::<String>();
+    let indent_len = indent.chars().count();
+    let usable_width = width.saturating_sub(indent_len).max(20);
+    let mut output = Vec::new();
+    let mut current = indent.clone();
+    let mut current_len = indent_len;
+
+    for word in trimmed.split_whitespace() {
+        for piece in split_fixed_word(word, usable_width) {
+            let piece_len = piece.chars().count();
+            let needs_space = current_len > indent_len;
+            let next_len = current_len + usize::from(needs_space) + piece_len;
+            if next_len > width && current_len > indent_len {
+                output.push(current);
+                current = format!("{indent}{piece}");
+                current_len = indent_len + piece_len;
+            } else {
+                if needs_space {
+                    current.push(' ');
+                    current_len += 1;
+                }
+                current.push_str(&piece);
+                current_len += piece_len;
+            }
+        }
+    }
+
+    if current_len > indent_len || output.is_empty() {
+        output.push(current);
+    }
+    output
+}
+
+fn split_fixed_word(word: &str, max_width: usize) -> Vec<String> {
+    let max_width = max_width.max(8);
+    let mut chunks = Vec::new();
+    let mut current = String::new();
+    let mut current_len = 0;
+    for ch in word.chars() {
+        if current_len == max_width {
+            chunks.push(current);
+            current = String::new();
+            current_len = 0;
+        }
+        current.push(ch);
+        current_len += 1;
+    }
+    if !current.is_empty() {
+        chunks.push(current);
+    }
+    chunks
 }
 
 fn run_ln_devnet() -> Result<u8, String> {
@@ -1569,6 +2729,13 @@ fn run_ln_devnet() -> Result<u8, String> {
     let alice_dir = base.join("alice");
     let bob_dir = base.join("bob");
     let evidence = evidence_dir()?;
+    stop_previous_ln_regtest(&bitcoin_cli, &lncli, &base);
+    wait_for_local_ports_closed(
+        &ln_devnet_ports(),
+        Duration::from_secs(15),
+        "previous LN regtest",
+    )?;
+    clear_ln_devnet_evidence(&evidence);
     if base.exists() {
         fs::remove_dir_all(&base)
             .map_err(|e| format!("failed to clean {}: {e}", base.display()))?;
@@ -1580,7 +2747,7 @@ fn run_ln_devnet() -> Result<u8, String> {
     run_status(
         Command::new(&bitcoind)
             .arg("-regtest")
-            .arg("-daemonwait")
+            .arg("-daemon")
             .arg(format!("-datadir={}", bitdir.display()))
             .arg("-server=1")
             .arg("-txindex=1")
@@ -1593,6 +2760,7 @@ fn run_ln_devnet() -> Result<u8, String> {
             .arg("-zmqpubrawtx=tcp://127.0.0.1:28363")
             .arg("-debug=0"),
     )?;
+    wait_bitcoin_rpc_active(&bitcoin_cli, &bitdir)?;
     let cleanup = LnRegtestCleanup {
         bitcoin_cli: bitcoin_cli.clone(),
         bitdir: bitdir.clone(),
@@ -1825,6 +2993,8 @@ fn run_ln_devnet() -> Result<u8, String> {
         "invoice": {
             "payment_hash": payment_hash,
             "preimage": preimage,
+            "preimage_source": "deterministic_test_vector_supplied_to_lnd_addinvoice",
+            "preimage_source_boundary": "The preimage is a deterministic local-devnet test vector supplied to real LND; LND computes the payment hash, settles the invoice, and exposes the same preimage in lookup/payment evidence.",
             "lookup_path": "evidence/ln-bob-lookupinvoice.json",
             "payment_path": "evidence/ln-alice-payinvoice.json"
         },
@@ -1850,6 +3020,41 @@ fn run_ln_devnet() -> Result<u8, String> {
     Ok(0)
 }
 
+fn stop_previous_ln_regtest(bitcoin_cli: &str, lncli: &str, base: &Path) {
+    let bitdir = base.join("bitcoin");
+    let alice_dir = base.join("alice");
+    let bob_dir = base.join("bob");
+    let _ = run_bytes(lncli, &lncli_args(&alice_dir, "127.0.0.1:12009", &["stop"]));
+    let _ = run_bytes(lncli, &lncli_args(&bob_dir, "127.0.0.1:12010", &["stop"]));
+    let _ = run_bytes(
+        bitcoin_cli,
+        &append_args(&bitcoin_base_args(&bitdir), &["stop"]),
+    );
+    let _ = wait_for_local_ports_closed(
+        &ln_devnet_ports(),
+        Duration::from_secs(5),
+        "previous LN regtest cleanup",
+    );
+}
+
+fn clear_ln_devnet_evidence(evidence: &Path) {
+    for file_name in [
+        "ln-devnet-evidence.json",
+        "ln-alice-getinfo.json",
+        "ln-alice-listchannels.json",
+        "ln-alice-payinvoice.json",
+        "ln-alice-walletbalance.json",
+        "ln-bob-getinfo.json",
+        "ln-bob-invoice.json",
+        "ln-bob-listchannels.json",
+        "ln-bob-lookupinvoice.json",
+        "ln-connect.json",
+        "ln-openchannel.json",
+    ] {
+        let _ = fs::remove_file(evidence.join(file_name));
+    }
+}
+
 struct LnRegtestCleanup {
     bitcoin_cli: String,
     bitdir: PathBuf,
@@ -1872,7 +3077,79 @@ impl Drop for LnRegtestCleanup {
             &self.bitcoin_cli,
             &append_args(&bitcoin_base_args(&self.bitdir), &["stop"]),
         );
+        let _ = wait_for_local_ports_closed(
+            &ln_devnet_ports(),
+            Duration::from_secs(5),
+            "LN regtest cleanup",
+        );
     }
+}
+
+fn ln_devnet_ports() -> [u16; 10] {
+    [
+        18563, 18564, 28362, 28363, 12009, 12010, 8280, 8281, 20735, 20736,
+    ]
+}
+
+fn wait_bitcoin_rpc_active(bitcoin_cli: &str, bitdir: &Path) -> Result<(), String> {
+    let args = append_args(&bitcoin_base_args(bitdir), &["getblockchaininfo"]);
+    let debug_log = bitdir.join("regtest/debug.log");
+    let deadline = Instant::now() + Duration::from_secs(30);
+    loop {
+        if run_bytes(bitcoin_cli, &args).is_ok() {
+            return Ok(());
+        }
+        if bitcoin_debug_log_has_start_failure(&debug_log)? {
+            return Err(format!(
+                "bitcoind regtest RPC did not start; debug log reports an RPC/HTTP bind failure at {}",
+                debug_log.display()
+            ));
+        }
+        if Instant::now() >= deadline {
+            return Err("bitcoind regtest RPC did not become active".to_string());
+        }
+        std::thread::sleep(Duration::from_millis(250));
+    }
+}
+
+fn bitcoin_debug_log_has_start_failure(path: &Path) -> Result<bool, String> {
+    if !path.is_file() {
+        return Ok(false);
+    }
+    let text = fs::read_to_string(path)
+        .map_err(|e| format!("failed to read bitcoind debug log {}: {e}", path.display()))?;
+    Ok(text.contains("Unable to bind any endpoint for RPC server")
+        || text.contains("Unable to start HTTP server"))
+}
+
+fn wait_for_local_ports_closed(
+    ports: &[u16],
+    timeout: Duration,
+    label: &str,
+) -> Result<(), String> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        let open_ports = ports
+            .iter()
+            .copied()
+            .filter(|port| local_port_is_open(*port))
+            .collect::<Vec<_>>();
+        if open_ports.is_empty() {
+            return Ok(());
+        }
+        if Instant::now() >= deadline {
+            return Err(format!(
+                "{label} still has local ports open after {}s: {:?}",
+                timeout.as_secs(),
+                open_ports
+            ));
+        }
+        std::thread::sleep(Duration::from_millis(200));
+    }
+}
+
+fn local_port_is_open(port: u16) -> bool {
+    TcpStream::connect(("127.0.0.1", port)).is_ok()
 }
 
 fn bitcoin_base_args(bitdir: &Path) -> Vec<String> {
@@ -2766,12 +4043,14 @@ fn run_adversarial_soak() -> Result<u8, String> {
         evidence_files,
         boundaries: vec![
             "Runs against Kurrent protocol validators and local evidence files; it does not claim mainnet deployment readiness by itself.".to_string(),
-            "Models mempool conflict, stale-state, fee-sponsor tamper, alternate-history, refund-race, swap-replay, and evidence-tamper cases locally.".to_string(),
+            "Models registry conflict, stale-state, fee-sponsor tamper, alternate-history, refund-race, swap-replay, and evidence-tamper cases locally; it does not discharge a real bounded-inclusion or fee-market theorem.".to_string(),
             "Independent external security review remains required before production readiness can pass.".to_string(),
         ],
     };
-    let path = production_dir.join("adversarial-mempool-soak.json");
+    let path = root()?.join(ADVERSARIAL_MODEL_SOAK_EVIDENCE);
     write_json_file(&path, &report)?;
+    let legacy_path = root()?.join(LEGACY_ADVERSARIAL_MEMPOOL_SOAK_EVIDENCE);
+    write_json_file(&legacy_path, &report)?;
     println!("adversarial soak passed; evidence: {}", path.display());
     Ok(0)
 }
@@ -3991,7 +5270,7 @@ fn write_production_target_profile() -> Result<u8, String> {
             "refund timeout evidence",
             "typed local acceptance report",
             "semantic transaction decoding verifier",
-            "deterministic adversarial mempool, alternate-history, refund-race, swap-replay, and evidence-tamper soak"
+            "deterministic adversarial model soak for registry conflict, alternate-history, refund-race, swap-replay, and evidence tampering"
         ],
         "not_yet_supported_for_production_gate": [
             "mainnet deployment",
@@ -4051,40 +5330,39 @@ fn prepare_security_review_package() -> Result<u8, String> {
             "report and signed attestation file hashes must match",
             "reviewed artefact paths and SHA-256 hashes must match this request package"
         ],
-        "passing_evidence_template": {
-            "schema_version": "kurrent-security-review-v1",
-            "status": "passed",
-            "review_type": "independent_external_security_review",
-            "completed_at": "YYYY-MM-DD",
-            "reviewer_name": "<external reviewer name>",
-            "reviewer_organisation": "<external reviewer organisation>",
-            "reviewer_contact": "<external reviewer contact>",
-            "reviewer_independence_attestation": "<statement of independence, conflicts, and review authority>",
-            "reviewed_git_commit": git_stdout(&root, &["rev-parse", "--verify", "HEAD"]),
-            "scope": required_scope,
-            "methodology": [
-                "manual protocol-design review",
-                "manual script/covenant constraint review",
-                "evidence and production-gate replay"
+        "passing_evidence_schema": {
+            "required_constant_fields": {
+                "schema_version": "kurrent-security-review-v1",
+                "status": "passed",
+                "review_type": "independent_external_security_review",
+                "reviewed_git_commit": git_stdout(&root, &["rev-parse", "--verify", "HEAD"])
+            },
+            "required_supplied_fields": [
+                "completed_at",
+                "reviewer_name",
+                "reviewer_organisation",
+                "reviewer_contact",
+                "reviewer_independence_attestation",
+                "methodology",
+                "finding_summary",
+                "report",
+                "signed_attestation"
             ],
-            "reviewed_artifacts": security_review_required_artifacts()?,
-            "finding_summary": {
-                "critical_open": 0,
-                "high_open": 0,
-                "medium_open": 0,
-                "low_open": 0,
-                "accepted_risk_count": 0,
-                "fixed_count": 0
-            },
-            "unresolved_blocking_findings": [],
-            "report": {
-                "path": "evidence/production/security-review-report.pdf",
-                "sha256": "<sha256 of report file bytes>"
-            },
-            "signed_attestation": {
-                "path": "evidence/production/security-review-attestation.txt",
-                "sha256": "<sha256 of signed attestation file bytes>"
-            }
+            "required_scope": required_scope,
+            "required_reviewed_artifacts": security_review_required_artifacts()?,
+            "required_zero_open_findings": [
+                "critical_open",
+                "high_open",
+                "medium_open",
+                "low_open"
+            ],
+            "required_file_hashes": [
+                "report.sha256 must equal the SHA-256 of evidence/production/security-review-report.pdf",
+                "signed_attestation.sha256 must equal the SHA-256 of evidence/production/security-review-attestation.txt"
+            ],
+            "required_empty_arrays": [
+                "unresolved_blocking_findings"
+            ]
         },
         "boundaries": [
             "This request package does not satisfy production readiness by itself.",
@@ -4144,6 +5422,12 @@ fn check() -> Result<u8, String> {
         ("run-ln-to-kaspa-flow", EXIT_LN_FLOW),
         ("run-kaspa-to-ln-flow", EXIT_KASPA_TO_LN_FLOW),
         ("run-refund-flow", EXIT_REFUND_FLOW),
+        ("write-production-target-profile", EXIT_PRODUCTION_READINESS),
+        (
+            "run-semantic-transaction-verifier",
+            EXIT_PRODUCTION_READINESS,
+        ),
+        ("run-adversarial-soak", EXIT_PRODUCTION_READINESS),
     ] {
         let result = match name {
             "run-kaspa-devnet" => run_kaspa_devnet()?,
@@ -4153,6 +5437,9 @@ fn check() -> Result<u8, String> {
             "run-ln-to-kaspa-flow" => run_ln_to_kaspa_flow()?,
             "run-kaspa-to-ln-flow" => run_kaspa_to_ln_flow()?,
             "run-refund-flow" => run_refund_flow()?,
+            "write-production-target-profile" => write_production_target_profile()?,
+            "run-semantic-transaction-verifier" => run_semantic_transaction_verifier()?,
+            "run-adversarial-soak" => run_adversarial_soak()?,
             _ => unreachable!(),
         };
         if result != 0 && first_failure.is_none() {
@@ -4165,10 +5452,11 @@ fn check() -> Result<u8, String> {
     }
     write_acceptance_report("passed", "passed")?;
     let verify = verify_evidence()?;
-    if verify == 0 {
-        println!("passed");
+    if verify != 0 {
+        return Ok(verify);
     }
-    Ok(verify)
+    println!("passed");
+    Ok(0)
 }
 
 fn run_status(cmd: &mut Command) -> Result<(), String> {
@@ -4206,6 +5494,23 @@ mod tests {
             .expect("system time must be after unix epoch")
             .as_nanos();
         env::temp_dir().join(format!("kurrentctl-{label}-{nanos}.json"))
+    }
+
+    fn unique_temp_dir(label: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time must be after unix epoch")
+            .as_nanos();
+        let path = env::temp_dir().join(format!("kurrentctl-{label}-{nanos}"));
+        fs::create_dir_all(&path).expect("test should create temp directory");
+        path
+    }
+
+    fn write_transcript_fixture(root: &Path, path: &str, text: &str) {
+        let full_path = root.join(path);
+        fs::create_dir_all(full_path.parent().expect("fixture path should have parent"))
+            .expect("test should create fixture parent");
+        fs::write(full_path, text).expect("test should write transcript fixture");
     }
 
     #[test]
@@ -4270,6 +5575,127 @@ mod tests {
     }
 
     #[test]
+    fn superficial_command_transcripts_do_not_satisfy_gate() {
+        let root = unique_temp_dir("superficial-transcripts");
+        let paths = required_command_transcript_paths()
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>();
+        for path in &paths {
+            write_transcript_fixture(&root, path, "status: passed\n");
+        }
+
+        assert!(verify_command_transcript_content(&root, &paths).is_err());
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn structured_command_transcripts_satisfy_gate() {
+        let root = unique_temp_dir("structured-transcripts");
+        let paths = required_command_transcript_paths()
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>();
+        write_transcript_fixture(
+            &root,
+            "evidence/ln-alice.log",
+            "RPC server listening\n\
+             gRPC proxy started\n\
+             Server listening\n\
+             Updating backup file\n",
+        );
+        write_transcript_fixture(
+            &root,
+            "evidence/ln-bob.log",
+            "RPC server listening\n\
+             gRPC proxy started\n\
+             Server listening\n\
+             Updating backup file\n",
+        );
+        write_transcript_fixture(
+            &root,
+            "evidence/kaspa-txscript-covenants.stdout.log",
+            "[COVENANT] Counter payload covenant\n\
+             [COVENANT] Expected failure: VerifyError\n\
+             [COVENANT] Example complete\n",
+        );
+        write_transcript_fixture(
+            &root,
+            "evidence/kaspa-daemon-compute-budget-relay.stdout.log",
+            "kaspad v2.0.1\n\
+             Utxoindex Data directory /tmp/utxoindex\n\
+             GRPC Server starting\n\
+             test daemon_compute_budget_relay_test ... ok\n",
+        );
+        write_transcript_fixture(
+            &root,
+            "evidence/kurrent-live-state-channel-driver.stderr.log",
+            "Running `drivers/kaspa-devnet/target/debug/kurrent-kaspa-devnet-driver evidence`\n",
+        );
+
+        assert!(verify_command_transcript_content(&root, &paths).is_ok());
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn state_channel_evidence_links_require_matching_template_and_state() {
+        let value = json!({
+            "settlement_template": {"hash": "template-hash"},
+            "channel_receipt": {
+                "hash": "receipt-hash",
+                "scope": {
+                    "settlement_template_hash": "template-hash",
+                    "state_number": 2
+                }
+            },
+            "state_header": {
+                "header": {
+                    "settlement_template_hash": "template-hash",
+                    "state_number": 2
+                }
+            },
+            "settlement": {"state_number": 2},
+            "model_validation": {
+                "receipt": {
+                    "settlement_template_hash": "model-template-hash",
+                    "state_number": 2
+                },
+                "latest_state_header": {
+                    "settlement_template_hash": "model-template-hash",
+                    "state_number": 2
+                }
+            }
+        });
+        verify_state_channel_evidence_value_links(&value).unwrap();
+    }
+
+    #[test]
+    fn state_channel_evidence_links_reject_template_mismatch() {
+        let value = json!({
+            "settlement_template": {"hash": "template-hash"},
+            "channel_receipt": {
+                "hash": "receipt-hash",
+                "scope": {
+                    "settlement_template_hash": "wrong-template-hash",
+                    "state_number": 2
+                }
+            },
+            "state_header": {
+                "header": {
+                    "settlement_template_hash": "template-hash",
+                    "state_number": 2
+                }
+            },
+            "settlement": {"state_number": 2}
+        });
+        assert!(verify_state_channel_evidence_value_links(&value)
+            .unwrap_err()
+            .contains("settlement_template_hash mismatch"));
+    }
+
+    #[test]
     fn structurally_incomplete_security_review_does_not_satisfy_gate() {
         let path = unique_temp_path("incomplete-security-review");
         let review = json!({
@@ -4279,7 +5705,7 @@ mod tests {
             "completed_at": "2026-06-11",
             "reviewer_name": "External Reviewer",
             "reviewer_organisation": "External Review Ltd",
-            "reviewer_contact": "reviewer@example.invalid",
+            "reviewer_contact": "independent-review-contact",
             "reviewer_independence_attestation": "External reviewer attests independence from implementation work.",
             "reviewed_git_commit": "not-the-current-commit",
             "scope": [],

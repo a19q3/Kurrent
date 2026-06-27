@@ -70,26 +70,6 @@
 //!   unavailable-data behaviour, proof-size and verification-cost
 //!   bounds.
 //!
-//! # Three-layer commitment hierarchy (legacy prototype surface)
-//!
-//! The legacy `LatestStateHeader` carries sixteen wire-level fields and
-//! `state_update_signing_hash` binds most of them, producing multiple
-//! sources of truth without additional cryptographic security. The
-//! production protocol specification should converge to the three-layer
-//! hierarchy defined in the thesis §5:
-//!
-//! - Static context: `KurrentScope` (prototype) →
-//!   `ScopeInputs` (normative, see `normative` section).
-//! - Dynamic state: `KurrentStateRoot` (prototype) →
-//!   `StateRootInput` (normative).
-//! - Participant authorisation: `compute_state_cert_message`
-//!   (prototype) → `StateCertMessage::compute` (normative).
-//!
-//! The legacy functions remain because the prototype evidence path
-//! still depends on them. The normative section below exposes the
-//! cleaner signature payload that the production protocol
-//! specification should converge to.
-//!
 //! # Three-layer derivation for sponsor accounting
 //!
 //! The claim "the sponsor input must not alter the authorised settlement
@@ -182,35 +162,23 @@
 //! Until it is specified, the construction remains verifier-assisted
 //! rather than fully trust-minimised.
 //!
-//! # Three-layer commitment hierarchy (production target)
+//! # Normative commitment hierarchy
 //!
-//! The legacy `LatestStateHeader` carries sixteen wire-level fields and
-//! `state_update_signing_hash` binds most of them, producing multiple
-//! sources of truth without additional cryptographic security. The
-//! production protocol specification should converge to the three-layer
-//! hierarchy defined in the thesis §"A Sketch Construction":
+//! Kurrent is pre-release, so the old epoch-bearing JSON commitment
+//! helpers have been removed from the public protocol surface rather
+//! than supported for compatibility. The normative construction is the
+//! typed BLAKE2b keyed-mode surface in the section below:
 //!
-//! - Static context: [`KurrentScope`] committed once via
-//!   [`compute_scope_id`].
-//! - Dynamic state: [`KurrentStateRoot`] committed once via
-//!   [`compute_state_root`].
-//! - Participant authorisation: a constant-size signed message
-//!   [`compute_state_cert_message`] that binds only `scope_id`, `epoch`,
-//!   `state_number`, and `state_root`. The participant threshold
-//!   signature is over this message. It does not bind the previous
-//!   commitment, balances as a separate field, the settlement template
-//!   hash as a separate field, the fee policy hash, the covenant
-//!   identity, the script hash, the lane id, the participant set hash,
-//!   or any factory-specific identity field.
-//! - Predecessor transcript metadata: [`compute_transition_record`]
-//!   produces a transition record between consecutive state roots. It
-//!   is recorded off-chain for auditability and signing discipline; it
-//!   is NOT a binding input to the on-chain displacement predicate.
+//! - Static context: [`ScopeInputs`] committed once via
+//!   [`ScopeInputs::compute_scope_id`].
+//! - Dynamic state: [`StateRootInput`] committed once per state, including
+//!   the authenticated [`SettlementMask`].
+//! - Participant authorisation: [`StateCertMessage::compute`], binding
+//!   only `scope_id`, `state_number`, and `state_root`.
 //!
-//! The functions in this section do not replace `state_update_signing_hash`
-//! (which the legacy harness and evidence flow still depend on); they
-//! expose the cleaner signature payload that the production protocol
-//! specification should converge to.
+//! Predecessor transcript metadata may still be recorded by the marker
+//! harness, but it is not a public commitment alternative and is not a
+//! binding input to the bilateral displacement predicate.
 
 use secp256k1::{schnorr::Signature, Message, XOnlyPublicKey};
 use serde::{Deserialize, Serialize};
@@ -354,6 +322,13 @@ pub enum KurrentError {
     InvalidPolicyField {
         field: &'static str,
         actual: u64,
+    },
+    /// Settlement values do not map to one of the normative non-zero
+    /// participant-output masks.
+    InvalidSettlementMask {
+        value_a: u64,
+        value_b: u64,
+        total: u64,
     },
     /// `state_number` is outside the normative `0..=2^63 - 1` range.
     /// Distinct from `StaleState` which is for sequencing conflicts.
@@ -862,6 +837,8 @@ pub struct AcceptanceReport {
     pub script_paths_and_hashes: Vec<EvidenceFile>,
     pub witness_paths_and_hashes: Vec<EvidenceFile>,
     pub flow_evidence_paths_and_hashes: Vec<FlowEvidenceFile>,
+    #[serde(default)]
+    pub source_artifact_hashes: Vec<EvidenceFile>,
     pub settlement_template_hashes: Vec<String>,
     pub channel_receipt_hashes: Vec<String>,
     pub command_transcript_paths: Vec<String>,
@@ -1209,174 +1186,6 @@ pub fn state_update_signing_digest(update: &StateUpdate) -> [u8; 32] {
         .expect("state update signing hash must be 32 bytes")
 }
 
-// =============================================================================
-// Three-layer commitment hierarchy
-// =============================================================================
-//
-// The legacy `LatestStateHeader` carries sixteen wire-level fields, and the
-// signed payload historically bound most of them through
-// `state_update_signing_hash`. That signed payload creates multiple sources
-// of truth rather than additional cryptographic security.
-//
-// The thesis §"A Sketch Construction" defines a three-layer commitment
-// hierarchy that the production protocol specification should converge to:
-//
-//   1. Static channel context -- `scope_id`, committed once for the lifetime
-//      of the channel/quotum.
-//   2. Dynamic state -- `state_root_n`, committed once per state.
-//   3. Participant authorisation -- `StateCert_n = QSig[H(scope_id, epoch, n,
-//      state_root_n)]`, constant-size under a fixed participant set.
-//
-// The functions below implement the normative commitment hierarchy. They do
-// not replace `state_update_signing_hash` (which the legacy harness and
-// evidence flow still depend on); they expose the cleaner signature payload
-// that a production protocol specification should converge to. See the
-// thesis for the field-by-field reduction and the rationale.
-
-/// Domain separator for the typed hash tag that prefixes every
-/// three-layer commitment. Acts as a protocol identifier so that
-/// commitments computed under different protocol versions cannot
-/// collide in a hash table or a signature message.
-pub const KURRENT_STATE_CERT_TAG: &str = "Kurrent/StateCert/v1";
-
-/// Domain separator for the scope identifier commitment.
-pub const DOMAIN_SCOPE_ID: &str = "KURRENT_SCOPE_ID_V1";
-
-/// Domain separator for the state root commitment.
-pub const DOMAIN_STATE_ROOT: &str = "KURRENT_STATE_ROOT_V1";
-
-/// Domain separator for the state certificate signing message.
-pub const DOMAIN_STATE_CERT: &str = "KURRENT_STATE_CERT_V1";
-
-/// Domain separator for the transition record.
-pub const DOMAIN_TRANSITION_RECORD: &str = "KURRENT_TRANSITION_RECORD_V1";
-
-/// Static channel context committed once inside the scope identifier.
-///
-/// All fields here are stable for the lifetime of the channel's current
-/// epoch; if any of them changes, the channel transitions to a new
-/// epoch and an `EpochTransitionCertificate` is required.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct KurrentScope {
-    /// Single canonical chain identifier replacing `network_profile` and
-    /// `genesis_or_devnet_id`.
-    pub chain_id: String,
-    /// Funding outpoint for a stand-alone channel; or
-    /// `H(factory_id, virtual_channel_id)` for a virtual channel inside a
-    /// factory.
-    pub origin_id: String,
-    /// Aggregate public key, threshold, and participant configuration.
-    pub auth_policy_hash: String,
-    /// Covenant identity and script hash folded into one context
-    /// commitment. Both fields are retained inside this commitment until
-    /// the property that the covenant identifier already cryptographically
-    /// commits to the script is formally established, in which case the
-    /// script hash may be dropped.
-    pub covenant_binding_hash: String,
-    /// Static settlement rules -- output ordering, permitted scripts,
-    /// conservation rules, sponsorship constraints. Only the dynamic
-    /// settlement distribution lives inside the state root.
-    pub settlement_policy_hash: String,
-    /// Response-window rule, DAA-score substrate policy, same-number-
-    /// conflict mode, replacement-vs-finalisation tie-breaker at equal
-    /// DAA score, and the lane identifier for the bound accepted-ordering
-    /// surface.
-    pub challenge_policy_hash: String,
-}
-
-/// Dynamic state committed once inside the state root.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct KurrentStateRoot {
-    /// Exact state-dependent participant output distribution derived from
-    /// the static settlement policy.
-    pub settlement_distribution_hash: String,
-    /// Merkle root of pending `ChannelReceipt` records (hashlock
-    /// preimage receipts, refund claims, swap receipts).
-    pub conditional_claims_root: String,
-    /// `H(fee_reserve_balance)` for the present Kurrent model; reserved
-    /// for richer dynamic fee state in production.
-    pub dynamic_fee_state_hash: String,
-}
-
-/// Compute the channel scope identifier from the static context.
-///
-/// `scope_id = H_tag(Kurrent/StateCert/v1, chain_id, origin_id, auth_policy_hash,
-///                   covenant_binding_hash, settlement_policy_hash, challenge_policy_hash)`
-pub fn compute_scope_id(scope: &KurrentScope) -> String {
-    hash_json(KURRENT_STATE_CERT_TAG, scope)
-}
-
-/// Compute the state root from the dynamic state.
-///
-/// `state_root_n = H_tag(settlement_distribution_hash, conditional_claims_root,
-///                       dynamic_fee_state_hash)`
-pub fn compute_state_root(state: &KurrentStateRoot) -> String {
-    hash_json(DOMAIN_STATE_ROOT, state)
-}
-
-/// Compute the message that the participant threshold signature binds.
-///
-/// `state_cert_message_n = H(scope_id, epoch, n, state_root_n)`
-///
-/// The participant signature is over this message; it does NOT bind the
-/// previous commitment, balances as a separate field, settlement template
-/// hash as a separate field, fee policy hash, covenant identity, script
-/// hash, lane id, participant set hash, or any factory-specific identity
-/// field. Those facts are committed once inside `scope_id` or `state_root_n`.
-pub fn compute_state_cert_message(
-    scope_id: &str,
-    epoch: u64,
-    state_number: u64,
-    state_root: &str,
-) -> String {
-    hash_json(
-        DOMAIN_STATE_CERT,
-        &StateCertSigningPayload {
-            scope_id,
-            epoch,
-            state_number,
-            state_root,
-        },
-    )
-}
-
-/// Compute the transition record between two consecutive state roots.
-///
-/// `transition_record_n = H(state_root_{n-1}, state_root_n)`
-///
-/// Recorded off-chain for auditability and signing discipline; NOT a
-/// binding input to the on-chain displacement predicate. The covenant
-/// does not check `transition_record_n` against the spent state's
-/// `state_root`; it only checks `scope_id`, `epoch`, `n'>n`, valid
-/// `StateCert_n`, conserved value, and correct successor outputs.
-pub fn compute_transition_record(prev_state_root: &str, state_root: &str) -> String {
-    hash_json(
-        DOMAIN_TRANSITION_RECORD,
-        &TransitionRecordSigningPayload {
-            prev_state_root,
-            state_root,
-        },
-    )
-}
-
-/// Internal signing payload for `compute_state_cert_message`. Kept
-/// private so callers use the four-argument function rather than
-/// constructing the payload themselves.
-#[derive(Debug, Serialize)]
-struct StateCertSigningPayload<'a> {
-    scope_id: &'a str,
-    epoch: u64,
-    state_number: u64,
-    state_root: &'a str,
-}
-
-/// Internal signing payload for `compute_transition_record`.
-#[derive(Debug, Serialize)]
-struct TransitionRecordSigningPayload<'a> {
-    prev_state_root: &'a str,
-    state_root: &'a str,
-}
-
 pub fn derive_kurrent_channel_lane_id(channel_id: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(DOMAIN_LANE_ID.as_bytes());
@@ -1657,8 +1466,9 @@ fn dedup_candidates_prefer_later(
 ///
 /// 1. `accepted_order_index` is strictly increasing;
 /// 2. `daa_score` is non-decreasing in accepted order;
-/// 3. `state_number` is strictly increasing by exactly one;
-/// 4. `previous_state_commitment` chains to the prior `new_state_commitment`.
+/// 3. `state_number` is strictly increasing;
+/// 4. adjacent prototype candidates still chain `previous_state_commitment`
+///    to the prior `new_state_commitment`.
 ///
 /// The displacement check further down iterates `ordered[index + 1..]`,
 /// which is only sound if the ordering precondition holds. In debug and
@@ -1667,18 +1477,13 @@ fn dedup_candidates_prefer_later(
 ///
 /// # Harness-scope caveat
 ///
-/// The four pairwise invariants above are a **harness simplification**, not
-/// a protocol constraint. The protocol itself permits arbitrary higher-state
-/// displacement by either (a) publishing the intervening commitment chain
-/// alongside the higher candidate, or (b) attaching a signed ancestry
-/// proof that the intervening states were threshold-authorised and
-/// commitment-continuous. The harness exercises only adjacent-state
-/// displacement because the model-level pairwise loop is what we have
-/// implemented here. A production protocol specification must additionally
-/// provide either the chain-disclosure witness format or the ancestry-proof
-/// verification path; that work is recorded in the thesis as a named
-/// protocol-specification requirement (see §"Named protocol-specification
-/// requirements") and is **not** discharged by this function.
+/// The marker evidence path carries predecessor transcript metadata for
+/// auditability, but the bilateral channel's replacement rule is
+/// predecessor-independent: any strictly higher authorised state can
+/// displace a lower candidate if it is accepted before the lower
+/// candidate's settlement matures. Therefore this function rejects
+/// non-increasing state numbers but does not require skipped predecessor
+/// commitments for `m > n + 1`.
 pub fn evaluate_settlement_eligibility(
     config: &KurrentChannelConfig,
     funding: &FundingState,
@@ -1741,14 +1546,15 @@ pub fn evaluate_settlement_eligibility(
                 state_number: next_state,
             });
         }
-        if next_state <= previous_state || next_state != previous_state + 1 {
+        if next_state <= previous_state {
             return Err(KurrentError::NonMonotonicState {
                 current: previous_state,
                 attempted: next_state,
             });
         }
-        if next.update.header.previous_state_commitment
-            != previous.update.header.new_state_commitment
+        if next_state == previous_state + 1
+            && next.update.header.previous_state_commitment
+                != previous.update.header.new_state_commitment
         {
             return Err(KurrentError::PreviousStateMismatch {
                 expected: previous.update.header.new_state_commitment.clone(),
@@ -2496,7 +2302,7 @@ pub const PROGRAMME_VERSION_V1: u16 = 1;
 /// Policy v1 fixed assignments.
 pub const POLICY_VERSION_V1: u16 = 1;
 pub const SPONSOR_POLICY_EXTERNAL_ONLY: u32 = 0;
-pub const SETTLEMENT_SHAPE_TWO_PARTY_FIXED: u32 = 0;
+pub const SETTLEMENT_SHAPE_TWO_PARTY_FIXED: u32 = 1;
 
 /// Reserved 64-byte field in `PolicyEncoding`; on v1 the field must be
 /// all-zero or the covenant rejects the policy.
@@ -2538,12 +2344,14 @@ pub fn blake2b_256_keyed_hex(domain_tag: &str, payload: &[u8]) -> String {
     hex::encode(blake2b_256_keyed(domain_tag, payload))
 }
 
-/// Fixed-width canonical script public key encoding, matching the
-/// consensus wire form of a Kaspa transaction output:
+/// Fixed-width canonical script public key encoding used inside signed
+/// commitments:
 ///
-/// `encodeSPK(spk) = le16(version) || le64(len(script)) || script`
+/// `commitSPK(spk) = le16(version) || le64(len(script)) || script`
 ///
-/// The covenant and the verifier compare only this fixed-width form.
+/// This is not the byte vector returned by Toccata output introspection.
+/// Actual transaction outputs are compared through
+/// [`EncodedSpk::toccata_encode`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EncodedSpk {
     pub version: u16,
@@ -2560,6 +2368,19 @@ impl EncodedSpk {
         let mut out = Vec::with_capacity(2 + 8 + self.script.len());
         out.extend_from_slice(&self.version.to_le_bytes());
         out.extend_from_slice(&(self.script.len() as u64).to_le_bytes());
+        out.extend_from_slice(&self.script);
+        out
+    }
+
+    /// Toccata transaction-output SPK byte form:
+    ///
+    /// `toccataSPK(spk) = be16(version) || script`
+    ///
+    /// This is the byte vector compared against `OpTxOutputSpk`; it is
+    /// deliberately distinct from the signed `commitSPK` form above.
+    pub fn toccata_encode(&self) -> Vec<u8> {
+        let mut out = Vec::with_capacity(2 + self.script.len());
+        out.extend_from_slice(&self.version.to_be_bytes());
         out.extend_from_slice(&self.script);
         out
     }
@@ -2603,12 +2424,58 @@ impl ParticipantSlot {
     }
 }
 
+/// Canonical settlement-presence mask authenticated by the state root
+/// and contest script. Kaspa rejects zero-valued outputs, so terminal
+/// states that pay all funds to one participant emit only the non-zero
+/// participant output.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SettlementMask {
+    /// `0x01`: A receives zero; the sole participant output pays B.
+    BOnly,
+    /// `0x02`: B receives zero; the sole participant output pays A.
+    AOnly,
+    /// `0x03`: both participants receive positive outputs.
+    Both,
+}
+
+impl SettlementMask {
+    pub fn byte(self) -> u8 {
+        match self {
+            Self::BOnly => 0x01,
+            Self::AOnly => 0x02,
+            Self::Both => 0x03,
+        }
+    }
+
+    pub fn participant_output_count(self) -> usize {
+        match self {
+            Self::BOnly | Self::AOnly => 1,
+            Self::Both => 2,
+        }
+    }
+
+    pub fn from_values(value_a: u64, value_b: u64, total: u64) -> Result<Self> {
+        validate_conservation(value_a, value_b, total)?;
+        match (value_a, value_b) {
+            (0, b) if b == total && total > 0 => Ok(Self::BOnly),
+            (a, 0) if a == total && total > 0 => Ok(Self::AOnly),
+            (a, b) if a > 0 && b > 0 => Ok(Self::Both),
+            _ => Err(KurrentError::InvalidSettlementMask {
+                value_a,
+                value_b,
+                total,
+            }),
+        }
+    }
+}
+
 /// Normative state root input: a (slot, spk, value) triple.
 ///
-/// `state_root_n = H_KurrentState/v1(0x00 || encodeSPK(spk_A) || le64(v_A)
+/// `state_root_n = H_KurrentState/v1(mask || 0x00 || commitSPK(spk_A) || le64(v_A)
 ///                              || 0x01 || encodeSPK(spk_B) || le64(v_B))`
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StateRootInput {
+    pub settlement_mask: SettlementMask,
     pub spk_a: EncodedSpk,
     pub value_a: u64,
     pub spk_b: EncodedSpk,
@@ -2620,6 +2487,7 @@ impl StateRootInput {
     /// `KurrentState/v1` domain tag.
     pub fn canonical_payload(&self) -> Vec<u8> {
         let mut out = Vec::new();
+        out.push(self.settlement_mask.byte());
         out.push(ParticipantSlot::A.tag());
         out.extend_from_slice(&self.spk_a.encode());
         out.extend_from_slice(&self.value_a.to_le_bytes());
@@ -2643,12 +2511,13 @@ impl StateRootInput {
 
 /// Canonical cooperative-close settlement-output hash:
 ///
-/// `S = H_KurrentCoopCloseOutputs/v1(encodeSPK(spk_A) || le64(v_A)
+/// `S = H_KurrentCoopCloseOutputs/v1(mask || commitSPK(spk_A) || le64(v_A)
 ///                                  || encodeSPK(spk_B) || le64(v_B))`
 ///
 /// This deliberately uses a different domain tag from
 /// `CoopCloseMessage::compute`, which signs `scope_id || input_outpoint || S`.
 pub fn coop_close_outputs_hash(
+    settlement_mask: SettlementMask,
     spk_a: &EncodedSpk,
     value_a: u64,
     spk_b: &EncodedSpk,
@@ -2656,7 +2525,8 @@ pub fn coop_close_outputs_hash(
 ) -> [u8; 32] {
     let encoded_a = spk_a.encode();
     let encoded_b = spk_b.encode();
-    let mut payload = Vec::with_capacity(encoded_a.len() + 8 + encoded_b.len() + 8);
+    let mut payload = Vec::with_capacity(1 + encoded_a.len() + 8 + encoded_b.len() + 8);
+    payload.push(settlement_mask.byte());
     payload.extend_from_slice(&encoded_a);
     payload.extend_from_slice(&value_a.to_le_bytes());
     payload.extend_from_slice(&encoded_b);
@@ -2665,12 +2535,19 @@ pub fn coop_close_outputs_hash(
 }
 
 pub fn coop_close_outputs_hash_hex(
+    settlement_mask: SettlementMask,
     spk_a: &EncodedSpk,
     value_a: u64,
     spk_b: &EncodedSpk,
     value_b: u64,
 ) -> String {
-    hex::encode(coop_close_outputs_hash(spk_a, value_a, spk_b, value_b))
+    hex::encode(coop_close_outputs_hash(
+        settlement_mask,
+        spk_a,
+        value_a,
+        spk_b,
+        value_b,
+    ))
 }
 
 /// 32-byte x-only BIP-340 aggregate verification key, produced by
@@ -2726,7 +2603,7 @@ pub fn musig2_aggregate_xonly(pubkey_a: [u8; 32], pubkey_b: [u8; 32]) -> Aggrega
         // Hash output can equal n; reject the (extremely unlikely) all-zero
         // case as well by re-deriving with a counter, matching the
         // standard MuSig2 tie-break rule.
-        secp256k1::Scalar::from_be_bytes(bytes).unwrap_or_else(|_| {
+        secp256k1::Scalar::from_be_bytes(bytes).unwrap_or({
             // 1 is not a valid coefficient for H_agg ≥ 1, so re-derive.
             // Probability of this branch is 2^-128; in practice never hit.
             secp256k1::Scalar::ONE
@@ -2852,14 +2729,6 @@ impl StateCertMessage {
     pub fn compute_hex(&self) -> Result<String> {
         Ok(hex::encode(self.compute()?))
     }
-
-    /// Compatibility shim for call sites that have not been migrated
-    /// to the `Result`-returning form. **Panics** if the state number
-    /// is out of range; use `compute` for fallible behaviour.
-    pub fn compute_unvalidated(&self) -> [u8; 32] {
-        self.compute()
-            .expect("StateCertMessage::compute called on out-of-range state_number")
-    }
 }
 
 /// Validate that the state number is within the normative range
@@ -2980,7 +2849,7 @@ impl ScopeInputs {
 ///
 /// v1 assignments: policy_version=1, sponsor_policy_id=0
 /// (external-sponsor-only for positive-fee protocol transactions),
-/// settlement_shape_id=0 (fixed two-party shape),
+/// settlement_shape_id=1 (two-party mask-bearing shape),
 /// coop_close_enabled ∈ {0, 1}, reserved_64 must be all-zero (rejection
 /// on non-zero is normative).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -3087,11 +2956,23 @@ impl BoundedShape {
         }
     }
 
-    /// Maximum number of output slots (fixed slots, plus optional sponsor).
-    pub fn output_slot_count(&self) -> usize {
+    /// Exact output-slot count for the branch and settlement mask.
+    ///
+    /// For replacement/opening the settlement mask is ignored because
+    /// output 0 is the successor contest output. For settlement and
+    /// cooperative close, participant outputs are selected by the mask
+    /// and optional sponsor change follows them.
+    pub fn output_slot_count(
+        &self,
+        settlement_mask: SettlementMask,
+        sponsor_change: bool,
+    ) -> usize {
+        let sponsor_slots = usize::from(sponsor_change);
         match self {
-            Self::ContestOpeningOrReplacement => 2,
-            Self::Settlement | Self::CoopClose => 3,
+            Self::ContestOpeningOrReplacement => 1 + sponsor_slots,
+            Self::Settlement | Self::CoopClose => {
+                settlement_mask.participant_output_count() + sponsor_slots
+            }
         }
     }
 
@@ -3157,8 +3038,10 @@ pub fn verify_replacement_state_root(
     witness_value_b: u64,
     expected_total: u64,
 ) -> Result<bool> {
-    validate_conservation(witness_value_a, witness_value_b, expected_total)?;
+    let settlement_mask =
+        SettlementMask::from_values(witness_value_a, witness_value_b, expected_total)?;
     let recomputed = StateRootInput {
+        settlement_mask,
         spk_a: witness_spk_a.clone(),
         value_a: witness_value_a,
         spk_b: witness_spk_b.clone(),

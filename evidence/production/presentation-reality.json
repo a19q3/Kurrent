@@ -1,0 +1,413 @@
+{
+  "blockers": [],
+  "checks": [
+    {
+      "details": "evidence/tool-detection.json exists and parses as JSON",
+      "id": "evidence_file_evidence_tool_detection_json",
+      "status": "passed"
+    },
+    {
+      "details": "local tool detection reports ready",
+      "id": "tool_detection_status",
+      "status": "passed"
+    },
+    {
+      "details": "kaspad resolves to an existing local executable path",
+      "id": "tool_path_kaspad",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa-cli resolves to an existing local executable path",
+      "id": "tool_path_kaspa-cli",
+      "status": "passed"
+    },
+    {
+      "details": "bitcoind resolves to an existing local executable path",
+      "id": "tool_path_bitcoind",
+      "status": "passed"
+    },
+    {
+      "details": "bitcoin-cli resolves to an existing local executable path",
+      "id": "tool_path_bitcoin-cli",
+      "status": "passed"
+    },
+    {
+      "details": "lnd resolves to an existing local executable path",
+      "id": "tool_path_lnd",
+      "status": "passed"
+    },
+    {
+      "details": "lncli resolves to an existing local executable path",
+      "id": "tool_path_lncli",
+      "status": "passed"
+    },
+    {
+      "details": "selected Kaspa source repository is present locally",
+      "id": "selected_kaspa_source_repo",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/kaspa-simnet-probe.json exists and parses as JSON",
+      "id": "evidence_file_evidence_kaspa_simnet_probe_json",
+      "status": "passed"
+    },
+    {
+      "details": "Kaspa simnet probe completed successfully",
+      "id": "kaspa_probe_status",
+      "status": "passed"
+    },
+    {
+      "details": "probe identifies a local kaspad simnet daemon",
+      "id": "kaspa_daemon_identity",
+      "status": "passed"
+    },
+    {
+      "details": "UTXO index and unsynchronised local mining are enabled",
+      "id": "kaspa_utxo_index_and_mining",
+      "status": "passed"
+    },
+    {
+      "details": "probe captured kaspad startup transcript evidence",
+      "id": "kaspa_daemon_transcript",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/ln-devnet-evidence.json exists and parses as JSON",
+      "id": "evidence_file_evidence_ln_devnet_evidence_json",
+      "status": "passed"
+    },
+    {
+      "details": "Bitcoin regtest plus Alice/Bob LND workflow completed successfully",
+      "id": "ln_devnet_status",
+      "status": "passed"
+    },
+    {
+      "details": "Alice and Bob expose distinct compressed secp256k1 identity keys",
+      "id": "ln_peer_identities",
+      "status": "passed"
+    },
+    {
+      "details": "legacy LN evidence omits preimage-source metadata; the preimage/payment-hash binding remains the blocking check",
+      "id": "ln_invoice_preimage_source",
+      "status": "passed"
+    },
+    {
+      "details": "deterministic invoice preimage hashes to the recorded Lightning payment hash",
+      "id": "ln_invoice_preimage_hash",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/ln-alice-payinvoice.json exists and parses as JSON",
+      "id": "evidence_file_evidence_ln_alice_payinvoice_json",
+      "status": "passed"
+    },
+    {
+      "details": "lncli payment evidence shows the invoice payment succeeded with the same hash and preimage",
+      "id": "ln_invoice_payment_status",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/ln-alice-listchannels.json exists and parses as JSON",
+      "id": "evidence_file_evidence_ln_alice_listchannels_json",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/ln-bob-listchannels.json exists and parses as JSON",
+      "id": "evidence_file_evidence_ln_bob_listchannels_json",
+      "status": "passed"
+    },
+    {
+      "details": "Alice and Bob list the same active channel with reciprocal remote pubkeys",
+      "id": "ln_bidirectional_channel_state",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/kurrent-live-state-channel-evidence.json exists and parses as JSON",
+      "id": "evidence_file_evidence_kurrent_live_state_channel_evidence_json",
+      "status": "passed"
+    },
+    {
+      "details": "latest-state Kaspa flow completed successfully",
+      "id": "state_channel_status",
+      "status": "passed"
+    },
+    {
+      "details": "state update advances from state 1 to state 2 and settlement uses state 2",
+      "id": "state_channel_transition",
+      "status": "passed"
+    },
+    {
+      "details": "stale state submission is rejected by the Kaspa-side validation path",
+      "id": "stale_state_rejected",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_funding_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_update_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_update_witness",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "stale_rejected_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "stale_rejected_witness",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_settlement_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_settlement_witness",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_1_redeem_script",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "state_2_redeem_script",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/kurrent-live-ln-to-kaspa-evidence.json exists and parses as JSON",
+      "id": "evidence_file_evidence_kurrent_live_ln_to_kaspa_evidence_json",
+      "status": "passed"
+    },
+    {
+      "details": "ln-to-kaspa hashlock flow completed successfully",
+      "id": "ln_to_kaspa_status",
+      "status": "passed"
+    },
+    {
+      "details": "ln-to-kaspa Kaspa-side preimage hash matches the Lightning payment hash",
+      "id": "ln_to_kaspa_preimage_binding",
+      "status": "passed"
+    },
+    {
+      "details": "ln-to-kaspa records concrete funding and settlement txids",
+      "id": "ln_to_kaspa_txids",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "ln_to_kaspa_funding_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "ln_to_kaspa_settlement_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "ln_to_kaspa_settlement_redeem_script",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "ln_to_kaspa_settlement_witness",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/kurrent-live-kaspa-to-ln-evidence.json exists and parses as JSON",
+      "id": "evidence_file_evidence_kurrent_live_kaspa_to_ln_evidence_json",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa-to-ln hashlock flow completed successfully",
+      "id": "kaspa_to_ln_status",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa-to-ln Kaspa-side preimage hash matches the Lightning payment hash",
+      "id": "kaspa_to_ln_preimage_binding",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa-to-ln records concrete funding and settlement txids",
+      "id": "kaspa_to_ln_txids",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "kaspa_to_ln_funding_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "kaspa_to_ln_settlement_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "kaspa_to_ln_settlement_redeem_script",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "kaspa_to_ln_settlement_witness",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/kurrent-live-refund-evidence.json exists and parses as JSON",
+      "id": "evidence_file_evidence_kurrent_live_refund_evidence_json",
+      "status": "passed"
+    },
+    {
+      "details": "refund timeout workflow completed successfully",
+      "id": "refund_status",
+      "status": "passed"
+    },
+    {
+      "details": "early refund is rejected before timeout maturity",
+      "id": "early_refund_rejected",
+      "status": "passed"
+    },
+    {
+      "details": "mature refund records a concrete Kaspa transaction id",
+      "id": "mature_refund_txid",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "refund_funding_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "early_refund_rejected_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "early_refund_rejected_witness",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "refund_raw_tx",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "refund_redeem_script",
+      "status": "passed"
+    },
+    {
+      "details": "hex artefact exists, decodes, and matches its recorded SHA-256",
+      "id": "refund_witness",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/kurrent-acceptance.json exists and parses as JSON",
+      "id": "evidence_file_evidence_kurrent_acceptance_json",
+      "status": "passed"
+    },
+    {
+      "details": "aggregate acceptance report is passed and blocker-free",
+      "id": "acceptance_status",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa_state_channel_flow is passed in the aggregate acceptance report",
+      "id": "acceptance_flow_kaspa_state_channel_flow",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa_factory_flow is passed in the aggregate acceptance report",
+      "id": "acceptance_flow_kaspa_factory_flow",
+      "status": "passed"
+    },
+    {
+      "details": "ln_to_kaspa_atomic_settlement is passed in the aggregate acceptance report",
+      "id": "acceptance_flow_ln_to_kaspa_atomic_settlement",
+      "status": "passed"
+    },
+    {
+      "details": "kaspa_to_ln_atomic_settlement is passed in the aggregate acceptance report",
+      "id": "acceptance_flow_kaspa_to_ln_atomic_settlement",
+      "status": "passed"
+    },
+    {
+      "details": "refund_timeout_flow is passed in the aggregate acceptance report",
+      "id": "acceptance_flow_refund_timeout_flow",
+      "status": "passed"
+    },
+    {
+      "details": "evidence_verifier_flow is passed in the aggregate acceptance report",
+      "id": "acceptance_flow_evidence_verifier_flow",
+      "status": "passed"
+    },
+    {
+      "details": "aggregate flow statuses contain no missing or unexecuted markers",
+      "id": "acceptance_has_no_superficial_statuses",
+      "status": "passed"
+    },
+    {
+      "details": "raw_transaction_paths_and_hashes is populated in aggregate acceptance",
+      "id": "acceptance_raw_tx_records",
+      "status": "passed"
+    },
+    {
+      "details": "script_paths_and_hashes is populated in aggregate acceptance",
+      "id": "acceptance_script_records",
+      "status": "passed"
+    },
+    {
+      "details": "witness_paths_and_hashes is populated in aggregate acceptance",
+      "id": "acceptance_witness_records",
+      "status": "passed"
+    },
+    {
+      "details": "command transcripts are present and contain expected daemon/driver markers",
+      "id": "acceptance_command_transcripts",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/production/semantic-transaction-verifier.json exists and parses as JSON",
+      "id": "evidence_file_evidence_production_semantic_transaction_verifier_json",
+      "status": "passed"
+    },
+    {
+      "details": "semantic verifier decoded transactions, verified hex records, and passed all semantic checks",
+      "id": "semantic_transaction_verifier_depth",
+      "status": "passed"
+    },
+    {
+      "details": "evidence/production/adversarial-model-soak.json exists and parses as JSON",
+      "id": "evidence_file_evidence_production_adversarial_model_soak_json",
+      "status": "passed"
+    },
+    {
+      "details": "adversarial soak ran multiple hostile scenarios with recorded evidence files",
+      "id": "adversarial_soak_depth",
+      "status": "passed"
+    }
+  ],
+  "generated_at": "1782572167",
+  "scope": "presentation reality gate for local devnet evidence",
+  "status": "passed",
+  "summary": {
+    "failed": 0,
+    "passed": 80,
+    "total": 80
+  }
+}

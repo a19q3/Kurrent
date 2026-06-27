@@ -10,27 +10,27 @@
   ],
   "live_evidence": {
     "path": "evidence/kurrent-live-ln-to-kaspa-evidence.json",
-    "sha256": "dc1483b9e3b053b1186e92a84371680fa31e2c995f2f6d3249530ba2b89daa96"
+    "sha256": "5a2881e82b7aa21d189c0ad69bd93c129918577b22bd1c4b2239e5d735a5699d"
   },
   "ln_evidence": {
     "path": "evidence/ln-devnet-evidence.json",
-    "sha256": "b2064d3bfcb496f70ea8e3a22b1aca955e17f54f8edb514f6d47127d02ae4433"
+    "sha256": "c813eda3c1706723d7c461a6b9eb607d77226a04b90ab56a15bbe38340689137"
   },
   "preimage_status": "passed",
   "receipt_scope": {
     "amount": 1000,
     "direction": "ln-to-kaspa",
     "domain_separator": "KURRENT_LN_INTEROP_V1",
-    "kaspa_funding_outpoint": "7b407ad252ec4f62d4fa5f9e55c266337da4a03851f9acb50afce00a6edd1b82:0",
-    "kaspa_settlement_outpoint": "18ecda6f6e833f1164a349dd0efab711b8d20e76b30ddaee8858172b1ac49d57:0",
+    "kaspa_funding_outpoint": "7f46300b3c1f27e0caada3b2b3a473178e7c5bc9cf524dfb50c6637a21aa7c50:0",
+    "kaspa_settlement_outpoint": "c25d4c6ea95b1937feb1f4b0da22f4caae489fa904c696bc21e632c49e9a607c:0",
     "ln_payment_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
     "network_profile": "kaspa-simnet-toccata + bitcoin-regtest-lnd",
     "preimage_hash": "dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8",
     "protocol_version": 1,
     "recipient": "alice",
-    "script_hash": "d20f2528354e1a1343691fe0740b72596ef791e1c0392c9aebfece837da65a89",
+    "script_hash": "e7bdce72eaa88fbf293f15e2965f12fd59de2716d30061c96c8c65425f6f6d43",
     "swap_id": "swap-ln-to-kaspa-001"
   },
   "status": "passed",
-  "swap_receipt_hash": "a1fdcb726d2ec6207ca18837a853ab8c03c2162ec595c626023b72499bb24579"
+  "swap_receipt_hash": "dc00e31131261c54700b07ee1e1100a234c589a23bb79c5115bf9ee76b00f26a"
 }
