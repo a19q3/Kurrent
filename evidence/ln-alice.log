@@ -1,261 +1,261 @@
-2026-06-27 15:25:50.198 [WRN] LTND: open /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/lnd.conf: no such file or directory
-2026-06-27 15:25:50.199 [WRN] LTND: Config 'bitcoin.active' is deprecated, please remove it
-2026-06-27 15:25:50.199 [INF] LTND: Version Info rev=848b72 version=0.20.1-beta commit="" debuglevel=production logging=info
-2026-06-27 15:25:50.199 [INF] LTND: Network Info rev=848b72 active_chain=Bitcoin network=regtest
-2026-06-27 15:25:50.199 [INF] RPCS: Generating TLS certificates...
-2026-06-27 15:25:50.201 [INF] RPCS: Done generating TLS certificates
-2026-06-27 15:25:50.209 [INF] RPCS: RPC server listening on 127.0.0.1:12009
-2026-06-27 15:25:50.222 [INF] RPCS: gRPC proxy started at 127.0.0.1:8280
-2026-06-27 15:25:50.222 [INF] LTND: Opening the main database, this might take a few minutes...
-2026-06-27 15:25:50.222 [INF] LTND: Opening bbolt database, sync_freelist=false, auto_compact=false
-2026-06-27 15:25:50.249 [INF] LTND: Creating local graph and channel state DB instances
-2026-06-27 15:25:50.279 [INF] CHDB: Checking for schema update: latest_version=33, db_version=33
-2026-06-27 15:25:50.279 [INF] CHDB: Applying 2 optional migrations
-2026-06-27 15:25:50.279 [INF] CHDB: Checking for optional update: name=prune_revocation_log
-2026-06-27 15:25:50.279 [INF] CHDB: Checking for optional update: name=gc_decayed_log
-2026-06-27 15:25:50.279 [INF] CHDB: Performing database optional migration: gc_decayed_log
-2026-06-27 15:25:50.280 [INF] CHDB: Migrating decayed log...
-2026-06-27 15:25:50.298 [INF] CHDB: Decayed log migrated successfully
-2026-06-27 15:25:50.320 [INF] CHDB: Successfully applied optional migration: gc_decayed_log
-2026-06-27 15:25:50.372 [INF] LTND: Database(s) now open (time_to_open=149.702917ms)!
-2026-06-27 15:25:50.402 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
-2026-06-27 15:25:50.402 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
-2026-06-27 15:25:50.418 [INF] BTWL: Started listening for bitcoind block notifications via ZMQ on 127.0.0.1:28362
-2026-06-27 15:25:50.418 [INF] BTWL: Started listening for bitcoind transaction notifications via ZMQ on 127.0.0.1:28363
-2026-06-27 15:25:50.420 [INF] CHRE: Initializing bitcoind backed fee estimator in CONSERVATIVE mode
-2026-06-27 15:25:50.420 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
-2026-06-27 15:25:50.420 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
-2026-06-27 15:25:52.103 [INF] BTWL: Opened wallet
-2026-06-27 15:25:52.629 [INF] BTWL: The wallet has been unlocked without a time limit
-2026-06-27 15:25:52.684 [INF] CHRE: LightningWallet opened
-2026-06-27 15:25:52.739 [INF] HSWC: Cleaning circuits from disk for closed channels
-2026-06-27 15:25:52.744 [INF] HSWC: Finished cleaning: no closed channels found, no actions taken.
-2026-06-27 15:25:52.745 [INF] HSWC: Restoring in-memory circuit state from disk
-2026-06-27 15:25:52.771 [INF] HSWC: Payment circuits loaded: num_pending=0, num_open=0
-2026-06-27 15:25:52.794 [INF] BTWL: Started rescan from block 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 (height 0) for 0 addrs, 0 outpoints
-2026-06-27 15:25:52.828 [INF] BTWL: Catching up block hashes to height 1, this might take a while
-2026-06-27 15:25:52.847 [INF] CRTR: Loaded 0 mission control entries
-2026-06-27 15:25:52.870 [INF] BTWL: Done catching up block hashes
-2026-06-27 15:25:52.878 [INF] ACSM: Access Manager initialized
-2026-06-27 15:25:52.878 [INF] BTWL: Rescanned through block 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 (height 1)
-2026-06-27 15:25:52.885 [INF] SWPR: Migrating UTXO nursery finalized TXIDs
-2026-06-27 15:25:52.924 [INF] LTND: Channel backup proxy channel notifier starting
-2026-06-27 15:25:52.935 [INF] CHIO: Registered queue=1 with 3 blockbeat consumers
-2026-06-27 15:25:52.945 [INF] ATPL: Instantiating autopilot with active=false, max_channels=5, allocation=0.600000, min_chan_size=20000, max_chan_size=16777215, private=false, min_confs=1, conf_target=3
-2026-06-27 15:25:52.952 [INF] LTND: We're not running within systemd or the service type is not 'notify'
-2026-06-27 15:25:52.965 [INF] LTND: Waiting for chain backend to finish sync rev=848b72 start_height=101
-2026-06-27 15:25:54.797 [INF] BTWL: Catching up block hashes to height 101, this might take a while
-2026-06-27 15:25:54.807 [INF] BTWL: Done catching up block hashes
-2026-06-27 15:25:54.807 [INF] BTWL: Finished rescan for 0 addresses (synced to block 46b4b101c13ec71b103f15b7674e716c2528319101c00c082c9f44a4a08cde8a, height 101)
-2026-06-27 15:25:55.011 [INF] LTND: Chain backend is fully synced! rev=848b72 end_height=101
-2026-06-27 15:25:55.012 [WRN] HLCK: check: disk space configured with 0 attempts, skipping it
-2026-06-27 15:25:55.012 [WRN] HLCK: check: tls configured with 0 attempts, skipping it
-2026-06-27 15:25:55.012 [INF] LNWL: SigPool starting
-2026-06-27 15:25:55.012 [INF] NTFN: bitcoind notifier starting...
-2026-06-27 15:25:55.025 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.025 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.025 [INF] BTCN: Broadcaster now active
-2026-06-27 15:25:55.025 [INF] CHNF: ChannelNotifier starting
-2026-06-27 15:25:55.025 [INF] PRNF: PeerNotifier starting
-2026-06-27 15:25:55.025 [INF] HSWC: HtlcNotifier starting
-2026-06-27 15:25:55.025 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.025 [INF] SRVR: Received initial block 46b4b101c13ec71b103f15b7674e716c2528319101c00c082c9f44a4a08cde8a at height 101
-2026-06-27 15:25:55.025 [INF] NTFN: Cancelling epoch notification, epoch_id=3
-2026-06-27 15:25:55.025 [INF] SWPR: TxPublisher starting...
-2026-06-27 15:25:55.026 [INF] SWPR: Sweeper starting
-2026-06-27 15:25:55.026 [INF] UTXN: UTXO nursery starting
-2026-06-27 15:25:55.037 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.038 [INF] BRAR: Breach arbiter starting
-2026-06-27 15:25:55.038 [INF] FNDG: Funding manager starting
-2026-06-27 15:25:55.038 [INF] BRAR: Starting contract observer, watching for breaches.
-2026-06-27 15:25:55.038 [INF] HSWC: HTLC Switch starting
-2026-06-27 15:25:55.039 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.039 [INF] HSWC: InterceptableSwitch starting...
-2026-06-27 15:25:55.040 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.040 [INF] INVC: HtlcModificationInterceptor starting...
-2026-06-27 15:25:55.040 [INF] CNCT: ChainArbitrator starting at height 101 with 0 chain watchers, 0 channel arbitrators, and budget config=[tolocal=0 BTC tolocalratio=0.5 anchorcpfp=0 BTC anchorcpfpratio=0.5 deadlinehtlc=0 BTC deadlinehtlcratio=0.5 nodeadlinehtlc=0 BTC nodeadlinehtlcratio=0.5]
-2026-06-27 15:25:55.040 [INF] GRDB: Populating in-memory channel graph, this might take a while...
-2026-06-27 15:25:55.040 [INF] GRDB: Finished populating in-memory channel graph (took 21.291µs, num_node_features=1, num_nodes=0, num_channels=0)
-2026-06-27 15:25:55.040 [INF] GRPH: Builder starting
-2026-06-27 15:25:55.059 [INF] CRTR: FilteredChainView starting
-2026-06-27 15:25:55.064 [INF] GRPH: Filtering chain using 0 channels active
-2026-06-27 15:25:55.075 [INF] GRPH: Prune tip for Channel Graph: height=101, hash=46b4b101c13ec71b103f15b7674e716c2528319101c00c082c9f44a4a08cde8a
-2026-06-27 15:25:55.084 [INF] CRTR: Channel Router starting
-2026-06-27 15:25:55.098 [INF] DISC: Authenticated Gossiper starting
-2026-06-27 15:25:55.098 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.099 [INF] INVC: InvoiceRegistry starting...
-2026-06-27 15:25:55.102 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.103 [INF] HSWC: Onion processor starting
-2026-06-27 15:25:55.121 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.121 [INF] NANN: Channel Status Manager starting
-2026-06-27 15:25:55.121 [INF] CHFT: ChannelEventStore starting...
-2026-06-27 15:25:55.121 [INF] CHFT: Adding 0 channels to event store
-2026-06-27 15:25:55.121 [INF] CHBU: chanbackup.SubSwapper starting
-2026-06-27 15:25:55.137 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:25:55.149 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:25:55.158 [INF] SRVR: connMgr starting...
-2026-06-27 15:25:55.159 [INF] CMGR: Server listening on 127.0.0.1:20735
-2026-06-27 15:25:55.159 [INF] SRVR: Auto peer bootstrapping is disabled
-2026-06-27 15:25:55.163 [INF] CHIO: BlockbeatDispatcher is starting with 1 consumer queues
-2026-06-27 15:25:55.163 [INF] NTFN: New block epoch subscription
-2026-06-27 15:25:55.842 [INF] BTWL: Inserting unconfirmed transaction 8f1136ed476390cb7f4caf4a78e71e5b2eb1a9a91bc34aa04bf9449980a2cf32
-2026-06-27 15:25:55.894 [INF] BTWL: Marking unconfirmed transaction 8f1136ed476390cb7f4caf4a78e71e5b2eb1a9a91bc34aa04bf9449980a2cf32 mined in block 102
-2026-06-27 15:25:55.894 [INF] GRPH: Pruning channel graph using block 443c82a921b2aaf10fd569a36a554e4e2b37002bae394e9e80c8c92ff50be89d (height=102)
-2026-06-27 15:25:55.908 [INF] NTFN: New block: height=102, sha=443c82a921b2aaf10fd569a36a554e4e2b37002bae394e9e80c8c92ff50be89d
-2026-06-27 15:25:55.920 [INF] NTFN: New block: height=103, sha=5c79cfc67865e790fa8e827f24b5d930660644172f132dcf6687fc87118eed67
-2026-06-27 15:25:55.923 [INF] GRPH: Block 443c82a921b2aaf10fd569a36a554e4e2b37002bae394e9e80c8c92ff50be89d (height=102) closed 0 channels
-2026-06-27 15:25:55.932 [INF] GRPH: Pruning channel graph using block 5c79cfc67865e790fa8e827f24b5d930660644172f132dcf6687fc87118eed67 (height=103)
-2026-06-27 15:25:55.973 [INF] GRPH: Block 5c79cfc67865e790fa8e827f24b5d930660644172f132dcf6687fc87118eed67 (height=103) closed 0 channels
-2026-06-27 15:25:55.994 [INF] GRPH: Pruning channel graph using block 2be940334de0c71329fc53de1a3dca759e4dee2a4b4587de9f3996b55740fa02 (height=104)
-2026-06-27 15:25:55.995 [INF] NTFN: New block: height=104, sha=2be940334de0c71329fc53de1a3dca759e4dee2a4b4587de9f3996b55740fa02
-2026-06-27 15:25:56.024 [INF] GRPH: Block 2be940334de0c71329fc53de1a3dca759e4dee2a4b4587de9f3996b55740fa02 (height=104) closed 0 channels
-2026-06-27 15:25:56.042 [INF] GRPH: Pruning channel graph using block 4e460a997ad074d917cd7c2041eeaaba6bcf81354b08b5ca812865e0ee106620 (height=105)
-2026-06-27 15:25:56.044 [INF] NTFN: New block: height=105, sha=4e460a997ad074d917cd7c2041eeaaba6bcf81354b08b5ca812865e0ee106620
-2026-06-27 15:25:56.068 [INF] GRPH: Block 4e460a997ad074d917cd7c2041eeaaba6bcf81354b08b5ca812865e0ee106620 (height=105) closed 0 channels
-2026-06-27 15:25:56.093 [INF] GRPH: Pruning channel graph using block 5b81f02399b6843f826b53e85a62eca07ec9d04173661dcb221422dd224e4d2d (height=106)
-2026-06-27 15:25:56.094 [INF] NTFN: New block: height=106, sha=5b81f02399b6843f826b53e85a62eca07ec9d04173661dcb221422dd224e4d2d
-2026-06-27 15:25:56.122 [INF] NTFN: New block: height=107, sha=7d50f3cfe87b97288cf33c3e360a8b06cfd5357de317d4df8d11bb5bb871ca6b
-2026-06-27 15:25:56.128 [INF] GRPH: Block 5b81f02399b6843f826b53e85a62eca07ec9d04173661dcb221422dd224e4d2d (height=106) closed 0 channels
-2026-06-27 15:25:56.128 [INF] GRPH: Pruning channel graph using block 7d50f3cfe87b97288cf33c3e360a8b06cfd5357de317d4df8d11bb5bb871ca6b (height=107)
-2026-06-27 15:25:56.148 [INF] GRPH: Block 7d50f3cfe87b97288cf33c3e360a8b06cfd5357de317d4df8d11bb5bb871ca6b (height=107) closed 0 channels
-2026-06-27 15:25:59.935 [INF] SRVR: Established outbound connection to: 03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf@127.0.0.1:20736
-2026-06-27 15:25:59.935 [INF] SRVR: Finalizing connection to 03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf@127.0.0.1:20736, inbound=false
-2026-06-27 15:25:59.935 [INF] ACSM: Upgraded outbound peer: restricted -> temporary peer=03dfcd6f0d4e
-2026-06-27 15:25:59.944 [INF] MSGX: Starting Router
-2026-06-27 15:25:59.944 [INF] PEER: Peer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): Negotiated chan series queries
-2026-06-27 15:25:59.944 [INF] DISC: Creating new GossipSyncer for peer=03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf
-2026-06-27 15:25:59.944 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): requesting new chans from height=0 and 107 blocks after
-2026-06-27 15:25:59.944 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): filtering chan range: start_height=0, num_blocks=107
-2026-06-27 15:25:59.944 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): sending final chan range chunk, size=0
-2026-06-27 15:25:59.946 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): buffering chan range reply of size=0
-2026-06-27 15:25:59.946 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): filtering through 0 chans
-2026-06-27 15:25:59.946 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): remote peer has no new chans
-2026-06-27 15:25:59.946 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): applying gossipFilter(start=2026-06-27 15:25:59.946689 +0800 CST m=+9.790504001, end=2162-08-03 21:54:14.946689 +0800 CST)
-2026-06-27 15:25:59.947 [INF] DISC: GossipSyncer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): applying new remote update horizon: start=2026-06-27 15:25:59 +0800 CST, end=2162-08-03 21:54:14 +0800 CST, has_updates=false
-2026-06-27 15:26:00.021 [INF] SWPR: Manual fee rate input of 250 sat/kw is too low, using 253 sat/kw instead
-2026-06-27 15:26:00.022 [INF] FNDG: Initiating fundingRequest(local_amt=0.01000000 BTC (subtract_fees=false), push_amt=100000000 mSAT, chain_hash=0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206, peer=03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf, min_confs=1)
-2026-06-27 15:26:00.033 [ERR] LNWL: unable to query estimator: fee estimation data not available yet
-2026-06-27 15:26:00.033 [INF] CHFD: Performing funding tx coin selection using 253 sat/kw as fee rate
-2026-06-27 15:26:00.057 [WRN] CHFD: Unable to find funding output for shim intent: unable to create witness script, no funding keys
-2026-06-27 15:26:00.153 [INF] FNDG: Target commit tx sat/kw for pendingID(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9): 2500
-2026-06-27 15:26:00.153 [INF] FNDG: Dust limit for pendingID(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9): 0.00000354 BTC
-2026-06-27 15:26:00.153 [INF] FNDG: Starting funding workflow with 127.0.0.1:20736 for pending_id(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9), committype=anchors-zero-fee-second-level
-2026-06-27 15:26:00.368 [INF] FNDG: Recv'd fundingResponse for pending_id(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9)
-2026-06-27 15:26:00.374 [INF] FNDG: pendingChan(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9): remote party proposes num_confs=3, csv_delay=144
-2026-06-27 15:26:00.374 [INF] FNDG: Generated ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) for pending_id(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9)
-2026-06-27 15:26:00.458 [INF] FNDG: Broadcasting funding tx for ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0): 0200000000010132cfa2809944f94ba04ac31ba9a9b12e5b1ee7784aaf4c7fcb906347ed36118f0000000000000000000240420f0000000000220020d5a9a1d0162007fb1fe588e264d018151210ee629c6a9e55c8a91dca816c094f1a7fdc0b000000002251200fc20622da6fa3a60561edaa561f7f8466b5a00c21281a5e8959d020be39591302473044022001f4f4132209afe3261a535b28045cef0d191ab6f9132a4dbf7532dd6197b70e02205c2374d10bfec03ec819d75f2bc898000f8a982cb7e844dfb053b8c7180aebe5012102f0851de8b6d7deb6eef267f562818a1d037ed84ec0581c66bd23dd1b5a75e88400000000
-2026-06-27 15:26:00.459 [INF] BTWL: Inserting unconfirmed transaction fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a
-2026-06-27 15:26:00.462 [WRN] BTWL: Transaction fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a not accepted by mempool: txn-already-in-mempool
-2026-06-27 15:26:00.506 [INF] CNCT: Creating new chainWatcher and ChannelArbitrator for ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0)
-2026-06-27 15:26:00.506 [INF] NTFN: New confirmation subscription: conf_id=1, txid=fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a, num_confs=6 height_hint=107
-2026-06-27 15:26:00.568 [INF] FNDG: Finalizing pending_id(0feb64a9fe87602eb145017469c24dc146365b337c7f5c324ad69ca34f340af9) over ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0), waiting for channel open on-chain
-2026-06-27 15:26:00.568 [INF] CNCT: Close observer for ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) active
-2026-06-27 15:26:00.568 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0): starting state=StateDefault, trigger=chainTrigger, triggerHeight=107
-2026-06-27 15:26:00.568 [INF] NTFN: New confirmation subscription: conf_id=2, txid=fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a, num_confs=3 height_hint=107
-2026-06-27 15:26:00.568 [INF] FNDG: Waiting for funding tx (fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a) to reach 3 confirmations
-2026-06-27 15:26:00.568 [INF] CHBU: Updating on-disk multi SCB backup: num_old_chans=0, num_new_chans=1
-2026-06-27 15:26:00.588 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:26:00.593 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:26:00.593 [INF] CHBU: Archiving old channel backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/chan-backup-archives
-2026-06-27 15:26:00.610 [INF] GRPH: Pruning channel graph using block 3599a155a2a6266152e2e8d693cdd823c3bfb8f6fd9b1b31e6f3882980ad57b4 (height=108)
-2026-06-27 15:26:00.610 [INF] BTWL: Marking unconfirmed transaction fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a mined in block 108
-2026-06-27 15:26:00.644 [INF] GRPH: Block 3599a155a2a6266152e2e8d693cdd823c3bfb8f6fd9b1b31e6f3882980ad57b4 (height=108) closed 0 channels
-2026-06-27 15:26:00.707 [INF] NTFN: New block: height=108, sha=3599a155a2a6266152e2e8d693cdd823c3bfb8f6fd9b1b31e6f3882980ad57b4
-2026-06-27 15:26:00.712 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) no close event
-2026-06-27 15:26:00.748 [INF] GRPH: Pruning channel graph using block 3fda720a62300ff7381c931e57f9c444dd38c242b48507926def1b73c45cce30 (height=109)
-2026-06-27 15:26:00.779 [INF] NTFN: New block: height=109, sha=3fda720a62300ff7381c931e57f9c444dd38c242b48507926def1b73c45cce30
-2026-06-27 15:26:00.793 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) no close event
-2026-06-27 15:26:00.812 [INF] GRPH: Block 3fda720a62300ff7381c931e57f9c444dd38c242b48507926def1b73c45cce30 (height=109) closed 0 channels
-2026-06-27 15:26:00.818 [INF] GRPH: Pruning channel graph using block 08f752e5f0b0d35c4e713a3fa5201ca0883f64182d72185c6cfd6d04f32353ce (height=110)
-2026-06-27 15:26:00.841 [INF] NTFN: New block: height=110, sha=08f752e5f0b0d35c4e713a3fa5201ca0883f64182d72185c6cfd6d04f32353ce
-2026-06-27 15:26:00.841 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) no close event
-2026-06-27 15:26:00.841 [INF] FNDG: ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) is now active: ChannelID(2a68b69ea8fa3eaf572236ecb6dd81520055191e7092f9214dfbc67d61bf54fa)
-2026-06-27 15:26:00.871 [INF] GRPH: Block 08f752e5f0b0d35c4e713a3fa5201ca0883f64182d72185c6cfd6d04f32353ce (height=110) closed 0 channels
-2026-06-27 15:26:00.938 [INF] ACSM: Peer transitioned temporary -> protected (channel opened) peer=03dfcd6f0d4e
-2026-06-27 15:26:00.938 [INF] CHBU: Updating on-disk multi SCB backup: num_old_chans=1, num_new_chans=1
-2026-06-27 15:26:00.940 [INF] FNDG: Peer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf) is online, sending ChannelReady for ChannelID(2a68b69ea8fa3eaf572236ecb6dd81520055191e7092f9214dfbc67d61bf54fa)
-2026-06-27 15:26:00.957 [WRN] CHBU: Replacing disk backup for ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) w/ newer version
-2026-06-27 15:26:00.958 [INF] GRPH: Pruning channel graph using block 431f77c415e531e74d93c0bb1989cffe870d70c2649d4f281e3d9576fa225e05 (height=111)
-2026-06-27 15:26:00.991 [INF] PEER: Peer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): New channel active ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) with peer
-2026-06-27 15:26:01.002 [INF] HSWC: ChannelLink(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0): starting
-2026-06-27 15:26:01.006 [INF] HSWC: Trimming open circuits for chan_id=108:1:0, start_htlc_id=0
-2026-06-27 15:26:01.010 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:26:01.033 [INF] HSWC: ChannelLink(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0): HTLC manager started, bandwidth=882000000 mSAT
-2026-06-27 15:26:01.027 [INF] HSWC: Adding live link chan_id=2a68b69ea8fa3eaf572236ecb6dd81520055191e7092f9214dfbc67d61bf54fa, short_chan_id=108:1:0
-2026-06-27 15:26:01.033 [INF] GRPH: Block 431f77c415e531e74d93c0bb1989cffe870d70c2649d4f281e3d9576fa225e05 (height=111) closed 0 channels
-2026-06-27 15:26:01.028 [INF] CNCT: Attempting to update ContractSignals for ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0)
-2026-06-27 15:26:01.055 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:26:01.050 [INF] NTFN: New block: height=111, sha=431f77c415e531e74d93c0bb1989cffe870d70c2649d4f281e3d9576fa225e05
-2026-06-27 15:26:01.055 [INF] CHBU: Archiving old channel backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/chan-backup-archives
-2026-06-27 15:26:01.056 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) no close event
-2026-06-27 15:26:01.099 [INF] GRPH: Pruning channel graph using block 2909679e9e16c61e3a1a4bb9aac69d2d99f16ccd291a89f79c2ff7f7bba56f31 (height=112)
-2026-06-27 15:26:01.119 [INF] GRPH: Block 2909679e9e16c61e3a1a4bb9aac69d2d99f16ccd291a89f79c2ff7f7bba56f31 (height=112) closed 0 channels
-2026-06-27 15:26:01.133 [INF] NTFN: New block: height=112, sha=2909679e9e16c61e3a1a4bb9aac69d2d99f16ccd291a89f79c2ff7f7bba56f31
-2026-06-27 15:26:01.133 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) no close event
-2026-06-27 15:26:01.151 [INF] GRPH: Pruning channel graph using block 7dad2ffa9dd333abd7c2eb6262ae8a40b47956f8e2520b9d770245189512dca3 (height=113)
-2026-06-27 15:26:01.188 [INF] GRPH: Block 7dad2ffa9dd333abd7c2eb6262ae8a40b47956f8e2520b9d770245189512dca3 (height=113) closed 0 channels
-2026-06-27 15:26:01.207 [INF] NTFN: New block: height=113, sha=7dad2ffa9dd333abd7c2eb6262ae8a40b47956f8e2520b9d770245189512dca3
-2026-06-27 15:26:01.207 [INF] CNCT: ChannelArbitrator(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) no close event
-2026-06-27 15:26:02.020 [INF] DISC: Received new remote announcement signature for 108:1:0
-2026-06-27 15:26:02.062 [INF] DISC: 1/2 of channel ann proof received for short_chan_id=118747255865344, waiting for other half
-2026-06-27 15:26:02.100 [INF] NTFN: New confirmation subscription: conf_id=3, txid=fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a, num_confs=6 height_hint=108
-2026-06-27 15:26:02.100 [ERR] RPCS: [/lnrpc.Lightning/OpenChannel]: rpc error: code = Unavailable desc = transport is closing
-2026-06-27 15:26:02.100 [INF] FNDG: Announcing ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0), short_chan_id=108:1:0
-2026-06-27 15:26:02.101 [INF] DISC: Received new local announcement signature for 108:1:0
-2026-06-27 15:26:02.661 [INF] DISC: Fully valid channel proof for short_chan_id=118747255865344 constructed, adding to next ann batch
-2026-06-27 15:26:06.619 [INF] SRVR: Adding preimage=0001020304050607080900010203040506070809000102030405060708090001 to witness cache for dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8
-2026-06-27 15:26:06.706 [INF] LTND: Received shutdown request.
-2026-06-27 15:26:06.709 [INF] LTND: Shutting down...
-2026-06-27 15:26:06.709 [INF] LTND: Gracefully shutting down.
-2026-06-27 15:26:06.709 [INF] CHIO: BlockbeatDispatcher is stopping
-2026-06-27 15:26:06.709 [INF] NTFN: Cancelling epoch notification, epoch_id=10
-2026-06-27 15:26:06.709 [INF] NANN: Channel Status Manager shutting down...
-2026-06-27 15:26:06.710 [INF] HSWC: HTLC Switch shutting down...
-2026-06-27 15:26:06.710 [INF] NTFN: Cancelling epoch notification, epoch_id=5
-2026-06-27 15:26:06.710 [INF] HSWC: Removing channel link with ChannelID(2a68b69ea8fa3eaf572236ecb6dd81520055191e7092f9214dfbc67d61bf54fa)
-2026-06-27 15:26:06.710 [INF] HSWC: ChannelLink(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0): stopping
-2026-06-27 15:26:06.710 [INF] HSWC: ChannelLink(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0): exited
-2026-06-27 15:26:06.712 [INF] HSWC: Onion processor shutting down...
-2026-06-27 15:26:06.716 [INF] HSWC: Decaying hash log received shutdown request
-2026-06-27 15:26:06.716 [INF] NTFN: Cancelling epoch notification, epoch_id=9
-2026-06-27 15:26:06.716 [INF] INVC: InvoiceRegistry shutting down...
-2026-06-27 15:26:06.716 [INF] INVC: InvoiceRegistry shutting down...
-2026-06-27 15:26:06.716 [INF] NTFN: Cancelling epoch notification, epoch_id=8
-2026-06-27 15:26:06.716 [INF] HSWC: InterceptableSwitch shutting down...
-2026-06-27 15:26:06.716 [INF] NTFN: Cancelling epoch notification, epoch_id=6
-2026-06-27 15:26:06.716 [INF] INVC: HtlcModificationInterceptor stopping...
-2026-06-27 15:26:06.716 [INF] CRTR: Channel Router shutting down...
-2026-06-27 15:26:06.716 [INF] GRPH: Builder shutting down...
-2026-06-27 15:26:06.716 [INF] CNCT: ChainArbitrator shutting down...
-2026-06-27 15:26:06.716 [INF] FNDG: Funding manager shutting down...
-2026-06-27 15:26:06.716 [INF] BRAR: Breach arbiter shutting down...
-2026-06-27 15:26:06.716 [INF] UTXN: UTXO nursery shutting down...
-2026-06-27 15:26:06.716 [INF] NTFN: Cancelling epoch notification, epoch_id=4
-2026-06-27 15:26:06.716 [INF] DISC: Authenticated gossiper shutting down...
-2026-06-27 15:26:06.716 [INF] NTFN: Cancelling epoch notification, epoch_id=7
-2026-06-27 15:26:06.716 [INF] SWPR: Sweeper shutting down...
-2026-06-27 15:26:06.716 [INF] SWPR: TxPublisher stopping...
-2026-06-27 15:26:06.716 [INF] CHNF: ChannelNotifier shutting down...
-2026-06-27 15:26:06.716 [INF] PRNF: PeerNotifier shutting down...
-2026-06-27 15:26:06.716 [INF] HSWC: HtlcNotifier shutting down...
-2026-06-27 15:26:06.717 [INF] CHBU: Updating on-disk multi SCB backup: num_old_chans=1, num_new_chans=1
-2026-06-27 15:26:06.729 [WRN] CHBU: Replacing disk backup for ChannelPoint(fa54bf617dc6fb4d21f992701e1955005281ddb6ec362257af3efaa89eb6682a:0) w/ newer version
-2026-06-27 15:26:06.740 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:26:06.745 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
-2026-06-27 15:26:06.745 [INF] CHBU: Archiving old channel backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/chan-backup-archives
-2026-06-27 15:26:06.752 [INF] CHBU: chanbackup.SubSwapper shutting down...
-2026-06-27 15:26:06.752 [INF] NTFN: bitcoind notifier shutting down...
-2026-06-27 15:26:06.752 [INF] NTFN: Stopping mempool notifier
-2026-06-27 15:26:06.752 [ERR] NTFN: dead epoch stream in BestBlockTracker
-2026-06-27 15:26:06.752 [INF] CHFT: ChannelEventStore shutting down...
-2026-06-27 15:26:06.771 [INF] SRVR: Disconnecting from 03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf@127.0.0.1:20736
-2026-06-27 15:26:06.772 [INF] HLCK: Health monitor shutting down...
-2026-06-27 15:26:06.772 [INF] PEER: Peer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): disconnecting 03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf@127.0.0.1:20736, reason: server: DisconnectPeer called
-2026-06-27 15:26:06.772 [INF] PEER: Peer(03dfcd6f0d4e598107575606a3fd3a36bd9b18ce3b2030f678e7a2e376864828cf): unable to read message from peer: read next header: read tcp 127.0.0.1:49447->127.0.0.1:20736: use of closed network connection
-2026-06-27 15:26:06.772 [INF] MSGX: Stopping Router
-2026-06-27 15:26:06.873 [INF] RPCS: Stopping RPC Server
-2026-06-27 15:26:06.873 [INF] RPCS: Stopping RouterRPC Sub-RPC Server
-2026-06-27 15:26:06.873 [INF] RPCS: Stopping VersionRPC Sub-RPC Server
-2026-06-27 15:26:06.873 [INF] RPCS: Stopping WatchtowerClientRPC Sub-RPC Server
-2026-06-27 15:26:06.873 [INF] RPCS: Stopping InvoicesRPC Sub-RPC Server
-2026-06-27 15:26:06.873 [INF] LTND: Shutdown complete
+2026-06-27 23:55:30.793 [WRN] LTND: open /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/lnd.conf: no such file or directory
+2026-06-27 23:55:30.795 [WRN] LTND: Config 'bitcoin.active' is deprecated, please remove it
+2026-06-27 23:55:30.796 [INF] LTND: Version Info rev=848b72 version=0.20.1-beta commit="" debuglevel=production logging=info
+2026-06-27 23:55:30.796 [INF] LTND: Network Info rev=848b72 active_chain=Bitcoin network=regtest
+2026-06-27 23:55:30.797 [INF] RPCS: Generating TLS certificates...
+2026-06-27 23:55:30.798 [INF] RPCS: Done generating TLS certificates
+2026-06-27 23:55:30.807 [INF] RPCS: RPC server listening on 127.0.0.1:12009
+2026-06-27 23:55:30.827 [INF] RPCS: gRPC proxy started at 127.0.0.1:8280
+2026-06-27 23:55:30.861 [INF] LTND: Opening the main database, this might take a few minutes...
+2026-06-27 23:55:30.861 [INF] LTND: Opening bbolt database, sync_freelist=false, auto_compact=false
+2026-06-27 23:55:30.884 [INF] LTND: Creating local graph and channel state DB instances
+2026-06-27 23:55:30.910 [INF] CHDB: Checking for schema update: latest_version=33, db_version=33
+2026-06-27 23:55:30.910 [INF] CHDB: Applying 2 optional migrations
+2026-06-27 23:55:30.910 [INF] CHDB: Checking for optional update: name=prune_revocation_log
+2026-06-27 23:55:30.910 [INF] CHDB: Checking for optional update: name=gc_decayed_log
+2026-06-27 23:55:30.910 [INF] CHDB: Performing database optional migration: gc_decayed_log
+2026-06-27 23:55:30.910 [INF] CHDB: Migrating decayed log...
+2026-06-27 23:55:30.928 [INF] CHDB: Decayed log migrated successfully
+2026-06-27 23:55:30.947 [INF] CHDB: Successfully applied optional migration: gc_decayed_log
+2026-06-27 23:55:30.988 [INF] LTND: Database(s) now open (time_to_open=127.452125ms)!
+2026-06-27 23:55:31.013 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
+2026-06-27 23:55:31.013 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
+2026-06-27 23:55:31.014 [INF] CHRE: Initializing bitcoind backed fee estimator in CONSERVATIVE mode
+2026-06-27 23:55:31.014 [INF] BTWL: Started listening for bitcoind block notifications via ZMQ on 127.0.0.1:28362
+2026-06-27 23:55:31.014 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
+2026-06-27 23:55:31.014 [INF] BTWL: Started listening for bitcoind transaction notifications via ZMQ on 127.0.0.1:28363
+2026-06-27 23:55:31.014 [INF] RPCC: Established connection to RPC server 127.0.0.1:18563
+2026-06-27 23:55:32.384 [INF] BTWL: Opened wallet
+2026-06-27 23:55:32.801 [INF] BTWL: The wallet has been unlocked without a time limit
+2026-06-27 23:55:32.862 [INF] CHRE: LightningWallet opened
+2026-06-27 23:55:32.925 [INF] HSWC: Cleaning circuits from disk for closed channels
+2026-06-27 23:55:32.925 [INF] HSWC: Finished cleaning: no closed channels found, no actions taken.
+2026-06-27 23:55:32.934 [INF] BTWL: Started rescan from block 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 (height 0) for 0 addrs, 0 outpoints
+2026-06-27 23:55:32.934 [INF] HSWC: Restoring in-memory circuit state from disk
+2026-06-27 23:55:32.935 [INF] BTWL: Catching up block hashes to height 1, this might take a while
+2026-06-27 23:55:32.954 [INF] HSWC: Payment circuits loaded: num_pending=0, num_open=0
+2026-06-27 23:55:32.971 [INF] BTWL: Done catching up block hashes
+2026-06-27 23:55:32.976 [INF] BTWL: Rescanned through block 0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206 (height 1)
+2026-06-27 23:55:33.036 [INF] CRTR: Loaded 0 mission control entries
+2026-06-27 23:55:33.058 [INF] ACSM: Access Manager initialized
+2026-06-27 23:55:33.058 [INF] SWPR: Migrating UTXO nursery finalized TXIDs
+2026-06-27 23:55:33.077 [INF] LTND: Channel backup proxy channel notifier starting
+2026-06-27 23:55:33.077 [INF] CHIO: Registered queue=1 with 3 blockbeat consumers
+2026-06-27 23:55:33.081 [INF] ATPL: Instantiating autopilot with active=false, max_channels=5, allocation=0.600000, min_chan_size=20000, max_chan_size=16777215, private=false, min_confs=1, conf_target=3
+2026-06-27 23:55:33.086 [INF] LTND: We're not running within systemd or the service type is not 'notify'
+2026-06-27 23:55:33.095 [INF] LTND: Waiting for chain backend to finish sync rev=848b72 start_height=101
+2026-06-27 23:55:34.970 [INF] BTWL: Catching up block hashes to height 101, this might take a while
+2026-06-27 23:55:34.980 [INF] BTWL: Done catching up block hashes
+2026-06-27 23:55:34.980 [INF] BTWL: Finished rescan for 0 addresses (synced to block 16aca78206cd0d360752c5caa38233b03c828fd6255d0e9ebd6a0963dc2abd6e, height 101)
+2026-06-27 23:55:35.106 [INF] LTND: Chain backend is fully synced! rev=848b72 end_height=101
+2026-06-27 23:55:35.106 [WRN] HLCK: check: disk space configured with 0 attempts, skipping it
+2026-06-27 23:55:35.106 [WRN] HLCK: check: tls configured with 0 attempts, skipping it
+2026-06-27 23:55:35.106 [INF] LNWL: SigPool starting
+2026-06-27 23:55:35.106 [INF] NTFN: bitcoind notifier starting...
+2026-06-27 23:55:35.107 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.108 [INF] BTCN: Broadcaster now active
+2026-06-27 23:55:35.111 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.111 [INF] CHNF: ChannelNotifier starting
+2026-06-27 23:55:35.111 [INF] PRNF: PeerNotifier starting
+2026-06-27 23:55:35.111 [INF] HSWC: HtlcNotifier starting
+2026-06-27 23:55:35.111 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.112 [INF] SRVR: Received initial block 16aca78206cd0d360752c5caa38233b03c828fd6255d0e9ebd6a0963dc2abd6e at height 101
+2026-06-27 23:55:35.112 [INF] NTFN: Cancelling epoch notification, epoch_id=3
+2026-06-27 23:55:35.112 [INF] SWPR: TxPublisher starting...
+2026-06-27 23:55:35.112 [INF] SWPR: Sweeper starting
+2026-06-27 23:55:35.112 [INF] UTXN: UTXO nursery starting
+2026-06-27 23:55:35.112 [INF] BRAR: Breach arbiter starting
+2026-06-27 23:55:35.112 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.115 [INF] FNDG: Funding manager starting
+2026-06-27 23:55:35.116 [INF] HSWC: HTLC Switch starting
+2026-06-27 23:55:35.116 [INF] BRAR: Starting contract observer, watching for breaches.
+2026-06-27 23:55:35.117 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.117 [INF] HSWC: InterceptableSwitch starting...
+2026-06-27 23:55:35.120 [INF] INVC: HtlcModificationInterceptor starting...
+2026-06-27 23:55:35.120 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.120 [INF] CNCT: ChainArbitrator starting at height 101 with 0 chain watchers, 0 channel arbitrators, and budget config=[tolocal=0 BTC tolocalratio=0.5 anchorcpfp=0 BTC anchorcpfpratio=0.5 deadlinehtlc=0 BTC deadlinehtlcratio=0.5 nodeadlinehtlc=0 BTC nodeadlinehtlcratio=0.5]
+2026-06-27 23:55:35.124 [INF] GRDB: Populating in-memory channel graph, this might take a while...
+2026-06-27 23:55:35.124 [INF] GRDB: Finished populating in-memory channel graph (took 25.917µs, num_node_features=1, num_nodes=0, num_channels=0)
+2026-06-27 23:55:35.124 [INF] GRPH: Builder starting
+2026-06-27 23:55:35.135 [INF] CRTR: FilteredChainView starting
+2026-06-27 23:55:35.137 [INF] GRPH: Filtering chain using 0 channels active
+2026-06-27 23:55:35.141 [INF] GRPH: Prune tip for Channel Graph: height=101, hash=16aca78206cd0d360752c5caa38233b03c828fd6255d0e9ebd6a0963dc2abd6e
+2026-06-27 23:55:35.152 [INF] CRTR: Channel Router starting
+2026-06-27 23:55:35.170 [INF] DISC: Authenticated Gossiper starting
+2026-06-27 23:55:35.170 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.171 [INF] INVC: InvoiceRegistry starting...
+2026-06-27 23:55:35.176 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.176 [INF] HSWC: Onion processor starting
+2026-06-27 23:55:35.183 [INF] NANN: Channel Status Manager starting
+2026-06-27 23:55:35.183 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:35.183 [INF] CHFT: ChannelEventStore starting...
+2026-06-27 23:55:35.183 [INF] CHFT: Adding 0 channels to event store
+2026-06-27 23:55:35.183 [INF] CHBU: chanbackup.SubSwapper starting
+2026-06-27 23:55:35.197 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:35.211 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:35.212 [INF] SRVR: connMgr starting...
+2026-06-27 23:55:35.212 [INF] CMGR: Server listening on 127.0.0.1:20735
+2026-06-27 23:55:35.212 [INF] SRVR: Auto peer bootstrapping is disabled
+2026-06-27 23:55:35.212 [INF] CHIO: BlockbeatDispatcher is starting with 1 consumer queues
+2026-06-27 23:55:35.212 [INF] NTFN: New block epoch subscription
+2026-06-27 23:55:36.616 [INF] BTWL: Inserting unconfirmed transaction a302dd225d6221a1cc652e59b4e0824165aa8442aceb8ffaef0d2243d621b974
+2026-06-27 23:55:36.657 [INF] GRPH: Pruning channel graph using block 2a9fb70f403458926072a86aa29d0080d8529b8e804a1828d66fb36dd6ce1879 (height=102)
+2026-06-27 23:55:36.657 [INF] BTWL: Marking unconfirmed transaction a302dd225d6221a1cc652e59b4e0824165aa8442aceb8ffaef0d2243d621b974 mined in block 102
+2026-06-27 23:55:36.661 [INF] NTFN: New block: height=102, sha=2a9fb70f403458926072a86aa29d0080d8529b8e804a1828d66fb36dd6ce1879
+2026-06-27 23:55:36.690 [INF] GRPH: Block 2a9fb70f403458926072a86aa29d0080d8529b8e804a1828d66fb36dd6ce1879 (height=102) closed 0 channels
+2026-06-27 23:55:36.720 [INF] GRPH: Pruning channel graph using block 43af110bd41f5af60b4219a2aa47b73502588c439d4d5b3c6f7192b994a3b169 (height=103)
+2026-06-27 23:55:36.721 [INF] NTFN: New block: height=103, sha=43af110bd41f5af60b4219a2aa47b73502588c439d4d5b3c6f7192b994a3b169
+2026-06-27 23:55:36.742 [INF] GRPH: Block 43af110bd41f5af60b4219a2aa47b73502588c439d4d5b3c6f7192b994a3b169 (height=103) closed 0 channels
+2026-06-27 23:55:36.767 [INF] GRPH: Pruning channel graph using block 20a8263075a2d5dcf0764c8b44d36c6a83c873f2a388a8c6dc39f1d7f7f8ac41 (height=104)
+2026-06-27 23:55:36.768 [INF] NTFN: New block: height=104, sha=20a8263075a2d5dcf0764c8b44d36c6a83c873f2a388a8c6dc39f1d7f7f8ac41
+2026-06-27 23:55:36.787 [INF] GRPH: Block 20a8263075a2d5dcf0764c8b44d36c6a83c873f2a388a8c6dc39f1d7f7f8ac41 (height=104) closed 0 channels
+2026-06-27 23:55:36.811 [INF] GRPH: Pruning channel graph using block 3911812843e7d532a0a34b764224c56b1d54431ff828d94b3da60af04f1f0bb7 (height=105)
+2026-06-27 23:55:36.812 [INF] NTFN: New block: height=105, sha=3911812843e7d532a0a34b764224c56b1d54431ff828d94b3da60af04f1f0bb7
+2026-06-27 23:55:36.830 [INF] GRPH: Block 3911812843e7d532a0a34b764224c56b1d54431ff828d94b3da60af04f1f0bb7 (height=105) closed 0 channels
+2026-06-27 23:55:36.846 [INF] GRPH: Pruning channel graph using block 56b27a1a2a46493b8521492aa42a3ea1c4337312a7be64b1cd7233776d15a07a (height=106)
+2026-06-27 23:55:36.847 [INF] NTFN: New block: height=106, sha=56b27a1a2a46493b8521492aa42a3ea1c4337312a7be64b1cd7233776d15a07a
+2026-06-27 23:55:36.876 [INF] GRPH: Block 56b27a1a2a46493b8521492aa42a3ea1c4337312a7be64b1cd7233776d15a07a (height=106) closed 0 channels
+2026-06-27 23:55:36.896 [INF] GRPH: Pruning channel graph using block 39b1452ca28ab800bd4b3bb81e80b410bf03f1dfae37279a5a614ecac5a3c394 (height=107)
+2026-06-27 23:55:36.897 [INF] NTFN: New block: height=107, sha=39b1452ca28ab800bd4b3bb81e80b410bf03f1dfae37279a5a614ecac5a3c394
+2026-06-27 23:55:36.913 [INF] GRPH: Block 39b1452ca28ab800bd4b3bb81e80b410bf03f1dfae37279a5a614ecac5a3c394 (height=107) closed 0 channels
+2026-06-27 23:55:40.163 [INF] SRVR: Established outbound connection to: 02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc@127.0.0.1:20736
+2026-06-27 23:55:40.164 [INF] SRVR: Finalizing connection to 02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc@127.0.0.1:20736, inbound=false
+2026-06-27 23:55:40.164 [INF] ACSM: Upgraded outbound peer: restricted -> temporary peer=02c6f3c51275
+2026-06-27 23:55:40.164 [INF] MSGX: Starting Router
+2026-06-27 23:55:40.164 [INF] PEER: Peer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): Negotiated chan series queries
+2026-06-27 23:55:40.164 [INF] DISC: Creating new GossipSyncer for peer=02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc
+2026-06-27 23:55:40.164 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): requesting new chans from height=0 and 107 blocks after
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): filtering chan range: start_height=0, num_blocks=107
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): sending final chan range chunk, size=0
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): buffering chan range reply of size=0
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): filtering through 0 chans
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): remote peer has no new chans
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): applying gossipFilter(start=2026-06-27 23:55:40.165173 +0800 CST m=+9.403882959, end=2162-08-04 06:23:55.165173 +0800 CST)
+2026-06-27 23:55:40.165 [INF] DISC: GossipSyncer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): applying new remote update horizon: start=2026-06-27 23:55:40 +0800 CST, end=2162-08-04 06:23:55 +0800 CST, has_updates=false
+2026-06-27 23:55:40.199 [INF] SWPR: Manual fee rate input of 250 sat/kw is too low, using 253 sat/kw instead
+2026-06-27 23:55:40.199 [INF] FNDG: Initiating fundingRequest(local_amt=0.01000000 BTC (subtract_fees=false), push_amt=100000000 mSAT, chain_hash=0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206, peer=02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc, min_confs=1)
+2026-06-27 23:55:40.200 [ERR] LNWL: unable to query estimator: fee estimation data not available yet
+2026-06-27 23:55:40.200 [INF] CHFD: Performing funding tx coin selection using 253 sat/kw as fee rate
+2026-06-27 23:55:40.219 [WRN] CHFD: Unable to find funding output for shim intent: unable to create witness script, no funding keys
+2026-06-27 23:55:40.296 [INF] FNDG: Target commit tx sat/kw for pendingID(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352): 2500
+2026-06-27 23:55:40.296 [INF] FNDG: Dust limit for pendingID(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352): 0.00000354 BTC
+2026-06-27 23:55:40.296 [INF] FNDG: Starting funding workflow with 127.0.0.1:20736 for pending_id(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352), committype=anchors-zero-fee-second-level
+2026-06-27 23:55:40.396 [INF] FNDG: Recv'd fundingResponse for pending_id(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352)
+2026-06-27 23:55:40.399 [INF] FNDG: pendingChan(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352): remote party proposes num_confs=3, csv_delay=144
+2026-06-27 23:55:40.399 [INF] FNDG: Generated ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) for pending_id(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352)
+2026-06-27 23:55:40.444 [INF] FNDG: Broadcasting funding tx for ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0): 0200000000010174b921d643220deffa8febac4284aa654182e0b4592e65cca121625d22dd02a30000000000000000000240420f00000000002200200cc75b9b82aa9db6e001f866267edb21297736a28ec0ef0ff8748f1e1d2466c01a7fdc0b00000000225120ea4838afcc1626ada4af16e05d350d1c7da26140d0213ac0910bd5b3cd30830902483045022100decaf018835b4edd765b5df12cac1bb89781cbd0d689bae197ed7aa7894eb877022056ebce58d2149ad4f5ab29cd01799b8057b82270cefed3fa8d23f059aff38885012102357a86bd88a1ca168bebe0e0c69bac12daf90e0594ff6a5b8f4584d8ba960a6700000000
+2026-06-27 23:55:40.445 [INF] BTWL: Inserting unconfirmed transaction cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d
+2026-06-27 23:55:40.446 [WRN] BTWL: Transaction cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d not accepted by mempool: txn-already-in-mempool
+2026-06-27 23:55:40.501 [INF] CNCT: Creating new chainWatcher and ChannelArbitrator for ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0)
+2026-06-27 23:55:40.501 [INF] NTFN: New confirmation subscription: conf_id=1, txid=cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d, num_confs=6 height_hint=107
+2026-06-27 23:55:40.546 [INF] FNDG: Finalizing pending_id(077048f535afde48fe4673c32d03b91b9ea195c5dcf6d4109bfdb7eb25f59352) over ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0), waiting for channel open on-chain
+2026-06-27 23:55:40.546 [INF] CNCT: Close observer for ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) active
+2026-06-27 23:55:40.546 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0): starting state=StateDefault, trigger=chainTrigger, triggerHeight=107
+2026-06-27 23:55:40.546 [INF] NTFN: New confirmation subscription: conf_id=2, txid=cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d, num_confs=3 height_hint=107
+2026-06-27 23:55:40.546 [INF] FNDG: Waiting for funding tx (cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d) to reach 3 confirmations
+2026-06-27 23:55:40.546 [INF] CHBU: Updating on-disk multi SCB backup: num_old_chans=0, num_new_chans=1
+2026-06-27 23:55:40.567 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:40.571 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:40.571 [INF] CHBU: Archiving old channel backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/chan-backup-archives
+2026-06-27 23:55:40.670 [INF] GRPH: Pruning channel graph using block 367de2607d13fcbb40ab3da90481ad0ddb0b441da01958b5dbfa3fd21367dbfe (height=108)
+2026-06-27 23:55:40.670 [INF] BTWL: Marking unconfirmed transaction cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d mined in block 108
+2026-06-27 23:55:40.696 [INF] GRPH: Block 367de2607d13fcbb40ab3da90481ad0ddb0b441da01958b5dbfa3fd21367dbfe (height=108) closed 0 channels
+2026-06-27 23:55:40.737 [INF] NTFN: New block: height=108, sha=367de2607d13fcbb40ab3da90481ad0ddb0b441da01958b5dbfa3fd21367dbfe
+2026-06-27 23:55:40.738 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) no close event
+2026-06-27 23:55:40.774 [INF] GRPH: Pruning channel graph using block 3f97761f1bdd92d04a76b6869c3ea7efc56cf7576b72d11eb0e01b15ce1123ef (height=109)
+2026-06-27 23:55:40.797 [INF] GRPH: Block 3f97761f1bdd92d04a76b6869c3ea7efc56cf7576b72d11eb0e01b15ce1123ef (height=109) closed 0 channels
+2026-06-27 23:55:40.810 [INF] NTFN: New block: height=109, sha=3f97761f1bdd92d04a76b6869c3ea7efc56cf7576b72d11eb0e01b15ce1123ef
+2026-06-27 23:55:40.811 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) no close event
+2026-06-27 23:55:40.814 [INF] GRPH: Pruning channel graph using block 2e12289b2a7cd3aa07d2246ede914ce344a3e34d438b240b22e542907d667637 (height=110)
+2026-06-27 23:55:40.845 [INF] GRPH: Block 2e12289b2a7cd3aa07d2246ede914ce344a3e34d438b240b22e542907d667637 (height=110) closed 0 channels
+2026-06-27 23:55:40.854 [INF] NTFN: New block: height=110, sha=2e12289b2a7cd3aa07d2246ede914ce344a3e34d438b240b22e542907d667637
+2026-06-27 23:55:40.854 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) no close event
+2026-06-27 23:55:40.855 [INF] FNDG: ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) is now active: ChannelID(8d867c4ef23ccff8417caa514b530c988a36c9c8a062f39a33a3915f0c67e9cb)
+2026-06-27 23:55:40.912 [INF] ACSM: Peer transitioned temporary -> protected (channel opened) peer=02c6f3c51275
+2026-06-27 23:55:40.913 [INF] CHBU: Updating on-disk multi SCB backup: num_old_chans=1, num_new_chans=1
+2026-06-27 23:55:40.914 [INF] FNDG: Peer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc) is online, sending ChannelReady for ChannelID(8d867c4ef23ccff8417caa514b530c988a36c9c8a062f39a33a3915f0c67e9cb)
+2026-06-27 23:55:40.934 [INF] GRPH: Pruning channel graph using block 341360d51dbf4398134a99a3f140d328585638c44f88e9eb5021a54e3a08aa4f (height=111)
+2026-06-27 23:55:40.941 [WRN] CHBU: Replacing disk backup for ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) w/ newer version
+2026-06-27 23:55:40.975 [INF] PEER: Peer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): New channel active ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) with peer
+2026-06-27 23:55:40.988 [INF] HSWC: ChannelLink(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0): starting
+2026-06-27 23:55:40.991 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:40.996 [INF] NTFN: New block: height=111, sha=341360d51dbf4398134a99a3f140d328585638c44f88e9eb5021a54e3a08aa4f
+2026-06-27 23:55:40.996 [INF] HSWC: Trimming open circuits for chan_id=108:1:0, start_htlc_id=0
+2026-06-27 23:55:41.004 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) no close event
+2026-06-27 23:55:41.009 [INF] GRPH: Block 341360d51dbf4398134a99a3f140d328585638c44f88e9eb5021a54e3a08aa4f (height=111) closed 0 channels
+2026-06-27 23:55:41.009 [INF] HSWC: Adding live link chan_id=8d867c4ef23ccff8417caa514b530c988a36c9c8a062f39a33a3915f0c67e9cb, short_chan_id=108:1:0
+2026-06-27 23:55:41.009 [INF] CNCT: Attempting to update ContractSignals for ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0)
+2026-06-27 23:55:41.010 [INF] HSWC: ChannelLink(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0): HTLC manager started, bandwidth=882000000 mSAT
+2026-06-27 23:55:41.015 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:41.015 [INF] CHBU: Archiving old channel backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/chan-backup-archives
+2026-06-27 23:55:41.031 [INF] GRPH: Pruning channel graph using block 19f14960c5be7150c17b92f2b120507fcf4ca8e212f7336e0f057e8b6d66774f (height=112)
+2026-06-27 23:55:41.051 [INF] GRPH: Block 19f14960c5be7150c17b92f2b120507fcf4ca8e212f7336e0f057e8b6d66774f (height=112) closed 0 channels
+2026-06-27 23:55:41.067 [INF] NTFN: New block: height=112, sha=19f14960c5be7150c17b92f2b120507fcf4ca8e212f7336e0f057e8b6d66774f
+2026-06-27 23:55:41.067 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) no close event
+2026-06-27 23:55:41.070 [INF] GRPH: Pruning channel graph using block 0915b78a4316c05282a1718bfb590408732941c68e5d27fa39458f2e20363d44 (height=113)
+2026-06-27 23:55:41.090 [INF] GRPH: Block 0915b78a4316c05282a1718bfb590408732941c68e5d27fa39458f2e20363d44 (height=113) closed 0 channels
+2026-06-27 23:55:41.107 [INF] NTFN: New block: height=113, sha=0915b78a4316c05282a1718bfb590408732941c68e5d27fa39458f2e20363d44
+2026-06-27 23:55:41.107 [INF] CNCT: ChannelArbitrator(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) no close event
+2026-06-27 23:55:42.000 [INF] DISC: Received new remote announcement signature for 108:1:0
+2026-06-27 23:55:42.519 [INF] NTFN: New confirmation subscription: conf_id=3, txid=cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d, num_confs=6 height_hint=108
+2026-06-27 23:55:42.519 [INF] FNDG: Announcing ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0), short_chan_id=108:1:0
+2026-06-27 23:55:42.519 [ERR] RPCS: [/lnrpc.Lightning/OpenChannel]: rpc error: code = Unavailable desc = transport is closing
+2026-06-27 23:55:42.528 [INF] DISC: 1/2 of channel ann proof received for short_chan_id=118747255865344, waiting for other half
+2026-06-27 23:55:42.528 [INF] DISC: Received new local announcement signature for 108:1:0
+2026-06-27 23:55:42.557 [INF] DISC: Fully valid channel proof for short_chan_id=118747255865344 constructed, adding to next ann batch
+2026-06-27 23:55:46.535 [INF] SRVR: Adding preimage=0001020304050607080900010203040506070809000102030405060708090001 to witness cache for dcb1ac4a5de370cad091c13f13aee2f936c278fa05d264653c0c1321852a35e8
+2026-06-27 23:55:46.637 [INF] LTND: Received shutdown request.
+2026-06-27 23:55:46.637 [INF] LTND: Shutting down...
+2026-06-27 23:55:46.637 [INF] LTND: Gracefully shutting down.
+2026-06-27 23:55:46.637 [INF] CHIO: BlockbeatDispatcher is stopping
+2026-06-27 23:55:46.637 [INF] NTFN: Cancelling epoch notification, epoch_id=10
+2026-06-27 23:55:46.637 [INF] NANN: Channel Status Manager shutting down...
+2026-06-27 23:55:46.637 [INF] HSWC: HTLC Switch shutting down...
+2026-06-27 23:55:46.637 [INF] NTFN: Cancelling epoch notification, epoch_id=5
+2026-06-27 23:55:46.637 [INF] HSWC: Removing channel link with ChannelID(8d867c4ef23ccff8417caa514b530c988a36c9c8a062f39a33a3915f0c67e9cb)
+2026-06-27 23:55:46.637 [INF] HSWC: ChannelLink(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0): stopping
+2026-06-27 23:55:46.637 [INF] HSWC: ChannelLink(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0): exited
+2026-06-27 23:55:46.640 [INF] HSWC: Onion processor shutting down...
+2026-06-27 23:55:46.641 [INF] HSWC: Decaying hash log received shutdown request
+2026-06-27 23:55:46.641 [INF] NTFN: Cancelling epoch notification, epoch_id=9
+2026-06-27 23:55:46.641 [INF] INVC: InvoiceRegistry shutting down...
+2026-06-27 23:55:46.641 [INF] INVC: InvoiceRegistry shutting down...
+2026-06-27 23:55:46.642 [INF] NTFN: Cancelling epoch notification, epoch_id=8
+2026-06-27 23:55:46.642 [INF] HSWC: InterceptableSwitch shutting down...
+2026-06-27 23:55:46.642 [INF] NTFN: Cancelling epoch notification, epoch_id=6
+2026-06-27 23:55:46.642 [INF] INVC: HtlcModificationInterceptor stopping...
+2026-06-27 23:55:46.642 [INF] CRTR: Channel Router shutting down...
+2026-06-27 23:55:46.642 [INF] GRPH: Builder shutting down...
+2026-06-27 23:55:46.642 [INF] CNCT: ChainArbitrator shutting down...
+2026-06-27 23:55:46.642 [INF] FNDG: Funding manager shutting down...
+2026-06-27 23:55:46.642 [INF] BRAR: Breach arbiter shutting down...
+2026-06-27 23:55:46.642 [INF] UTXN: UTXO nursery shutting down...
+2026-06-27 23:55:46.642 [INF] NTFN: Cancelling epoch notification, epoch_id=4
+2026-06-27 23:55:46.642 [INF] DISC: Authenticated gossiper shutting down...
+2026-06-27 23:55:46.642 [INF] NTFN: Cancelling epoch notification, epoch_id=7
+2026-06-27 23:55:46.642 [INF] SWPR: Sweeper shutting down...
+2026-06-27 23:55:46.642 [INF] SWPR: TxPublisher stopping...
+2026-06-27 23:55:46.642 [INF] CHNF: ChannelNotifier shutting down...
+2026-06-27 23:55:46.642 [INF] PRNF: PeerNotifier shutting down...
+2026-06-27 23:55:46.642 [INF] HSWC: HtlcNotifier shutting down...
+2026-06-27 23:55:46.642 [INF] CHBU: Updating on-disk multi SCB backup: num_old_chans=1, num_new_chans=1
+2026-06-27 23:55:46.653 [WRN] CHBU: Replacing disk backup for ChannelPoint(cbe9670c5f91a3339af362a0c8c9368a980c534b51aa7c41f8cf3cf24e7c868d:0) w/ newer version
+2026-06-27 23:55:46.667 [INF] CHBU: Updating backup file at /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:46.673 [INF] CHBU: Swapping old multi backup file from /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/temp-dont-use.backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/channel.backup
+2026-06-27 23:55:46.673 [INF] CHBU: Archiving old channel backup to /Users/arthur/RustroverProjects/Kurrent/.kurrent-devnet/lnd-regtest/alice/data/chain/bitcoin/regtest/chan-backup-archives
+2026-06-27 23:55:46.677 [INF] CHBU: chanbackup.SubSwapper shutting down...
+2026-06-27 23:55:46.677 [INF] NTFN: bitcoind notifier shutting down...
+2026-06-27 23:55:46.677 [INF] NTFN: Stopping mempool notifier
+2026-06-27 23:55:46.677 [ERR] NTFN: dead epoch stream in BestBlockTracker
+2026-06-27 23:55:46.677 [INF] CHFT: ChannelEventStore shutting down...
+2026-06-27 23:55:46.685 [INF] SRVR: Disconnecting from 02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc@127.0.0.1:20736
+2026-06-27 23:55:46.685 [INF] HLCK: Health monitor shutting down...
+2026-06-27 23:55:46.685 [INF] PEER: Peer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): disconnecting 02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc@127.0.0.1:20736, reason: server: DisconnectPeer called
+2026-06-27 23:55:46.685 [INF] PEER: Peer(02c6f3c51275ec3c49c8a2c81be1667d2b6f501aef4b64ed90e579b10ef4cea3bc): unable to read message from peer: read next header: read tcp 127.0.0.1:52156->127.0.0.1:20736: use of closed network connection
+2026-06-27 23:55:46.685 [INF] MSGX: Stopping Router
+2026-06-27 23:55:46.786 [INF] RPCS: Stopping RPC Server
+2026-06-27 23:55:46.786 [INF] RPCS: Stopping VersionRPC Sub-RPC Server
+2026-06-27 23:55:46.786 [INF] RPCS: Stopping WatchtowerClientRPC Sub-RPC Server
+2026-06-27 23:55:46.786 [INF] RPCS: Stopping InvoicesRPC Sub-RPC Server
+2026-06-27 23:55:46.786 [INF] RPCS: Stopping RouterRPC Sub-RPC Server
+2026-06-27 23:55:46.787 [INF] LTND: Shutdown complete

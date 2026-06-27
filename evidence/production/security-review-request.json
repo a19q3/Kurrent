@@ -14,12 +14,12 @@
     "Only a completed independent external security review at evidence/production/security-review.json can satisfy the final gate.",
     "Any source, evidence, or runbook change after this package is generated requires regenerating the package and re-reviewing changed artefacts."
   ],
-  "generated_at": "1782572167",
-  "git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
+  "generated_at": "1782575779",
+  "git_commit": "bbb926ce5792960eb9e3a99c74ea86808eacfbf5",
   "passing_evidence_schema": {
     "required_constant_fields": {
       "review_type": "independent_external_security_review",
-      "reviewed_git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
+      "reviewed_git_commit": "bbb926ce5792960eb9e3a99c74ea86808eacfbf5",
       "schema_version": "kurrent-security-review-v1",
       "status": "passed"
     },
@@ -109,12 +109,12 @@
       {
         "id": "local_acceptance",
         "path": "evidence/kurrent-acceptance.json",
-        "sha256": "e05070a026ab991d96f34a5b29c37f8879d55615c833535f8a55e162429fb4f5"
+        "sha256": "47b4874b42506c539314bf5ca2e3f720f1e48ad30204097d95cb0200166336bd"
       },
       {
         "id": "target_profile",
         "path": "evidence/production/target-profile.json",
-        "sha256": "c150a0b941d80e29c272dde625d51de155cf41fb2a837cbb670cfc6d42980605"
+        "sha256": "ca12680b55c13699c0debd98b94272be310edc2a9bcdf4775be609b8bdd4b0fa"
       },
       {
         "id": "semantic_transaction_verifier",
@@ -249,12 +249,12 @@
     {
       "id": "local_acceptance",
       "path": "evidence/kurrent-acceptance.json",
-      "sha256": "e05070a026ab991d96f34a5b29c37f8879d55615c833535f8a55e162429fb4f5"
+      "sha256": "47b4874b42506c539314bf5ca2e3f720f1e48ad30204097d95cb0200166336bd"
     },
     {
       "id": "target_profile",
       "path": "evidence/production/target-profile.json",
-      "sha256": "c150a0b941d80e29c272dde625d51de155cf41fb2a837cbb670cfc6d42980605"
+      "sha256": "ca12680b55c13699c0debd98b94272be310edc2a9bcdf4775be609b8bdd4b0fa"
     },
     {
       "id": "semantic_transaction_verifier",

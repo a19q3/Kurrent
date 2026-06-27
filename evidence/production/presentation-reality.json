@@ -87,7 +87,7 @@
       "status": "passed"
     },
     {
-      "details": "legacy LN evidence omits preimage-source metadata; the preimage/payment-hash binding remains the blocking check",
+      "details": "LN evidence declares a deterministic local-devnet preimage supplied to real LND addinvoice",
       "id": "ln_invoice_preimage_source",
       "status": "passed"
     },
@@ -402,7 +402,7 @@
       "status": "passed"
     }
   ],
-  "generated_at": "1782572167",
+  "generated_at": "1782575779",
   "scope": "presentation reality gate for local devnet evidence",
   "status": "passed",
   "summary": {

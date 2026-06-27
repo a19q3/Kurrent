@@ -1,6 +1,6 @@
 {
-  "generated_at": "1782572166",
-  "git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
+  "generated_at": "1782575779",
+  "git_commit": "bbb926ce5792960eb9e3a99c74ea86808eacfbf5",
   "kaspa_source_profile": {
     "current_branch": "master",
     "head": "98a4ccd8d200853787f227bd4536ac540cf34957",
@@ -12,7 +12,7 @@
   "local_acceptance": {
     "acceptance_report": {
       "path": "evidence/kurrent-acceptance.json",
-      "sha256": "e05070a026ab991d96f34a5b29c37f8879d55615c833535f8a55e162429fb4f5"
+      "sha256": "47b4874b42506c539314bf5ca2e3f720f1e48ad30204097d95cb0200166336bd"
     },
     "flows": {
       "evidence_verifier_flow": "passed",
@@ -131,7 +131,7 @@
     {
       "name": "bitcoind",
       "path": "/opt/homebrew/bin/bitcoind",
-      "version": null
+      "version": "Bitcoin Core daemon version v31.0.0 bitcoind"
     },
     {
       "name": "bitcoin-cli",

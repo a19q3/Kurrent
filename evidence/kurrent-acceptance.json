@@ -1,6 +1,6 @@
 {
-  "timestamp": "1782572166",
-  "git_commit": "dfc1b49ac7945a907b05bb7901c85eeaf8afc5ef",
+  "timestamp": "1782575778",
+  "git_commit": "bbb926ce5792960eb9e3a99c74ea86808eacfbf5",
   "tool_versions": [
     {
       "name": "kaspad",
@@ -50,7 +50,7 @@
     {
       "name": "bitcoind",
       "path": "/opt/homebrew/bin/bitcoind",
-      "version": null
+      "version": "Bitcoin Core daemon version v31.0.0 bitcoind"
     },
     {
       "name": "bitcoin-cli",
@@ -112,7 +112,7 @@
   "ln_invoice_payment_preimage_evidence": [
     {
       "path": "evidence/ln-devnet-evidence.json",
-      "sha256": "b2064d3bfcb496f70ea8e3a22b1aca955e17f54f8edb514f6d47127d02ae4433"
+      "sha256": "80c5b8162093b9c76ece5db390f5f218a02409ac8f6f662eeda7dd084c53d24e"
     }
   ],
   "refund_txid_outpoint": "f3c7b1935749eaf3ed7dde92a95700aa31c3c59ceb10fcb813f20737368c1131:0",

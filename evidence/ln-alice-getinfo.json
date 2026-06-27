@@ -1,7 +1,7 @@
 {
-  "alias": "0303be157099a5d0d768",
-  "best_header_timestamp": "1781589947",
-  "block_hash": "4d97e6c04af0e11fc975b272649316c6ff577a1ae4c8844dd85148b69c01b85b",
+  "alias": "03e05a7ef323b04d4b7d",
+  "best_header_timestamp": "1782575747",
+  "block_hash": "16aca78206cd0d360752c5caa38233b03c828fd6255d0e9ebd6a0963dc2abd6e",
   "block_height": 101,
   "chains": [
     {
@@ -93,7 +93,7 @@
       "name": "tlv-onion"
     }
   },
-  "identity_pubkey": "0303be157099a5d0d76884219118e679d12351bcd398027e41c0325e5329ac0c37",
+  "identity_pubkey": "03e05a7ef323b04d4b7d3a65f58c56d885c2ec3777b2900251ae663a610d61d24e",
   "num_active_channels": 0,
   "num_inactive_channels": 0,
   "num_peers": 0,
