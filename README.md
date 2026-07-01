@@ -25,6 +25,13 @@ This repository has two layers. Keep them separate when reading results.
 | Prototype evidence harness | The local-devnet code and evidence scripts in this repository. | Local evidence harness. It is not the final contest-output transaction graph. |
 | Mainnet / production | A live deployment on public Kaspa infrastructure. | Not claimed. |
 
+The Kaspa L1 substrate assumed by the thesis is now the Toccata-mainnet surface:
+KIP-17 introspection, KIP-20 covenant context, DAA-relative sequence maturity,
+and the KIP-21 lane-proof RPCs used by this repository's observability harness.
+For local evidence generation, keep the sibling `rusty-kaspa` checkout on
+current `origin/master` at or after `9fdbaf1b`; stale `origin/toccata` checkouts
+are rejected by `kurrentctl detect-tools`.
+
 The latest thesis version is the best entry point:
 
 - [Thesis source](docs/KURRENT_THESIS.tex)
@@ -186,6 +193,8 @@ The production gate is stricter than the local acceptance gate:
 A production claim would require, at minimum:
 
 - a target Kaspa profile with the required covenant and introspection surface;
+- a pinned `rusty-kaspa` source revision satisfying the Kurrent Toccata-mainnet
+  RPC capability gate;
 - a concrete contest-output transaction graph implementation;
 - precise production script byte layout;
 - monitoring and fee-inclusion assumptions for the response window;
@@ -263,10 +272,12 @@ For protocol review:
 
 For implementation work:
 
-1. Run `./scripts/check.sh`.
-2. Inspect `evidence/kurrent-acceptance.json`.
-3. Run `./scripts/verify-evidence.sh` against the freshly generated report.
-4. Run the production-readiness script to see which gates remain blocked.
+1. Ensure `../rusty-kaspa` is on current `origin/master`.
+2. Run `cargo run --quiet --bin kurrentctl -- detect-tools`.
+3. Run `./scripts/check.sh`.
+4. Inspect `evidence/kurrent-acceptance.json`.
+5. Run `./scripts/verify-evidence.sh` against the freshly generated report.
+6. Run the production-readiness script to see which gates remain blocked.
 
 ## Non-Claims
 

@@ -189,6 +189,10 @@ use std::path::Path;
 
 pub mod client;
 
+// HARNESS DOMAIN TAGS - JSON SHA-256, not thesis commitment tags.
+// These tags are used by local evidence fixtures and devnet reports via
+// `hash_json(domain, value)`. They are deliberately separate from the
+// BLAKE2b keyed-mode commitment tags in the normative section below.
 pub const DOMAIN_STATE: &str = "KURRENT_STATE_V1";
 pub const DOMAIN_SETTLEMENT_TEMPLATE: &str = "KURRENT_SETTLEMENT_TEMPLATE_V1";
 pub const DOMAIN_CHANNEL_RECEIPT: &str = "KURRENT_CHANNEL_RECEIPT_V1";
@@ -200,6 +204,8 @@ pub const DOMAIN_STATE_SIGNATURE: &str = "KURRENT_STATE_SIGNATURE_V1";
 pub const DOMAIN_LANE_ID: &str = "KURRENT_LANE_V1";
 pub const DOMAIN_SETTLEMENT_DISTRIBUTION: &str = "KURRENT_SETTLEMENT_DISTRIBUTION_V1";
 pub const DOMAIN_SETTLEMENT_FEE_POLICY: &str = "KURRENT_SETTLEMENT_FEE_POLICY_V1";
+pub const DOMAIN_SETTLEMENT_CANDIDATE_MARKER: &str = "KURRENT_SETTLEMENT_CANDIDATE_MARKER_V1";
+pub const DOMAIN_FEE_SPONSORED_CANDIDATE_MARKER: &str = "KURRENT_FEE_SPONSORED_CANDIDATE_MARKER_V1";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KurrentError {
@@ -412,6 +418,17 @@ pub struct StateUpdate {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SettlementEligibilityPolicy {
     pub response_window_daa: u64,
+    #[serde(default)]
+    pub reorg_tolerance_daa: u32,
+}
+
+pub fn validate_response_window_daa(response_window_daa: u64) -> Result<u32> {
+    if !(MIN_RESPONSE_WINDOW_DAA..=MAX_RESPONSE_WINDOW_DAA).contains(&response_window_daa) {
+        return Err(KurrentError::SettlementEligibilityEvidenceMismatch(format!(
+            "response_window_daa must be in {MIN_RESPONSE_WINDOW_DAA}..={MAX_RESPONSE_WINDOW_DAA}, got {response_window_daa}"
+        )));
+    }
+    Ok(response_window_daa as u32)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -773,8 +790,11 @@ pub struct LnSwapEvidence {
     pub preimage_hash: String,
     pub kaspa_funding_outpoint: String,
     pub kaspa_settlement_outpoint: String,
+    pub ln_amount_sat: u64,
+    pub kaspa_amount_sompi: u64,
     pub amount: u64,
     pub recipient: String,
+    pub recipient_spk_sha256: String,
     pub script_hash: String,
     pub evidence_file_hashes: BTreeMap<String, String>,
 }
@@ -819,6 +839,8 @@ pub struct OpcodeCapabilityEvidence {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AcceptanceReport {
     pub timestamp: String,
+    #[serde(default)]
+    pub gate: String,
     pub git_commit: Option<String>,
     pub tool_versions: Vec<ToolEvidence>,
     pub kaspa_branch_profile: Option<String>,
@@ -843,6 +865,8 @@ pub struct AcceptanceReport {
     pub channel_receipt_hashes: Vec<String>,
     pub command_transcript_paths: Vec<String>,
     pub flows: BTreeMap<String, String>,
+    #[serde(default)]
+    pub local_acceptance_status: String,
     pub status: String,
     pub blocker_code: String,
     pub blockers: Vec<String>,
@@ -859,11 +883,17 @@ pub struct ProductionEvidenceRequirement {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProductionReadinessReport {
     pub timestamp: String,
+    #[serde(default)]
+    pub gate: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub git_commit: Option<String>,
+    #[serde(default)]
+    pub production_readiness_status: String,
     pub status: String,
     pub acceptance_status: String,
     pub requirements: Vec<ProductionEvidenceRequirement>,
+    #[serde(default)]
+    pub audit_blockers: Vec<String>,
     pub blockers: Vec<String>,
 }
 
@@ -1350,6 +1380,18 @@ pub fn validate_channel_update(
     if public_key_participants != participants {
         return Err(KurrentError::ParticipantSetMismatch);
     }
+    if config.access_manifest.required_signatures < 2 {
+        return Err(KurrentError::InsufficientSignatures {
+            required: 2,
+            actual: config.access_manifest.required_signatures,
+        });
+    }
+    if config.access_manifest.required_signatures as usize > participants.len() {
+        return Err(KurrentError::InsufficientSignatures {
+            required: config.access_manifest.required_signatures,
+            actual: participants.len() as u16,
+        });
+    }
 
     for participant in update.balances.keys() {
         if !participants.contains(participant) {
@@ -1492,6 +1534,9 @@ pub fn evaluate_settlement_eligibility(
     candidates: &[SettlementEligibilityCandidate],
     current_daa: u64,
 ) -> Result<Vec<SettlementEligibilityDecision>> {
+    let response_window_daa = validate_response_window_daa(policy.response_window_daa)? as u64;
+    let reorg_tolerance_daa = policy.reorg_tolerance_daa as u64;
+
     for candidate in candidates {
         validate_channel_update(config, funding, &candidate.update, template)?;
         validate_settlement_candidate_evidence(config, funding, candidate)?;
@@ -1568,7 +1613,8 @@ pub fn evaluate_settlement_eligibility(
         let eligible_after_daa = candidate
             .evidence
             .daa_score
-            .checked_add(policy.response_window_daa)
+            .checked_add(response_window_daa)
+            .and_then(|deadline| deadline.checked_add(reorg_tolerance_daa))
             .ok_or_else(|| {
                 KurrentError::SettlementEligibilityEvidenceMismatch(
                     "candidate response-window DAA overflows u64".to_string(),
@@ -1576,7 +1622,7 @@ pub fn evaluate_settlement_eligibility(
             })?;
         let displacement = ordered[index + 1..].iter().find(|higher| {
             higher.update.header.state_number > candidate.update.header.state_number
-                && higher.evidence.daa_score <= eligible_after_daa
+                && higher.evidence.daa_score < eligible_after_daa
         });
 
         let (status, displaced_by) = if let Some(higher) = displacement {
@@ -1584,7 +1630,7 @@ pub fn evaluate_settlement_eligibility(
                 SettlementEligibilityStatus::Displaced,
                 Some(higher.evidence.candidate_txid.clone()),
             )
-        } else if current_daa >= eligible_after_daa {
+        } else if current_daa > eligible_after_daa {
             (SettlementEligibilityStatus::EligibleToFinalise, None)
         } else if index == 0 {
             (SettlementEligibilityStatus::Provisional, None)
@@ -2157,18 +2203,34 @@ pub fn validate_preimage_bytes(preimage: &[u8], expected_hash: &str) -> Result<(
 }
 
 fn decode_preimage(preimage: &str) -> Result<Vec<u8>> {
-    if preimage.len().is_multiple_of(2) && preimage.chars().all(|ch| ch.is_ascii_hexdigit()) {
-        hex::decode(preimage).map_err(|_| KurrentError::WrongPreimage)
-    } else {
-        Ok(preimage.as_bytes().to_vec())
+    if preimage.len() != 64 || !preimage.chars().all(|ch| ch.is_ascii_hexdigit()) {
+        return Err(KurrentError::WrongPreimage);
     }
+    hex::decode(preimage).map_err(|_| KurrentError::WrongPreimage)
 }
 
 pub fn validate_ln_swap(evidence: &LnSwapEvidence, receipt: &ChannelReceipt) -> Result<()> {
     receipt.validate_hash()?;
-    if evidence.amount == 0 || evidence.recipient.is_empty() || evidence.script_hash.is_empty() {
+    let recipient_spk_hash_valid = evidence.recipient_spk_sha256.len() == 64
+        && evidence
+            .recipient_spk_sha256
+            .chars()
+            .all(|ch| ch.is_ascii_hexdigit());
+    if evidence.amount == 0
+        || evidence.ln_amount_sat == 0
+        || evidence.kaspa_amount_sompi == 0
+        || evidence.recipient.is_empty()
+        || !recipient_spk_hash_valid
+        || evidence.script_hash.is_empty()
+    {
         return Err(KurrentError::InvalidSwapEvidence(
-            "amount, recipient, and script hash are required".to_string(),
+            "LN amount, Kaspa amount, recipient, recipient script hash, and script hash are required"
+                .to_string(),
+        ));
+    }
+    if evidence.amount != evidence.kaspa_amount_sompi {
+        return Err(KurrentError::InvalidSwapEvidence(
+            "legacy amount must equal kaspa_amount_sompi".to_string(),
         ));
     }
     if !matches!(evidence.direction.as_str(), "ln-to-kaspa" | "kaspa-to-ln") {
@@ -2279,9 +2341,11 @@ pub fn sha256_hex(bytes: &[u8]) -> String {
 // Bounded transaction shapes: see `BoundedShape` per branch.
 // ============================================================================
 
-/// Domain tags used as BLAKE2b keyed-mode keys, matching the spec's
-/// ASCII tag list. Each tag is used directly as the BLAKE2b key (key
-/// length up to 64 bytes; shorter keys are zero-padded internally).
+/// COMMITMENT DOMAIN TAGS - BLAKE2b keyed mode, matching the thesis.
+///
+/// These are not the harness JSON/SHA-256 tags above. Each tag is used
+/// directly as the BLAKE2b key (key length up to 64 bytes; shorter keys
+/// are zero-padded internally).
 pub const DOMAIN_KURRENT_SCOPE: &str = "KurrentScope/v1";
 pub const DOMAIN_KURRENT_STATE: &str = "KurrentState/v1";
 pub const DOMAIN_KURRENT_STATE_CERT: &str = "KurrentStateCert/v1";
@@ -2293,6 +2357,11 @@ pub const DOMAIN_KURRENT_POLICY: &str = "KurrentPolicy/v1";
 /// signed-script-number comparison; the full range `0..=2^63 - 1` is
 /// operationally usable.
 pub const MAX_STATE_NUMBER: u64 = (1u64 << 63) - 1;
+pub const MAX_SCRIPT_AMOUNT: u64 = (1u64 << 63) - 1;
+pub const MIN_RESPONSE_WINDOW_DAA: u64 = 1;
+pub const MAX_RESPONSE_WINDOW_DAA: u64 = u32::MAX as u64;
+pub const DEFAULT_REORG_TOLERANCE_DAA: u32 = 1;
+pub const MAX_BLAKE2B_KEY_BYTES: usize = 64;
 
 /// Normative programme version (spec ABI). Bumped only when the set
 /// of valid protocol spends or the canonical bytes being signed/hashed
@@ -2324,18 +2393,31 @@ pub const POLICY_RESERVED_64_MUST_BE_ZERO: [u8; 64] = [0u8; 64];
 /// `blake2` crate's `Blake2bMac` API with the domain tag as the key;
 /// the key length limit is 64 bytes and ASCII domain tags fit within
 /// that limit.
-pub fn blake2b_256_keyed(domain_tag: &str, payload: &[u8]) -> [u8; 32] {
+pub fn try_blake2b_256_keyed(domain_tag: &str, payload: &[u8]) -> Result<[u8; 32]> {
     use blake2::digest::consts::U32;
     use blake2::digest::{FixedOutput, Update};
     use blake2::Blake2bMac;
+    if domain_tag.len() > MAX_BLAKE2B_KEY_BYTES {
+        return Err(KurrentError::InvalidPolicyField {
+            field: "blake2b_domain_tag",
+            actual: domain_tag.len() as u64,
+        });
+    }
     let mut hasher: Blake2bMac<U32> =
         <Blake2bMac<U32> as blake2::digest::KeyInit>::new_from_slice(domain_tag.as_bytes())
-            .expect("ASCII domain tag fits within the 64-byte BLAKE2b key limit");
+            .map_err(|_| KurrentError::InvalidPolicyField {
+                field: "blake2b_domain_tag",
+                actual: domain_tag.len() as u64,
+            })?;
     hasher.update(payload);
     let result = hasher.finalize_fixed();
     let mut out = [0u8; 32];
     out.copy_from_slice(&result);
-    out
+    Ok(out)
+}
+
+pub fn blake2b_256_keyed(domain_tag: &str, payload: &[u8]) -> [u8; 32] {
+    try_blake2b_256_keyed(domain_tag, payload).expect("domain tag must be a valid BLAKE2b key")
 }
 
 /// Hex-encoded BLAKE2b-256 keyed-mode hash, matching the spec's hash
@@ -2455,6 +2537,13 @@ impl SettlementMask {
     }
 
     pub fn from_values(value_a: u64, value_b: u64, total: u64) -> Result<Self> {
+        if value_a > MAX_SCRIPT_AMOUNT || value_b > MAX_SCRIPT_AMOUNT || total > MAX_SCRIPT_AMOUNT {
+            return Err(KurrentError::InvalidSettlementMask {
+                value_a,
+                value_b,
+                total,
+            });
+        }
         validate_conservation(value_a, value_b, total)?;
         match (value_a, value_b) {
             (0, b) if b == total && total > 0 => Ok(Self::BOnly),
@@ -2488,6 +2577,7 @@ impl StateRootInput {
     pub fn canonical_payload(&self) -> Vec<u8> {
         let mut out = Vec::new();
         out.push(self.settlement_mask.byte());
+        out.extend_from_slice(&PROGRAMME_VERSION_V1.to_le_bytes());
         out.push(ParticipantSlot::A.tag());
         out.extend_from_slice(&self.spk_a.encode());
         out.extend_from_slice(&self.value_a.to_le_bytes());
@@ -2594,20 +2684,26 @@ pub fn musig2_aggregate_xonly(pubkey_a: [u8; 32], pubkey_b: [u8; 32]) -> Aggrega
 
     // a_i = H_agg(L || P_i)
     let coefficient = |pk: &[u8; 32]| -> secp256k1::Scalar {
-        let mut h: Blake2bMac<U32> =
-            <Blake2bMac<U32> as blake2::digest::KeyInit>::new_from_slice(&[])
-                .expect("empty key is valid for BLAKE2b Mac");
-        h.update(&l);
-        h.update(pk);
-        let bytes: [u8; 32] = h.finalize_fixed().into();
-        // Hash output can equal n; reject the (extremely unlikely) all-zero
-        // case as well by re-deriving with a counter, matching the
-        // standard MuSig2 tie-break rule.
-        secp256k1::Scalar::from_be_bytes(bytes).unwrap_or({
-            // 1 is not a valid coefficient for H_agg ≥ 1, so re-derive.
-            // Probability of this branch is 2^-128; in practice never hit.
-            secp256k1::Scalar::ONE
-        })
+        let mut counter = 0u32;
+        loop {
+            let mut h: Blake2bMac<U32> =
+                <Blake2bMac<U32> as blake2::digest::KeyInit>::new_from_slice(&[])
+                    .expect("empty key is valid for BLAKE2b Mac");
+            h.update(&l);
+            h.update(pk);
+            if counter != 0 {
+                h.update(&counter.to_le_bytes());
+            }
+            let bytes: [u8; 32] = h.finalize_fixed().into();
+            if let Ok(scalar) = secp256k1::Scalar::from_be_bytes(bytes) {
+                if scalar != secp256k1::Scalar::ZERO {
+                    return scalar;
+                }
+            }
+            counter = counter
+                .checked_add(1)
+                .expect("MuSig2 coefficient counter is practically bounded");
+        }
     };
 
     let a1 = coefficient(&keys[0]);
@@ -2845,19 +2941,21 @@ impl ScopeInputs {
 ///
 /// `PolicyEncoding = le16(policy_version) || le32(sponsor_policy_id)
 ///                 || le32(settlement_shape_id) || coop_close_enabled{1}
+///                 || le32(reorg_tolerance_daa)
 ///                 || reserved_64`
 ///
 /// v1 assignments: policy_version=1, sponsor_policy_id=0
 /// (external-sponsor-only for positive-fee protocol transactions),
 /// settlement_shape_id=1 (two-party mask-bearing shape),
-/// coop_close_enabled ∈ {0, 1}, reserved_64 must be all-zero (rejection
-/// on non-zero is normative).
+/// coop_close_enabled ∈ {0, 1}, reorg_tolerance_daa ≥ 1, reserved_64
+/// must be all-zero (rejection on non-zero is normative).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolicyEncoding {
     pub policy_version: u16,
     pub sponsor_policy_id: u32,
     pub settlement_shape_id: u32,
     pub coop_close_enabled: bool,
+    pub reorg_tolerance_daa: u32,
     pub reserved_64: [u8; 64],
 }
 
@@ -2876,17 +2974,19 @@ impl PolicyEncoding {
             sponsor_policy_id: SPONSOR_POLICY_EXTERNAL_ONLY,
             settlement_shape_id: SETTLEMENT_SHAPE_TWO_PARTY_FIXED,
             coop_close_enabled: true,
+            reorg_tolerance_daa: DEFAULT_REORG_TOLERANCE_DAA,
             reserved_64: POLICY_RESERVED_64_MUST_BE_ZERO,
         }
     }
 
     /// Canonical fixed-width payload.
     pub fn canonical_payload(&self) -> Vec<u8> {
-        let mut out = Vec::with_capacity(2 + 4 + 4 + 1 + 64);
+        let mut out = Vec::with_capacity(2 + 4 + 4 + 1 + 4 + 64);
         out.extend_from_slice(&self.policy_version.to_le_bytes());
         out.extend_from_slice(&self.sponsor_policy_id.to_le_bytes());
         out.extend_from_slice(&self.settlement_shape_id.to_le_bytes());
         out.push(if self.coop_close_enabled { 1 } else { 0 });
+        out.extend_from_slice(&self.reorg_tolerance_daa.to_le_bytes());
         out.extend_from_slice(&self.reserved_64);
         out
     }
@@ -2910,6 +3010,12 @@ impl PolicyEncoding {
             return Err(KurrentError::InvalidPolicyField {
                 field: "settlement_shape_id",
                 actual: self.settlement_shape_id as u64,
+            });
+        }
+        if self.reorg_tolerance_daa == 0 {
+            return Err(KurrentError::InvalidPolicyField {
+                field: "reorg_tolerance_daa",
+                actual: self.reorg_tolerance_daa as u64,
             });
         }
         if self.reserved_64 != POLICY_RESERVED_64_MUST_BE_ZERO {
@@ -3006,6 +3112,21 @@ pub fn check_sponsor_invariant(
     sponsor_change_value: u64,
     fee: u64,
 ) -> Result<()> {
+    if sponsor_input_value == 0 {
+        if sponsor_change_value != 0 || fee != 0 {
+            return Err(KurrentError::ConservationFailure {
+                expected: sponsor_input_value,
+                actual: sponsor_change_value.saturating_add(fee),
+            });
+        }
+        return Ok(());
+    }
+    if fee == 0 {
+        return Err(KurrentError::ConservationFailure {
+            expected: sponsor_input_value,
+            actual: sponsor_change_value,
+        });
+    }
     let total = sponsor_change_value
         .checked_add(fee)
         .ok_or(KurrentError::ConservationFailure {

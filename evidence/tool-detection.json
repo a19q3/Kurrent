@@ -1,5 +1,5 @@
 {
-  "timestamp": "1782545140",
+  "timestamp": "1782888306",
   "status": "ready",
   "blockers": [],
   "tools": [
@@ -16,12 +16,12 @@
     {
       "name": "kaspa-cli",
       "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-cli",
-      "version": "Kaspa Cli Wallet v2.0.0 (type 'help' for list of commands)"
+      "version": "Kaspa Cli Wallet v2.0.1 (type 'help' for list of commands)"
     },
     {
       "name": "kaspa-wallet",
       "path": "/Users/arthur/RustroverProjects/rusty-kaspa/target/release/kaspa-wallet",
-      "version": "Kaspa Cli Wallet v2.0.0 (type 'help' for list of commands)"
+      "version": "Kaspa Cli Wallet v2.0.1 (type 'help' for list of commands)"
     },
     {
       "name": "rusty-kaspa",
@@ -92,12 +92,15 @@
   },
   "known_bin_dirs": [
     "/Users/arthur/go/bin",
+    "/Users/arthur/.cargo/bin",
     "/Users/arthur/RustroverProjects/rusty-kaspa/target/release",
     "/Users/arthur/RustroverProjects/rusty-kaspa/target/debug",
     "/Users/arthur/RustroverProjects/rusty-kaspa-toccata/target/release",
     "/Users/arthur/RustroverProjects/rusty-kaspa-toccata/target/debug",
-    "/Users/arthur/RustroverProjects/rusty-kaspa/target/release",
-    "/Users/arthur/RustroverProjects/rusty-kaspa/target/debug"
+    "/Users/arthur/RustroverProjects/kaspa/target/release",
+    "/Users/arthur/RustroverProjects/kaspa/target/debug",
+    "/Users/arthur/RustroverProjects/Kaspa/target/release",
+    "/Users/arthur/RustroverProjects/Kaspa/target/debug"
   ],
   "parent_kaspa_repo": {
     "path": "/Users/arthur/RustroverProjects/rusty-kaspa",
@@ -105,6 +108,9 @@
     "head": "98a4ccd8d200853787f227bd4536ac540cf34957",
     "origin_toccata": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
     "origin_master": "98a4ccd8d200853787f227bd4536ac540cf34957",
+    "matches_origin_master": true,
+    "has_seq_commit_lane_proof_rpc": true,
+    "has_rpc_covenant_output_conversion_fix": true,
     "status_short": "## master...origin/master"
   },
   "selected_kaspa_repo": {
@@ -113,6 +119,9 @@
     "head": "98a4ccd8d200853787f227bd4536ac540cf34957",
     "origin_toccata": "0ae28f939e61994a11eb8eb6dd775255e2924afb",
     "origin_master": "98a4ccd8d200853787f227bd4536ac540cf34957",
+    "matches_origin_master": true,
+    "has_seq_commit_lane_proof_rpc": true,
+    "has_rpc_covenant_output_conversion_fix": true,
     "status_short": "## master...origin/master"
   },
   "lnd_repo": {
@@ -120,7 +129,8 @@
     "current_branch": "",
     "head": "848b72ce96eb68fa90fd4336523ca4c59bddcd4c",
     "origin_toccata": null,
-    "origin_master": "cbe77749cde745086f85198151a99006ae4ca084",
+    "origin_master": "40c64f9db30de8ff22d42f1146d07508a30bed14",
+    "matches_origin_master": false,
     "status_short": "## HEAD (no branch)"
   }
 }

@@ -1,6 +1,6 @@
 # Production Key Management
 
-Status: passed
+Status: drafted (runbook-level, not production gate status)
 
 This runbook is a production-readiness artefact for key-management procedure only.
 It does not claim that Kurrent is production-ready, mainnet-ready, or externally

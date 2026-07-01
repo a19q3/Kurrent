@@ -1,6 +1,6 @@
 # Production Monitoring
 
-Status: passed
+Status: drafted (runbook-level, not production gate status)
 
 This runbook describes the monitoring procedure required by the production gate.
 It is not a production deployment claim.
@@ -18,6 +18,8 @@ in the thesis and does not cover public Lightning route-hop operation.
 Operators monitor the following signals for each deployment profile:
 
 - local Kaspa node reachability and network identity;
+- local `rusty-kaspa` source revision and whether it satisfies
+  `kurrentctl detect-tools`;
 - current DAA score and response-window distance for each contested state;
 - latest accepted channel state number and state-root hash;
 - replacement, settlement, refund, and cooperative-close transaction status;

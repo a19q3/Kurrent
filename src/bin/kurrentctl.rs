@@ -11,8 +11,9 @@ use kurrent::{
     SettlementEligibilityStatus, SettlementFeePolicy, SettlementRegistry,
     SettlementSponsorEvidence, SettlementTemplate, StateUpdate, ToolEvidence, TouchedLeaves,
     VirtualChannelState, DOMAIN_CHANNEL_RECEIPT, DOMAIN_CLAIM_SCOPE,
-    DOMAIN_FACTORY_MATERIALISATION, DOMAIN_LN_INTEROP, DOMAIN_PARTICIPANT_SET,
-    DOMAIN_SETTLEMENT_TEMPLATE, DOMAIN_STATE, DOMAIN_STATE_SIGNATURE,
+    DOMAIN_FACTORY_MATERIALISATION, DOMAIN_FEE_SPONSORED_CANDIDATE_MARKER, DOMAIN_LN_INTEROP,
+    DOMAIN_PARTICIPANT_SET, DOMAIN_SETTLEMENT_CANDIDATE_MARKER, DOMAIN_SETTLEMENT_TEMPLATE,
+    DOMAIN_STATE, DOMAIN_STATE_SIGNATURE,
 };
 use secp256k1::{Keypair, Message, Secp256k1, SecretKey};
 use serde::Serialize;
@@ -39,6 +40,14 @@ const EXIT_REFUND_FLOW: u8 = 15;
 const EXIT_EVIDENCE: u8 = 16;
 const EXIT_PRODUCTION_READINESS: u8 = 17;
 const PRESENTATION_WIDTH: usize = 88;
+const LN_TO_KASPA_PREIMAGE_HEX: &str =
+    "0001020304050607080900010203040506070809000102030405060708090001";
+const KASPA_TO_LN_PREIMAGE_HEX: &str =
+    "1011121314151617181910111213141516171819101112131415161718191011";
+const LN_SWAP_AMOUNT_SAT: u64 = 1_000;
+const SYNTHETIC_HARNESS_FIXTURE_CLASS: &str = "synthetic_harness_fixture";
+const KASPA_SEQ_COMMIT_LANE_PROOF_COMMIT: &str = "2787953e";
+const KASPA_RPC_COVENANT_OUTPUT_FIX_COMMIT: &str = "9fdbaf1b";
 
 fn main() -> ExitCode {
     match run() {
@@ -113,6 +122,11 @@ struct RepoRecord {
     head: Option<String>,
     origin_toccata: Option<String>,
     origin_master: Option<String>,
+    matches_origin_master: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    has_seq_commit_lane_proof_rpc: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    has_rpc_covenant_output_conversion_fix: Option<bool>,
     status_short: Option<String>,
 }
 
@@ -340,22 +354,89 @@ fn git_stdout(repo: &Path, args: &[&str]) -> Option<String> {
     command_stdout(cmd)
 }
 
+fn git_network_command() -> Command {
+    let mut cmd = Command::new("git");
+    for var in [
+        "http_proxy",
+        "https_proxy",
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+    ] {
+        cmd.env_remove(var);
+    }
+    cmd.arg("-c")
+        .arg("http.proxy=")
+        .arg("-c")
+        .arg("https.proxy=");
+    cmd
+}
+
+fn git_is_ancestor(repo: &Path, ancestor: &str) -> bool {
+    Command::new("git")
+        .args(["merge-base", "--is-ancestor", ancestor, "HEAD"])
+        .current_dir(repo)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map(|status| status.success())
+        .unwrap_or(false)
+}
+
+fn file_contains(path: &Path, needle: &str) -> bool {
+    fs::read_to_string(path)
+        .map(|content| content.contains(needle))
+        .unwrap_or(false)
+}
+
+fn kaspa_has_seq_commit_lane_proof_rpc(repo: &Path) -> bool {
+    git_is_ancestor(repo, KASPA_SEQ_COMMIT_LANE_PROOF_COMMIT)
+        || file_contains(
+            &repo.join("rpc/grpc/client/src/lib.rs"),
+            "get_seq_commit_lane_proof_call",
+        )
+}
+
+fn kaspa_has_rpc_covenant_output_conversion_fix(repo: &Path) -> bool {
+    git_is_ancestor(repo, KASPA_RPC_COVENANT_OUTPUT_FIX_COMMIT)
+        || (file_contains(
+            &repo.join("rpc/core/src/convert/tx.rs"),
+            "Self::with_covenant",
+        ) && file_contains(
+            &repo.join("rpc/core/src/convert/tx.rs"),
+            "item.covenant.and_then",
+        ))
+}
+
+fn kaspa_checkout_satisfies_kurrent(repo: &Path) -> bool {
+    kaspa_has_seq_commit_lane_proof_rpc(repo) && kaspa_has_rpc_covenant_output_conversion_fix(repo)
+}
+
 fn current_git_commit(repo: &Path) -> Result<String, String> {
     git_stdout(repo, &["rev-parse", "--verify", "HEAD"])
         .ok_or_else(|| "failed to resolve current git HEAD".to_string())
 }
 
-fn repo_record(path: Option<PathBuf>) -> Option<RepoRecord> {
+fn repo_record(path: Option<PathBuf>, include_kaspa_capabilities: bool) -> Option<RepoRecord> {
     let path = path?;
     if !path.join(".git").exists() {
         return None;
     }
+    let head = git_stdout(&path, &["rev-parse", "HEAD"]);
+    let origin_master = git_stdout(&path, &["rev-parse", "origin/master"]);
+    let has_seq_commit_lane_proof_rpc =
+        include_kaspa_capabilities.then(|| kaspa_has_seq_commit_lane_proof_rpc(&path));
+    let has_rpc_covenant_output_conversion_fix =
+        include_kaspa_capabilities.then(|| kaspa_has_rpc_covenant_output_conversion_fix(&path));
     Some(RepoRecord {
         path: path.display().to_string(),
         current_branch: git_stdout(&path, &["branch", "--show-current"]),
-        head: git_stdout(&path, &["rev-parse", "HEAD"]),
+        head: head.clone(),
         origin_toccata: git_stdout(&path, &["rev-parse", "origin/toccata"]),
-        origin_master: git_stdout(&path, &["rev-parse", "origin/master"]),
+        origin_master: origin_master.clone(),
+        matches_origin_master: head.is_some() && head == origin_master,
+        has_seq_commit_lane_proof_rpc,
+        has_rpc_covenant_output_conversion_fix,
         status_short: git_stdout(&path, &["status", "--short", "--branch"]),
     })
 }
@@ -430,6 +511,19 @@ fn detection_report() -> DetectionReport {
             "No local Kaspa source checkout with the expected covenant-capability profile was found."
                 .to_string(),
         );
+    } else if let Some(repo) = selected_repo.as_ref() {
+        if !kaspa_has_seq_commit_lane_proof_rpc(repo) {
+            blockers.push(
+                "Kaspa checkout is too old for Kurrent: missing get_seq_commit_lane_proof RPC. Use kaspanet/rusty-kaspa v2.0.1 or newer, preferably current origin/master."
+                    .to_string(),
+            );
+        }
+        if !kaspa_has_rpc_covenant_output_conversion_fix(repo) {
+            blockers.push(
+                "Kaspa checkout lacks the post-v2.0.1 covenant-output RPC conversion fix. Use current kaspanet/rusty-kaspa origin/master at or after 9fdbaf1b."
+                    .to_string(),
+            );
+        }
     }
     if !kaspa_node_available {
         blockers
@@ -468,9 +562,9 @@ fn detection_report() -> DetectionReport {
             .iter()
             .map(|p| p.display().to_string())
             .collect(),
-        parent_kaspa_repo: repo_record(parent_repo),
-        selected_kaspa_repo: repo_record(selected_repo),
-        lnd_repo: repo_record(lnd_repo),
+        parent_kaspa_repo: repo_record(parent_repo, true),
+        selected_kaspa_repo: repo_record(selected_repo, true),
+        lnd_repo: repo_record(lnd_repo, false),
     }
 }
 
@@ -631,7 +725,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
     let kaspa_branch_profile = detection
         .selected_kaspa_repo
         .as_ref()
-        .and_then(|repo| repo.origin_toccata.clone().or_else(|| repo.head.clone()));
+        .and_then(|repo| repo.origin_master.clone().or_else(|| repo.head.clone()));
     let ln_evidence_path = evidence_root.join("ln-devnet-evidence.json");
     let ln_invoice_payment_preimage_evidence = if ln_evidence_path.exists() {
         let bytes = fs::read(&ln_evidence_path).map_err(|e| e.to_string())?;
@@ -851,6 +945,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
 
     let report = AcceptanceReport {
         timestamp: timestamp(),
+        gate: "local-acceptance".to_string(),
         git_commit: git_stdout(&root()?, &["rev-parse", "--verify", "HEAD"]),
         tool_versions: detection.tools,
         kaspa_branch_profile,
@@ -889,6 +984,7 @@ fn write_acceptance_report(status: &str, blocker_code: &str) -> Result<(), Strin
         channel_receipt_hashes,
         command_transcript_paths,
         flows,
+        local_acceptance_status: status.to_string(),
         status: status.to_string(),
         blocker_code: blocker_code.to_string(),
         blockers,
@@ -916,6 +1012,10 @@ fn verify_evidence() -> Result<u8, String> {
     }
     if report.status != "passed" {
         eprintln!("acceptance evidence is not passed");
+        return Ok(EXIT_EVIDENCE);
+    }
+    if report.gate != "local-acceptance" || report.local_acceptance_status != report.status {
+        eprintln!("acceptance evidence has inconsistent gate/status metadata");
         return Ok(EXIT_EVIDENCE);
     }
     if !report.blockers.is_empty() {
@@ -1039,6 +1139,10 @@ fn verify_evidence() -> Result<u8, String> {
         eprintln!("{err}");
         return Ok(EXIT_EVIDENCE);
     }
+    if let Err(err) = verify_state_channel_protocol_fixture_markers(&root) {
+        eprintln!("{err}");
+        return Ok(EXIT_EVIDENCE);
+    }
     let presentation = verify_presentation_reality()?;
     if presentation != 0 {
         return Ok(presentation);
@@ -1099,6 +1203,98 @@ fn verify_state_channel_evidence_links(
     Ok(())
 }
 
+fn verify_state_channel_protocol_fixture_markers(root: &Path) -> Result<(), String> {
+    let flow_path = resolve_record_path(root, "evidence/kurrent-state-channel-flow-evidence.json");
+    let flow: Value = serde_json::from_slice(&fs::read(&flow_path).map_err(|e| {
+        format!(
+            "failed to read state-channel flow evidence {}: {e}",
+            flow_path.display()
+        )
+    })?)
+    .map_err(|e| {
+        format!(
+            "failed to parse state-channel flow evidence {}: {e}",
+            flow_path.display()
+        )
+    })?;
+
+    let protocol_files = flow
+        .get("protocol_files")
+        .and_then(Value::as_array)
+        .ok_or_else(|| "state-channel flow evidence is missing protocol_files".to_string())?;
+    if protocol_files.is_empty() {
+        return Err("state-channel flow evidence has no protocol_files".to_string());
+    }
+
+    let mut saw_template = false;
+    let mut saw_headers = false;
+    let mut saw_receipt = false;
+    for record in protocol_files {
+        let evidence = evidence_file_from_value(record)?;
+        verify_file_hash_record(
+            root,
+            "state_channel_protocol_files",
+            &evidence,
+            HashMode::FileBytes,
+        )?;
+        let path = resolve_record_path(root, &evidence.path);
+        let value: Value = serde_json::from_slice(
+            &fs::read(&path)
+                .map_err(|e| format!("failed to read protocol fixture {}: {e}", path.display()))?,
+        )
+        .map_err(|e| format!("failed to parse protocol fixture {}: {e}", path.display()))?;
+
+        if evidence
+            .path
+            .ends_with("kurrent-state-channel-settlement-template.json")
+        {
+            require_json_str_eq(&value, "/evidence_class", SYNTHETIC_HARNESS_FIXTURE_CLASS)?;
+            saw_template = true;
+        } else if evidence
+            .path
+            .ends_with("kurrent-state-channel-headers.json")
+        {
+            let headers = value
+                .as_array()
+                .ok_or_else(|| "state-channel headers fixture is not a JSON array".to_string())?;
+            if headers.is_empty() {
+                return Err("state-channel headers fixture is empty".to_string());
+            }
+            for (index, header) in headers.iter().enumerate() {
+                require_json_str_eq(
+                    header,
+                    "/header/evidence_class",
+                    SYNTHETIC_HARNESS_FIXTURE_CLASS,
+                )
+                .map_err(|err| format!("state-channel header fixture {index}: {err}"))?;
+            }
+            saw_headers = true;
+        } else if evidence
+            .path
+            .ends_with("kurrent-state-channel-receipt.json")
+        {
+            require_json_str_eq(&value, "/evidence_class", SYNTHETIC_HARNESS_FIXTURE_CLASS)?;
+            require_json_str_eq(
+                &value,
+                "/scope/evidence_class",
+                SYNTHETIC_HARNESS_FIXTURE_CLASS,
+            )?;
+            saw_receipt = true;
+        }
+    }
+
+    for (name, seen) in [
+        ("settlement template fixture", saw_template),
+        ("headers fixture", saw_headers),
+        ("receipt fixture", saw_receipt),
+    ] {
+        if !seen {
+            return Err(format!("state-channel protocol_files missing {name}"));
+        }
+    }
+    Ok(())
+}
+
 fn verify_state_channel_evidence_value_links(value: &Value) -> Result<(), String> {
     let settlement_template_hash = required_json_str(value, "/settlement_template/hash")?;
     let receipt_template_hash =
@@ -1154,11 +1350,32 @@ fn required_json_str<'a>(value: &'a Value, path: &str) -> Result<&'a str, String
     json_pointer_str(value, path).ok_or_else(|| format!("missing string field: {path}"))
 }
 
+fn require_json_str_eq(value: &Value, path: &str, expected: &str) -> Result<(), String> {
+    let actual = required_json_str(value, path)?;
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(format!(
+            "wrong string field {path}: expected {expected}, actual {actual}"
+        ))
+    }
+}
+
 fn required_json_u64(value: &Value, path: &str) -> Result<u64, String> {
     value
         .pointer(path)
         .and_then(Value::as_u64)
         .ok_or_else(|| format!("missing u64 field: {path}"))
+}
+
+fn ln_swap_value<'a>(value: &'a Value, direction: &str) -> Option<&'a Value> {
+    value.pointer(&format!("/swaps/{direction}")).or_else(|| {
+        if direction == "ln-to-kaspa" {
+            value.get("invoice")
+        } else {
+            None
+        }
+    })
 }
 
 fn verify_presentation_reality() -> Result<u8, String> {
@@ -1275,7 +1492,8 @@ fn verify_presentation_reality() -> Result<u8, String> {
         &mut checks,
         &mut blockers,
     );
-    let mut ln_payment_hash = None;
+    let mut ln_payment_hash_by_direction = BTreeMap::new();
+    let mut ln_amount_sat_by_direction = BTreeMap::new();
     if let Some(value) = &ln {
         record_presentation_check(
             &mut checks,
@@ -1293,55 +1511,106 @@ fn verify_presentation_reality() -> Result<u8, String> {
             is_hex_len(alice, 66) && is_hex_len(bob, 66) && alice != bob,
             "Alice and Bob expose distinct compressed secp256k1 identity keys",
         );
-        let preimage = json_pointer_str(value, "/invoice/preimage").unwrap_or("");
-        let payment_hash = json_pointer_str(value, "/invoice/payment_hash").unwrap_or("");
-        let preimage_hash_matches = hex::decode(preimage)
-            .map(|bytes| sha256_hex(&bytes) == payment_hash)
-            .unwrap_or(false);
-        if preimage_hash_matches {
-            ln_payment_hash = Some(payment_hash.to_string());
-        }
-        let preimage_source = json_pointer_str(value, "/invoice/preimage_source");
-        record_presentation_check(
-            &mut checks,
-            &mut blockers,
-            "ln_invoice_preimage_source",
-            preimage_source.is_none()
-                || preimage_source == Some("deterministic_test_vector_supplied_to_lnd_addinvoice"),
-            match preimage_source {
-                Some(_) => {
-                    "LN evidence declares a deterministic local-devnet preimage supplied to real LND addinvoice"
-                }
-                None => {
-                    "legacy LN evidence omits preimage-source metadata; the preimage/payment-hash binding remains the blocking check"
-                }
-            },
-        );
-        record_presentation_check(
-            &mut checks,
-            &mut blockers,
-            "ln_invoice_preimage_hash",
-            is_hex_len(preimage, 64) && is_hex_len(payment_hash, 64) && preimage_hash_matches,
-            "deterministic invoice preimage hashes to the recorded Lightning payment hash",
-        );
-
-        if let Some(payment_path) = json_pointer_str(value, "/invoice/payment_path") {
-            if let Some(payment) =
-                load_presentation_json(&root, payment_path, &mut checks, &mut blockers)
-            {
+        for direction in ["ln-to-kaspa", "kaspa-to-ln"] {
+            let id_prefix = direction.replace('-', "_");
+            let Some(invoice) = ln_swap_value(value, direction) else {
                 record_presentation_check(
                     &mut checks,
                     &mut blockers,
-                    "ln_invoice_payment_status",
-                    payment.get("status").and_then(Value::as_str) == Some("SUCCEEDED")
-                        && payment.get("payment_hash").and_then(Value::as_str)
-                            == Some(payment_hash)
-                        && payment.get("payment_preimage").and_then(Value::as_str)
-                            == Some(preimage),
-                    "lncli payment evidence shows the invoice payment succeeded with the same hash and preimage",
+                    &format!("ln_{id_prefix}_invoice_present"),
+                    false,
+                    format!("LN evidence contains a settled invoice for {direction}"),
                 );
+                continue;
+            };
+            let preimage = invoice
+                .get("preimage")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            let payment_hash = invoice
+                .get("payment_hash")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            let amount_sat = invoice
+                .get("amount_sat")
+                .and_then(Value::as_u64)
+                .unwrap_or(0);
+            let preimage_hash_matches = hex::decode(preimage)
+                .map(|bytes| sha256_hex(&bytes) == payment_hash)
+                .unwrap_or(false);
+            if preimage_hash_matches && amount_sat > 0 {
+                ln_payment_hash_by_direction
+                    .insert(direction.to_string(), payment_hash.to_string());
+                ln_amount_sat_by_direction.insert(direction.to_string(), amount_sat);
             }
+            let preimage_source = invoice.get("preimage_source").and_then(Value::as_str);
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                &format!("ln_{id_prefix}_preimage_source"),
+                preimage_source == Some("deterministic_test_vector_supplied_to_lnd_addinvoice"),
+                format!("{direction} declares a deterministic local-devnet preimage supplied to real LND addinvoice"),
+            );
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                &format!("ln_{id_prefix}_preimage_hash"),
+                amount_sat > 0
+                    && is_hex_len(preimage, 64)
+                    && is_hex_len(payment_hash, 64)
+                    && preimage_hash_matches,
+                format!("{direction} preimage hashes to its recorded Lightning payment hash and has a positive sat amount"),
+            );
+
+            let payment_ok = invoice
+                .get("payment_path")
+                .and_then(Value::as_str)
+                .and_then(|path| load_presentation_json(&root, path, &mut checks, &mut blockers))
+                .is_some_and(|payment| {
+                    payment.get("status").and_then(Value::as_str) == Some("SUCCEEDED")
+                        && payment.get("payment_hash").and_then(Value::as_str) == Some(payment_hash)
+                        && payment.get("payment_preimage").and_then(Value::as_str) == Some(preimage)
+                });
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                &format!("ln_{id_prefix}_payment_status"),
+                payment_ok,
+                format!(
+                    "{direction} lncli payment evidence succeeded with the same hash and preimage"
+                ),
+            );
+
+            let lookup_ok = invoice
+                .get("lookup_path")
+                .and_then(Value::as_str)
+                .and_then(|path| load_presentation_json(&root, path, &mut checks, &mut blockers))
+                .is_some_and(|lookup| {
+                    lookup
+                        .get("settled")
+                        .and_then(Value::as_bool)
+                        .unwrap_or(false)
+                        && lookup.get("r_preimage").and_then(Value::as_str) == Some(preimage)
+                });
+            record_presentation_check(
+                &mut checks,
+                &mut blockers,
+                &format!("ln_{id_prefix}_lookup_status"),
+                lookup_ok,
+                format!("{direction} lookupinvoice evidence is settled with the expected preimage"),
+            );
         }
+        let distinct_swap_hashes = ln_payment_hash_by_direction
+            .get("ln-to-kaspa")
+            .zip(ln_payment_hash_by_direction.get("kaspa-to-ln"))
+            .is_some_and(|(left, right)| left != right);
+        record_presentation_check(
+            &mut checks,
+            &mut blockers,
+            "ln_directional_payment_hashes_distinct",
+            distinct_swap_hashes,
+            "opposite LN/Kaspa swap directions use distinct Lightning payment hashes",
+        );
 
         let alice_channels = json_pointer_str(value, "/channel/alice_channels_path")
             .and_then(|path| load_presentation_json(&root, path, &mut checks, &mut blockers));
@@ -1451,7 +1720,10 @@ fn verify_presentation_reality() -> Result<u8, String> {
         &root,
         "evidence/kurrent-live-ln-to-kaspa-evidence.json",
         "ln-to-kaspa",
-        ln_payment_hash.as_deref(),
+        ln_payment_hash_by_direction
+            .get("ln-to-kaspa")
+            .map(String::as_str),
+        ln_amount_sat_by_direction.get("ln-to-kaspa").copied(),
         &mut checks,
         &mut blockers,
     );
@@ -1459,7 +1731,10 @@ fn verify_presentation_reality() -> Result<u8, String> {
         &root,
         "evidence/kurrent-live-kaspa-to-ln-evidence.json",
         "kaspa-to-ln",
-        ln_payment_hash.as_deref(),
+        ln_payment_hash_by_direction
+            .get("kaspa-to-ln")
+            .map(String::as_str),
+        ln_amount_sat_by_direction.get("kaspa-to-ln").copied(),
         &mut checks,
         &mut blockers,
     );
@@ -1722,6 +1997,7 @@ fn verify_hashlock_reality(
     evidence_path: &str,
     expected_flow: &str,
     ln_payment_hash: Option<&str>,
+    ln_amount_sat: Option<u64>,
     checks: &mut Vec<Value>,
     blockers: &mut Vec<String>,
 ) {
@@ -1744,6 +2020,54 @@ fn verify_hashlock_reality(
         ln_payment_hash.is_some()
             && value.get("preimage_sha256").and_then(Value::as_str) == ln_payment_hash,
         format!("{expected_flow} Kaspa-side preimage hash matches the Lightning payment hash"),
+    );
+    record_presentation_check(
+        checks,
+        blockers,
+        &format!("{id_prefix}_ln_hash_field"),
+        ln_payment_hash.is_some()
+            && value.get("ln_payment_hash").and_then(Value::as_str) == ln_payment_hash,
+        format!(
+            "{expected_flow} live report carries the direction-specific Lightning payment hash"
+        ),
+    );
+    record_presentation_check(
+        checks,
+        blockers,
+        &format!("{id_prefix}_amount_binding"),
+        ln_amount_sat.is_some()
+            && value.get("ln_amount_sat").and_then(Value::as_u64) == ln_amount_sat
+            && value
+                .pointer("/model_validation/swap_evidence/ln_amount_sat")
+                .and_then(Value::as_u64)
+                == ln_amount_sat
+            && value.pointer("/settlement/output_value").and_then(Value::as_u64)
+                == value
+                    .pointer("/model_validation/swap_evidence/kaspa_amount_sompi")
+                    .and_then(Value::as_u64)
+            && value.pointer("/settlement/output_value").and_then(Value::as_u64)
+                == value
+                    .pointer("/model_validation/swap_evidence/amount")
+                    .and_then(Value::as_u64),
+        format!("{expected_flow} binds LN sat amount and Kaspa sompi settlement amount without unit ambiguity"),
+    );
+    record_presentation_check(
+        checks,
+        blockers,
+        &format!("{id_prefix}_recipient_spk_binding"),
+        value
+            .pointer("/settlement/recipient_spk_sha256")
+            .and_then(Value::as_str)
+            .is_some_and(|hash| {
+                is_hex_len(hash, 64)
+                    && Some(hash)
+                        == value
+                            .pointer("/model_validation/swap_evidence/recipient_spk_sha256")
+                            .and_then(Value::as_str)
+            }),
+        format!(
+            "{expected_flow} carries the recipient script-public-key hash into typed swap evidence"
+        ),
     );
     record_presentation_check(
         checks,
@@ -2035,6 +2359,15 @@ fn production_readiness_requirements() -> [(&'static str, &'static str, &'static
     ]
 }
 
+fn production_audit_blockers() -> Vec<String> {
+    vec![
+        "normative contest-output graph implementation, script bytecode, runtime cost model, and consensus-fee economics remain the next production milestone".to_string(),
+        "local JSON/devnet harness evidence is non-final and must remain separated from normative on-chain commitments".to_string(),
+        "dirty-worktree acceptance is mitigated by artefact hashes and reviewed_git_commit checks, not eliminated".to_string(),
+        "independent external security review must be completed and passing before production readiness can pass".to_string(),
+    ]
+}
+
 fn production_evidence_satisfies(id: &str, path: &Path) -> Result<bool, String> {
     if !path.is_file() {
         return Ok(false);
@@ -2076,9 +2409,17 @@ fn production_json_evidence_satisfies(id: &str, value: &Value) -> bool {
     match id {
         "prod_target_profile" => {
             value
-                .get("git_commit")
+                .get("gate")
                 .and_then(Value::as_str)
-                .is_some_and(|commit| !commit.is_empty())
+                .is_some_and(|gate| gate == "production-target-profile")
+                && value
+                    .get("target_profile_status")
+                    .and_then(Value::as_str)
+                    .is_some_and(|status| status == "passed")
+                && value
+                    .get("git_commit")
+                    .and_then(Value::as_str)
+                    .is_some_and(|commit| !commit.is_empty())
                 && value
                     .get("required_production_gates")
                     .and_then(Value::as_array)
@@ -2087,6 +2428,37 @@ fn production_json_evidence_satisfies(id: &str, value: &Value) -> bool {
                     .get("local_acceptance")
                     .and_then(|local| local.get("acceptance_report"))
                     .is_some()
+                && json_array_contains_str(value, "/harness_json_domains", DOMAIN_STATE)
+                && json_array_contains_str(
+                    value,
+                    "/harness_json_domains",
+                    DOMAIN_SETTLEMENT_CANDIDATE_MARKER,
+                )
+                && json_array_contains_str(
+                    value,
+                    "/harness_json_domains",
+                    DOMAIN_FEE_SPONSORED_CANDIDATE_MARKER,
+                )
+                && json_array_contains_str(
+                    value,
+                    "/normative_commitment_domains",
+                    kurrent::DOMAIN_KURRENT_SCOPE,
+                )
+                && json_array_contains_str(
+                    value,
+                    "/normative_commitment_domains",
+                    kurrent::DOMAIN_KURRENT_POLICY,
+                )
+                && json_array_contains_str(
+                    value,
+                    "/harness_synthetic_evidence",
+                    "evidence/kurrent-state-channel-headers.json",
+                )
+                && json_array_contains_str(
+                    value,
+                    "/live_driver_evidence",
+                    "evidence/kurrent-live-state-channel-evidence.json",
+                )
         }
         "semantic_transaction_verifier" => {
             value
@@ -2124,11 +2496,20 @@ fn production_json_evidence_satisfies(id: &str, value: &Value) -> bool {
     }
 }
 
+fn json_array_contains_str(value: &Value, pointer: &str, needle: &str) -> bool {
+    value
+        .pointer(pointer)
+        .and_then(Value::as_array)
+        .is_some_and(|items| items.iter().any(|item| item.as_str() == Some(needle)))
+}
+
 fn production_runbook_satisfies(id: &str, text: &str) -> bool {
-    if !text
-        .lines()
-        .any(|line| line.trim().eq_ignore_ascii_case("Status: passed"))
-    {
+    let has_runbook_status = text.lines().any(|line| {
+        let line = line.trim();
+        line.eq_ignore_ascii_case("Status: drafted (runbook-level, not production gate status)")
+            || line.eq_ignore_ascii_case("Status: passed")
+    });
+    if !has_runbook_status {
         return false;
     }
     let required_sections: &[&str] = match id {
@@ -2337,6 +2718,7 @@ fn verify_production_readiness() -> Result<u8, String> {
     let evidence = evidence_dir()?;
     let acceptance_path = evidence.join("kurrent-acceptance.json");
     let mut blockers = Vec::new();
+    let audit_blockers = production_audit_blockers();
     let acceptance_status = if acceptance_path.is_file() {
         let report: AcceptanceReport =
             serde_json::from_slice(&fs::read(&acceptance_path).map_err(|e| e.to_string())?)
@@ -2395,10 +2777,13 @@ fn verify_production_readiness() -> Result<u8, String> {
     .to_string();
     let report = ProductionReadinessReport {
         timestamp: timestamp(),
+        gate: "production-readiness".to_string(),
         git_commit: Some(current_commit),
+        production_readiness_status: status.clone(),
         status: status.clone(),
         acceptance_status,
         requirements,
+        audit_blockers,
         blockers: blockers.clone(),
     };
     write_json_file(&evidence.join("kurrent-production-readiness.json"), &report)?;
@@ -2483,7 +2868,23 @@ fn prepare_devnet_tools() -> Result<u8, String> {
     .unwrap_or_else(|| parent.join("rusty-kaspa"));
     if kaspa.join(".git").exists() {
         run_status(
+            git_network_command()
+                .arg("-C")
+                .arg(&kaspa)
+                .arg("fetch")
+                .arg("--all")
+                .arg("--prune")
+                .arg("--tags"),
+        )?;
+        run_status(
             Command::new("git")
+                .arg("-C")
+                .arg(&kaspa)
+                .arg("switch")
+                .arg("master"),
+        )?;
+        run_status(
+            git_network_command()
                 .arg("-C")
                 .arg(&kaspa)
                 .arg("pull")
@@ -2491,12 +2892,18 @@ fn prepare_devnet_tools() -> Result<u8, String> {
         )?;
     } else {
         run_status(
-            Command::new("git")
+            git_network_command()
                 .arg("clone")
                 .arg("--filter=blob:none")
                 .arg("https://github.com/kaspanet/rusty-kaspa.git")
                 .arg(&kaspa),
         )?;
+    }
+    if !kaspa_checkout_satisfies_kurrent(&kaspa) {
+        return Err(format!(
+            "Kaspa checkout at {} does not satisfy Kurrent's Toccata-mainnet RPC capability requirements; use current kaspanet/rusty-kaspa origin/master.",
+            kaspa.display()
+        ));
     }
 
     let lnd = parent.join("lnd");
@@ -2918,59 +3325,26 @@ fn run_ln_devnet() -> Result<u8, String> {
         return Ok(EXIT_LN_FLOW);
     }
 
-    let preimage = "0001020304050607080900010203040506070809000102030405060708090001";
-    let invoice = run_json_file(
-        &lncli,
-        &lncli_args(
-            &bob_dir,
-            "127.0.0.1:12010",
-            &[
-                "addinvoice",
-                "--amt=1000",
-                "--memo=kurrent-regtest",
-                &format!("--preimage={preimage}"),
-            ],
-        ),
-        &evidence.join("ln-bob-invoice.json"),
-    )?;
-    let payment_request = json_str(&invoice, "payment_request")?;
-    let payment_hash = json_str(&invoice, "r_hash")?;
-    let _payment = run_json_file(
-        &lncli,
-        &lncli_args(
-            &alice_dir,
-            "127.0.0.1:12009",
-            &[
-                "payinvoice",
-                "--force",
-                "--json",
-                "--fee_limit=1000",
-                &payment_request,
-            ],
-        ),
-        &evidence.join("ln-alice-payinvoice.json"),
-    )?;
-    let lookup = run_json_file(
-        &lncli,
-        &lncli_args(
-            &bob_dir,
-            "127.0.0.1:12010",
-            &["lookupinvoice", &payment_hash],
-        ),
-        &evidence.join("ln-bob-lookupinvoice.json"),
-    )?;
-    let settled = lookup
-        .get("settled")
-        .and_then(Value::as_bool)
-        .unwrap_or(false);
-    let observed_preimage = json_str(&lookup, "r_preimage")?;
-    if !settled || observed_preimage != preimage {
-        write_acceptance_report("failed/blocked", "ln_invoice_not_settled")?;
-        let _ = alice.kill();
-        let _ = bob.kill();
-        drop(cleanup);
-        return Ok(EXIT_LN_FLOW);
-    }
+    let ln_to_kaspa_swap = run_ln_regtest_swap_payment(LnRegtestSwapPayment {
+        lncli: &lncli,
+        alice_dir: &alice_dir,
+        bob_dir: &bob_dir,
+        evidence: &evidence,
+        direction: "ln-to-kaspa",
+        preimage: LN_TO_KASPA_PREIMAGE_HEX,
+        amount_sat: LN_SWAP_AMOUNT_SAT,
+        use_legacy_file_names: true,
+    })?;
+    let kaspa_to_ln_swap = run_ln_regtest_swap_payment(LnRegtestSwapPayment {
+        lncli: &lncli,
+        alice_dir: &alice_dir,
+        bob_dir: &bob_dir,
+        evidence: &evidence,
+        direction: "kaspa-to-ln",
+        preimage: KASPA_TO_LN_PREIMAGE_HEX,
+        amount_sat: LN_SWAP_AMOUNT_SAT,
+        use_legacy_file_names: false,
+    })?;
 
     let ln_evidence = json!({
         "status": "passed",
@@ -2990,13 +3364,10 @@ fn run_ln_devnet() -> Result<u8, String> {
             "alice_channels_path": "evidence/ln-alice-listchannels.json",
             "bob_channels_path": "evidence/ln-bob-listchannels.json"
         },
-        "invoice": {
-            "payment_hash": payment_hash,
-            "preimage": preimage,
-            "preimage_source": "deterministic_test_vector_supplied_to_lnd_addinvoice",
-            "preimage_source_boundary": "The preimage is a deterministic local-devnet test vector supplied to real LND; LND computes the payment hash, settles the invoice, and exposes the same preimage in lookup/payment evidence.",
-            "lookup_path": "evidence/ln-bob-lookupinvoice.json",
-            "payment_path": "evidence/ln-alice-payinvoice.json"
+        "invoice": ln_to_kaspa_swap.clone(),
+        "swaps": {
+            "ln-to-kaspa": ln_to_kaspa_swap,
+            "kaspa-to-ln": kaspa_to_ln_swap
         },
         "logs": [
             "evidence/ln-alice.log",
@@ -3018,6 +3389,118 @@ fn run_ln_devnet() -> Result<u8, String> {
         evidence.join("ln-devnet-evidence.json").display()
     );
     Ok(0)
+}
+
+struct LnRegtestSwapPayment<'a> {
+    lncli: &'a str,
+    alice_dir: &'a Path,
+    bob_dir: &'a Path,
+    evidence: &'a Path,
+    direction: &'a str,
+    preimage: &'a str,
+    amount_sat: u64,
+    use_legacy_file_names: bool,
+}
+
+fn run_ln_regtest_swap_payment(args: LnRegtestSwapPayment<'_>) -> Result<Value, String> {
+    let LnRegtestSwapPayment {
+        lncli,
+        alice_dir,
+        bob_dir,
+        evidence,
+        direction,
+        preimage,
+        amount_sat,
+        use_legacy_file_names,
+    } = args;
+    let invoice_file = if use_legacy_file_names {
+        "ln-bob-invoice.json".to_string()
+    } else {
+        format!("ln-bob-invoice-{direction}.json")
+    };
+    let payment_file = if use_legacy_file_names {
+        "ln-alice-payinvoice.json".to_string()
+    } else {
+        format!("ln-alice-payinvoice-{direction}.json")
+    };
+    let lookup_file = if use_legacy_file_names {
+        "ln-bob-lookupinvoice.json".to_string()
+    } else {
+        format!("ln-bob-lookupinvoice-{direction}.json")
+    };
+    let amount_arg = format!("--amt={amount_sat}");
+    let memo_arg = format!("--memo=kurrent-regtest-{direction}");
+    let preimage_arg = format!("--preimage={preimage}");
+    let invoice = run_json_file(
+        lncli,
+        &lncli_args(
+            bob_dir,
+            "127.0.0.1:12010",
+            &["addinvoice", &amount_arg, &memo_arg, &preimage_arg],
+        ),
+        &evidence.join(&invoice_file),
+    )?;
+    let payment_request = json_str(&invoice, "payment_request")?;
+    let payment_hash = json_str(&invoice, "r_hash")?;
+    let preimage_hash = sha256_hex(
+        &hex::decode(preimage)
+            .map_err(|e| format!("{direction} preimage is not valid hex: {e}"))?,
+    );
+    if payment_hash != preimage_hash {
+        return Err(format!(
+            "{direction} LND invoice payment hash does not equal sha256(preimage)"
+        ));
+    }
+
+    let payment = run_json_file(
+        lncli,
+        &lncli_args(
+            alice_dir,
+            "127.0.0.1:12009",
+            &[
+                "payinvoice",
+                "--force",
+                "--json",
+                "--fee_limit=1000",
+                &payment_request,
+            ],
+        ),
+        &evidence.join(&payment_file),
+    )?;
+    let lookup = run_json_file(
+        lncli,
+        &lncli_args(
+            bob_dir,
+            "127.0.0.1:12010",
+            &["lookupinvoice", &payment_hash],
+        ),
+        &evidence.join(&lookup_file),
+    )?;
+    let settled = lookup
+        .get("settled")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let observed_preimage = json_str(&lookup, "r_preimage")?;
+    let payment_succeeded = payment.get("status").and_then(Value::as_str) == Some("SUCCEEDED")
+        && payment.get("payment_hash").and_then(Value::as_str) == Some(payment_hash.as_str())
+        && payment.get("payment_preimage").and_then(Value::as_str) == Some(preimage);
+    if !settled || observed_preimage != preimage || !payment_succeeded {
+        return Err(format!(
+            "{direction} invoice payment did not settle with the expected preimage"
+        ));
+    }
+
+    Ok(json!({
+        "direction": direction,
+        "amount_sat": amount_sat,
+        "payment_hash": payment_hash,
+        "preimage": preimage,
+        "preimage_source": "deterministic_test_vector_supplied_to_lnd_addinvoice",
+        "preimage_source_boundary": "The preimage is a deterministic local-devnet test vector supplied to real LND; LND computes the payment hash, settles the invoice, and exposes the same preimage in lookup/payment evidence.",
+        "invoice_path": format!("evidence/{invoice_file}"),
+        "lookup_path": format!("evidence/{lookup_file}"),
+        "payment_path": format!("evidence/{payment_file}")
+    }))
 }
 
 fn stop_previous_ln_regtest(bitcoin_cli: &str, lncli: &str, base: &Path) {
@@ -3043,11 +3526,14 @@ fn clear_ln_devnet_evidence(evidence: &Path) {
         "ln-alice-getinfo.json",
         "ln-alice-listchannels.json",
         "ln-alice-payinvoice.json",
+        "ln-alice-payinvoice-kaspa-to-ln.json",
         "ln-alice-walletbalance.json",
         "ln-bob-getinfo.json",
         "ln-bob-invoice.json",
+        "ln-bob-invoice-kaspa-to-ln.json",
         "ln-bob-listchannels.json",
         "ln-bob-lookupinvoice.json",
+        "ln-bob-lookupinvoice-kaspa-to-ln.json",
         "ln-connect.json",
         "ln-openchannel.json",
     ] {
@@ -3298,6 +3784,9 @@ fn wait_lnd_server_active(lncli: &str, lnddir: &Path, rpc: &str) -> Result<(), S
 
 fn write_state_channel_protocol_files() -> Result<Vec<EvidenceFile>, String> {
     let evidence = evidence_dir()?;
+    // Synthetic harness-domain evidence, not live driver output and not
+    // thesis commitment-domain material. The live driver evidence is
+    // recorded separately under `kurrent-live-state-channel-evidence.json`.
     let live_state = fs::read(evidence.join("kurrent-live-state-channel-evidence.json"))
         .ok()
         .and_then(|bytes| serde_json::from_slice::<Value>(&bytes).ok());
@@ -3320,6 +3809,7 @@ fn write_state_channel_protocol_files() -> Result<Vec<EvidenceFile>, String> {
         .unwrap_or("missing-live-kurrent-covenant-id")
         .to_string();
     let template = json!({
+        "evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS,
         "domain_separator": DOMAIN_SETTLEMENT_TEMPLATE,
         "template_id": "kurrent-state-settle-v1",
         "outputs": {
@@ -3338,6 +3828,7 @@ fn write_state_channel_protocol_files() -> Result<Vec<EvidenceFile>, String> {
     for state_number in 0..=2_u64 {
         let new_commitment = sha256_hex(format!("kurrent-state-{state_number}").as_bytes());
         let header = json!({
+            "evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS,
             "domain_separator": DOMAIN_STATE,
             "network_profile": "kaspa-simnet-toccata",
             "genesis_or_devnet_id": "local-toccata-simnet",
@@ -3365,6 +3856,7 @@ fn write_state_channel_protocol_files() -> Result<Vec<EvidenceFile>, String> {
     write_json_file(&headers_path, &headers)?;
 
     let receipt_scope = json!({
+        "evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS,
         "domain_separator": DOMAIN_CHANNEL_RECEIPT,
         "protocol_version": 1_u16,
         "network_profile": "kaspa-simnet-toccata",
@@ -3379,6 +3871,7 @@ fn write_state_channel_protocol_files() -> Result<Vec<EvidenceFile>, String> {
         "direction": null
     });
     let receipt = json!({
+        "evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS,
         "receipt_hash": hash_json(DOMAIN_CHANNEL_RECEIPT, &receipt_scope),
         "scope": receipt_scope
     });
@@ -3714,6 +4207,10 @@ fn run_ln_swap_flow(
     let mut kaspa_settlement_outpoint =
         Value::String("missing-live-kaspa-settlement-outpoint".to_string());
     let mut kaspa_script_hash = Value::String("missing-live-kaspa-script-hash".to_string());
+    let mut ln_amount_sat = Value::String("missing-ln-amount-sat".to_string());
+    let mut kaspa_amount_sompi = Value::String("missing-live-kaspa-amount-sompi".to_string());
+    let mut recipient = Value::String("missing-live-recipient".to_string());
+    let mut recipient_spk_sha256 = Value::String("missing-live-recipient-spk-sha256".to_string());
 
     if ln_path.exists() {
         ln_file = Some(file_evidence(&ln_path)?);
@@ -3722,7 +4219,7 @@ fn run_ln_swap_flow(
         if value.get("status").and_then(Value::as_str) != Some("passed") {
             blockers.push("LN devnet evidence exists but is not marked passed".to_string());
         }
-        if let Some(invoice) = value.get("invoice") {
+        if let Some(invoice) = ln_swap_value(&value, direction) {
             let observed_payment_hash = invoice
                 .get("payment_hash")
                 .and_then(Value::as_str)
@@ -3746,9 +4243,17 @@ fn run_ln_swap_flow(
                 }
                 Err(err) => blockers.push(format!("LN preimage is not valid hex: {err}")),
             }
+            if let Some(amount_sat) = invoice.get("amount_sat").and_then(Value::as_u64) {
+                ln_amount_sat = json!(amount_sat);
+            } else {
+                blockers.push(format!(
+                    "{direction} LN invoice evidence is missing amount_sat"
+                ));
+            }
         } else {
-            blockers
-                .push("LN invoice evidence is missing from ln-devnet-evidence.json".to_string());
+            blockers.push(format!(
+                "{direction} LN invoice evidence is missing from ln-devnet-evidence.json"
+            ));
         }
     } else {
         blockers
@@ -3774,6 +4279,39 @@ fn run_ln_swap_flow(
             {
                 kaspa_script_hash = json!(script_hash);
             }
+            if let Some(amount) = value
+                .pointer("/model_validation/swap_evidence/kaspa_amount_sompi")
+                .and_then(Value::as_u64)
+                .or_else(|| {
+                    value
+                        .pointer("/settlement/output_value")
+                        .and_then(Value::as_u64)
+                })
+            {
+                kaspa_amount_sompi = json!(amount);
+            } else {
+                blockers.push(format!(
+                    "{direction} live evidence is missing kaspa_amount_sompi"
+                ));
+            }
+            if let Some(label) = value
+                .pointer("/model_validation/swap_evidence/recipient")
+                .and_then(Value::as_str)
+            {
+                recipient = json!(label);
+            } else {
+                blockers.push(format!("{direction} live evidence is missing recipient"));
+            }
+            if let Some(spk_hash) = value
+                .pointer("/model_validation/swap_evidence/recipient_spk_sha256")
+                .and_then(Value::as_str)
+            {
+                recipient_spk_sha256 = json!(spk_hash);
+            } else {
+                blockers.push(format!(
+                    "{direction} live evidence is missing recipient_spk_sha256"
+                ));
+            }
             file
         });
 
@@ -3787,8 +4325,11 @@ fn run_ln_swap_flow(
         "preimage_hash": preimage_hash,
         "kaspa_funding_outpoint": kaspa_funding_outpoint,
         "kaspa_settlement_outpoint": kaspa_settlement_outpoint,
-        "amount": 1_000_u64,
-        "recipient": if direction == "ln-to-kaspa" { "alice" } else { "bob" },
+        "ln_amount_sat": ln_amount_sat,
+        "kaspa_amount_sompi": kaspa_amount_sompi.clone(),
+        "amount": kaspa_amount_sompi,
+        "recipient": recipient,
+        "recipient_spk_sha256": recipient_spk_sha256,
         "script_hash": kaspa_script_hash,
     });
     let swap_file_path = evidence.join(file_name);
@@ -3811,7 +4352,9 @@ fn run_ln_swap_flow(
             "swap direction must be either ln-to-kaspa or kaspa-to-ln",
             "receipt hash must be fresh after swap scope mutation",
             "receipt protocol version, network profile, swap id, direction, funding outpoint, settlement outpoint, and script hash are bound to evidence",
-            "zero-amount or empty-recipient swap evidence is rejected by the model"
+            "LN amount is recorded in sats, Kaspa settlement amount is recorded in sompi, and the legacy amount alias must equal kaspa_amount_sompi",
+            "zero-amount or empty-recipient swap evidence is rejected by the model",
+            "recipient script public key hash is carried from live Kaspa evidence"
         ],
         "swap_receipt_hash": hash_json(DOMAIN_LN_INTEROP, &receipt_scope),
         "receipt_scope": receipt_scope,
@@ -4365,6 +4908,7 @@ fn run_fee_sponsored_adversarial_soak(
         let fixture = AdversarialChannelFixture::new(iteration);
         let eligibility_policy = SettlementEligibilityPolicy {
             response_window_daa: 5,
+            reorg_tolerance_daa: 0,
         };
         let fee_policy = SettlementFeePolicy {
             policy_id: format!("soak-fee-policy-{iteration}"),
@@ -4410,7 +4954,7 @@ fn run_fee_sponsored_adversarial_soak(
                 &eligibility_policy,
                 &fee_policy,
                 &[lower.clone(), higher],
-                107,
+                108,
             ),
         )?;
         if decisions[0].eligibility.status != SettlementEligibilityStatus::Displaced
@@ -5149,8 +5693,8 @@ fn adversarial_after_materialisation(
 }
 
 fn adversarial_ln_case(iteration: usize, direction: &str) -> (LnSwapEvidence, ChannelReceipt) {
-    let preimage = format!("preimage-{iteration}-{direction}");
-    let preimage_hash = sha256_hex(preimage.as_bytes());
+    let preimage = sha256_hex(format!("preimage-{iteration}-{direction}").as_bytes());
+    let preimage_hash = sha256_hex(&hex::decode(&preimage).expect("sha256 hex is valid"));
     let swap_id = format!("swap-{iteration}-{direction}");
     let funding_outpoint = format!("swap-funding-{iteration}:0");
     let settlement_outpoint = format!("swap-settlement-{iteration}:0");
@@ -5165,12 +5709,15 @@ fn adversarial_ln_case(iteration: usize, direction: &str) -> (LnSwapEvidence, Ch
         preimage_hash,
         kaspa_funding_outpoint: funding_outpoint.clone(),
         kaspa_settlement_outpoint: settlement_outpoint.clone(),
+        ln_amount_sat: 1_000 + iteration as u64,
+        kaspa_amount_sompi: 100 + iteration as u64,
         amount: 100 + iteration as u64,
         recipient: match direction {
             "ln-to-kaspa" => "alice",
             _ => "bob",
         }
         .to_string(),
+        recipient_spk_sha256: sha256_hex(format!("swap-recipient-spk-{iteration}").as_bytes()),
         script_hash: script_hash.clone(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -5240,6 +5787,8 @@ fn write_production_target_profile() -> Result<u8, String> {
 
     let profile = json!({
         "status": "passed",
+        "gate": "production-target-profile",
+        "target_profile_status": "passed",
         "generated_at": timestamp(),
         "scope": "production target profile for Kurrent local-devnet-to-production hardening",
         "git_commit": git_stdout(&root, &["rev-parse", "--verify", "HEAD"]),
@@ -5253,7 +5802,7 @@ fn write_production_target_profile() -> Result<u8, String> {
         "kaspa_source_profile": detection.selected_kaspa_repo,
         "tool_versions": detection.tools,
         "lockfiles": lockfiles,
-        "protocol_domains": [
+        "harness_json_domains": [
             DOMAIN_STATE,
             DOMAIN_STATE_SIGNATURE,
             DOMAIN_SETTLEMENT_TEMPLATE,
@@ -5261,7 +5810,34 @@ fn write_production_target_profile() -> Result<u8, String> {
             DOMAIN_FACTORY_MATERIALISATION,
             DOMAIN_LN_INTEROP,
             DOMAIN_PARTICIPANT_SET,
-            DOMAIN_CLAIM_SCOPE
+            DOMAIN_CLAIM_SCOPE,
+            DOMAIN_SETTLEMENT_CANDIDATE_MARKER,
+            DOMAIN_FEE_SPONSORED_CANDIDATE_MARKER
+        ],
+        "normative_commitment_domains": [
+            kurrent::DOMAIN_KURRENT_SCOPE,
+            kurrent::DOMAIN_KURRENT_STATE,
+            kurrent::DOMAIN_KURRENT_STATE_CERT,
+            kurrent::DOMAIN_KURRENT_COOP_CLOSE_OUTPUTS,
+            kurrent::DOMAIN_KURRENT_COOP_CLOSE,
+            kurrent::DOMAIN_KURRENT_POLICY
+        ],
+        "harness_synthetic_evidence": [
+            "evidence/kurrent-state-channel-settlement-template.json",
+            "evidence/kurrent-state-channel-headers.json",
+            "evidence/kurrent-state-channel-receipt.json",
+            "evidence/kurrent-factory-materialisation-model.json",
+            "evidence/kurrent-refund-model.json"
+        ],
+        "live_driver_evidence": [
+            "evidence/kurrent-live-state-channel-evidence.json",
+            "evidence/kurrent-live-lane-monitor-evidence.json",
+            "evidence/kurrent-live-settlement-eligibility-evidence.json",
+            "evidence/kurrent-live-fee-sponsored-displacement-evidence.json",
+            "evidence/kurrent-live-factory-evidence.json",
+            "evidence/kurrent-live-ln-to-kaspa-evidence.json",
+            "evidence/kurrent-live-kaspa-to-ln-evidence.json",
+            "evidence/kurrent-live-refund-evidence.json"
         ],
         "supported_for_production_gate": [
             "latest-state state-channel model with Schnorr participant signatures",
@@ -5514,6 +6090,42 @@ mod tests {
     }
 
     #[test]
+    fn kaspa_capability_probe_requires_toccata_mainnet_rpc_surface() {
+        let root = unique_temp_dir("kaspa-capability-probe");
+        let grpc_path = root.join("rpc/grpc/client/src");
+        let convert_path = root.join("rpc/core/src/convert");
+        fs::create_dir_all(&grpc_path).expect("test should create grpc fixture directory");
+        fs::create_dir_all(&convert_path).expect("test should create rpc fixture directory");
+
+        fs::write(grpc_path.join("lib.rs"), "// stale grpc client\n")
+            .expect("test should write stale grpc fixture");
+        fs::write(
+            convert_path.join("tx.rs"),
+            "Ok(Self::new(item.value.unwrap(), item.script_public_key.unwrap()))",
+        )
+        .expect("test should write stale rpc conversion fixture");
+        assert!(!kaspa_has_seq_commit_lane_proof_rpc(&root));
+        assert!(!kaspa_has_rpc_covenant_output_conversion_fix(&root));
+        assert!(!kaspa_checkout_satisfies_kurrent(&root));
+
+        fs::write(
+            grpc_path.join("lib.rs"),
+            "route!(get_seq_commit_lane_proof_call, GetSeqCommitLaneProof);",
+        )
+        .expect("test should write current grpc fixture");
+        fs::write(
+            convert_path.join("tx.rs"),
+            "Ok(Self::with_covenant(value, script_public_key, item.covenant.and_then(|bind| bind.0.map(Into::into))))",
+        )
+        .expect("test should write current rpc conversion fixture");
+        assert!(kaspa_has_seq_commit_lane_proof_rpc(&root));
+        assert!(kaspa_has_rpc_covenant_output_conversion_fix(&root));
+        assert!(kaspa_checkout_satisfies_kurrent(&root));
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
     fn superficial_security_review_status_does_not_satisfy_gate() {
         let path = unique_temp_path("superficial-security-review");
         fs::write(&path, br#"{"status":"passed"}"#)
@@ -5553,7 +6165,7 @@ mod tests {
     fn structured_runbook_satisfies_gate() {
         let text = format!(
             "{}\n{}\n{}\n{}\n{}\n",
-            "Status: passed",
+            "Status: drafted (runbook-level, not production gate status)",
             "## Scope\nThis runbook covers signer isolation, backup, and recovery controls for the local Kurrent production-readiness gate. The document is intentionally procedural and does not claim mainnet deployment.",
             "## Controls\nKeys are generated offline, signer hosts are isolated, access is reviewed, backups are encrypted, and recovery material is tested against non-production fixtures before any release claim.",
             "## Recovery Procedure\nDeclare the incident owner, freeze signing, recover from an encrypted backup into an isolated host, verify participant public keys, replay local acceptance, and record the operator sign-off.",
@@ -5572,6 +6184,79 @@ mod tests {
             "prod_target_profile",
             &json!({"status": "passed"})
         ));
+    }
+
+    #[test]
+    fn state_channel_protocol_fixtures_must_be_marked_synthetic() {
+        let root = unique_temp_dir("synthetic-protocol-fixtures");
+        let evidence = root.join("evidence");
+        fs::create_dir_all(&evidence).expect("test should create evidence directory");
+
+        let template_path = evidence.join("kurrent-state-channel-settlement-template.json");
+        let headers_path = evidence.join("kurrent-state-channel-headers.json");
+        let receipt_path = evidence.join("kurrent-state-channel-receipt.json");
+        let flow_path = evidence.join("kurrent-state-channel-flow-evidence.json");
+
+        write_json_file(
+            &template_path,
+            &json!({"evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS}),
+        )
+        .expect("test should write template fixture");
+        write_json_file(
+            &headers_path,
+            &json!([{
+                "hash": "header-hash",
+                "header": {"evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS}
+            }]),
+        )
+        .expect("test should write header fixture");
+        write_json_file(
+            &receipt_path,
+            &json!({
+                "evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS,
+                "scope": {"evidence_class": SYNTHETIC_HARNESS_FIXTURE_CLASS}
+            }),
+        )
+        .expect("test should write receipt fixture");
+        write_json_file(
+            &flow_path,
+            &json!({
+                "protocol_files": [
+                    file_evidence(&template_path).unwrap(),
+                    file_evidence(&headers_path).unwrap(),
+                    file_evidence(&receipt_path).unwrap()
+                ]
+            }),
+        )
+        .expect("test should write flow fixture");
+
+        verify_state_channel_protocol_fixture_markers(&root).unwrap();
+
+        write_json_file(
+            &headers_path,
+            &json!([{
+                "hash": "header-hash",
+                "header": {"domain_separator": DOMAIN_STATE}
+            }]),
+        )
+        .expect("test should write unmarked header fixture");
+        write_json_file(
+            &flow_path,
+            &json!({
+                "protocol_files": [
+                    file_evidence(&template_path).unwrap(),
+                    file_evidence(&headers_path).unwrap(),
+                    file_evidence(&receipt_path).unwrap()
+                ]
+            }),
+        )
+        .expect("test should rewrite flow fixture with updated hash");
+
+        assert!(verify_state_channel_protocol_fixture_markers(&root)
+            .unwrap_err()
+            .contains("evidence_class"));
+
+        let _ = fs::remove_dir_all(root);
     }
 
     #[test]

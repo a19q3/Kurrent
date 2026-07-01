@@ -158,6 +158,7 @@ fn candidate(
 fn eligibility_policy(window: u64) -> SettlementEligibilityPolicy {
     SettlementEligibilityPolicy {
         response_window_daa: window,
+        reorg_tolerance_daa: 0,
     }
 }
 
@@ -430,7 +431,7 @@ fn settlement_eligibility_displaces_lower_candidate_and_matures_survivor() {
         &t,
         &eligibility_policy(5),
         &[lower, higher],
-        107,
+        108,
     )
     .unwrap();
 
@@ -715,6 +716,61 @@ fn response_window_substrate_is_daa_score_not_blue_score() {
 }
 
 #[test]
+fn settlement_eligibility_rejects_zero_response_window() {
+    let t = template();
+    let lower = candidate(update(1, "state-1", t.hash()), "candidate-lower", 10, 100);
+    assert!(matches!(
+        evaluate_settlement_eligibility(
+            &channel_config(),
+            &funding(),
+            &t,
+            &eligibility_policy(0),
+            &[lower],
+            101,
+        ),
+        Err(KurrentError::SettlementEligibilityEvidenceMismatch(reason))
+            if reason.contains("response_window_daa")
+    ));
+}
+
+#[test]
+fn settlement_eligibility_rejects_response_window_above_sequence_range() {
+    let t = template();
+    let lower = candidate(update(1, "state-1", t.hash()), "candidate-lower", 10, 100);
+    assert!(matches!(
+        evaluate_settlement_eligibility(
+            &channel_config(),
+            &funding(),
+            &t,
+            &eligibility_policy(u32::MAX as u64 + 1),
+            &[lower],
+            101,
+        ),
+        Err(KurrentError::SettlementEligibilityEvidenceMismatch(reason))
+            if reason.contains("response_window_daa")
+    ));
+}
+
+#[test]
+fn settlement_eligibility_deadline_boundary_is_not_final() {
+    let t = template();
+    let lower = candidate(update(1, "state-1", t.hash()), "candidate-lower", 10, 100);
+    let decisions = evaluate_settlement_eligibility(
+        &channel_config(),
+        &funding(),
+        &t,
+        &eligibility_policy(5),
+        &[lower],
+        105,
+    )
+    .unwrap();
+    assert_eq!(
+        decisions[0].status,
+        SettlementEligibilityStatus::Provisional
+    );
+}
+
+#[test]
 fn settlement_eligibility_allows_predecessor_independent_skipped_state_number() {
     let t = template();
     let first = candidate(update(1, "state-1", t.hash()), "candidate-a", 10, 100);
@@ -782,7 +838,7 @@ fn fee_sponsored_candidates_preserve_latest_state_displacement() {
         &eligibility_policy(5),
         &fee_policy(100),
         &[lower, higher],
-        107,
+        108,
     )
     .unwrap();
 
@@ -1262,6 +1318,62 @@ fn ln_hex_preimage_validates_against_decoded_bytes_hash() {
 }
 
 #[test]
+fn ln_preimage_rejects_prefixed_or_raw_text_encoding() {
+    let preimage = "0001020304050607080900010203040506070809000102030405060708090001";
+    let hash = sha256_hex(&hex::decode(preimage).unwrap());
+    assert!(matches!(
+        validate_preimage(&format!("0x{preimage}"), &hash),
+        Err(KurrentError::WrongPreimage)
+    ));
+    assert!(matches!(
+        validate_preimage("raw-preimage-text", &hash),
+        Err(KurrentError::WrongPreimage)
+    ));
+}
+
+const LN_TEST_PREIMAGE: &str = "0001020304050607080900010203040506070809000102030405060708090001";
+
+fn ln_test_hash() -> String {
+    sha256_hex(&hex::decode(LN_TEST_PREIMAGE).unwrap())
+}
+
+fn valid_ln_swap_fixture_for_test(swap_id: &str) -> (LnSwapEvidence, ChannelReceipt) {
+    let hash = ln_test_hash();
+    let evidence = LnSwapEvidence {
+        protocol_version: 1,
+        network_profile: "local-toccata-devnet".to_string(),
+        swap_id: swap_id.to_string(),
+        direction: "ln-to-kaspa".to_string(),
+        ln_payment_hash: hash.clone(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
+        preimage_hash: hash,
+        kaspa_funding_outpoint: "funding:0".to_string(),
+        kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
+        amount: 100,
+        recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
+        script_hash: "script-hash".to_string(),
+        evidence_file_hashes: BTreeMap::new(),
+    };
+    let mut receipt = ChannelReceipt::new(
+        1,
+        "local-toccata-devnet",
+        "channel-a",
+        "funding:0",
+        "settlement:0",
+        2,
+        "script-hash",
+    );
+    receipt.swap_id = Some(swap_id.to_string());
+    receipt.direction = Some("ln-to-kaspa".to_string());
+    receipt.refresh_hash();
+    (evidence, receipt)
+}
+
+#[test]
 fn ln_swap_accepts_hex_preimage_from_lnd_evidence() {
     let preimage = "0001020304050607080900010203040506070809000102030405060708090001";
     let hash = sha256_hex(&hex::decode(preimage).unwrap());
@@ -1275,8 +1387,12 @@ fn ln_swap_accepts_hex_preimage_from_lnd_evidence() {
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1297,19 +1413,23 @@ fn ln_swap_accepts_hex_preimage_from_lnd_evidence() {
 
 #[test]
 fn ln_to_kaspa_receipt_replay_fails() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-1".to_string(),
         direction: "ln-to-kaspa".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1333,19 +1453,23 @@ fn ln_to_kaspa_receipt_replay_fails() {
 
 #[test]
 fn kaspa_to_ln_receipt_replay_fails() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-2".to_string(),
         direction: "kaspa-to-ln".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "bob".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1369,19 +1493,23 @@ fn kaspa_to_ln_receipt_replay_fails() {
 
 #[test]
 fn ln_swap_rejects_stale_receipt_hash_after_scope_mutation() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-stale-hash".to_string(),
         direction: "ln-to-kaspa".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1404,19 +1532,23 @@ fn ln_swap_rejects_stale_receipt_hash_after_scope_mutation() {
 
 #[test]
 fn ln_swap_rejects_wrong_kaspa_funding_outpoint() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-funding".to_string(),
         direction: "ln-to-kaspa".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1440,19 +1572,23 @@ fn ln_swap_rejects_wrong_kaspa_funding_outpoint() {
 
 #[test]
 fn ln_swap_rejects_wrong_kaspa_settlement_outpoint() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-settlement".to_string(),
         direction: "kaspa-to-ln".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "bob".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1476,19 +1612,23 @@ fn ln_swap_rejects_wrong_kaspa_settlement_outpoint() {
 
 #[test]
 fn ln_swap_rejects_wrong_script_hash() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-script".to_string(),
         direction: "ln-to-kaspa".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1512,19 +1652,23 @@ fn ln_swap_rejects_wrong_script_hash() {
 
 #[test]
 fn ln_swap_rejects_wrong_protocol_version() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 2,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-protocol".to_string(),
         direction: "ln-to-kaspa".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 100,
         amount: 100,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1551,19 +1695,23 @@ fn ln_swap_rejects_wrong_protocol_version() {
 
 #[test]
 fn ln_swap_rejects_zero_amount_evidence() {
-    let hash = sha256_hex(b"preimage");
+    let hash = ln_test_hash();
     let evidence = LnSwapEvidence {
         protocol_version: 1,
         network_profile: "local-toccata-devnet".to_string(),
         swap_id: "swap-zero".to_string(),
         direction: "ln-to-kaspa".to_string(),
         ln_payment_hash: hash.clone(),
-        preimage: "preimage".to_string(),
+        preimage: LN_TEST_PREIMAGE.to_string(),
         preimage_hash: hash,
         kaspa_funding_outpoint: "funding:0".to_string(),
         kaspa_settlement_outpoint: "settlement:0".to_string(),
+        ln_amount_sat: 1_000,
+        kaspa_amount_sompi: 0,
         amount: 0,
         recipient: "alice".to_string(),
+        recipient_spk_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+            .to_string(),
         script_hash: "script-hash".to_string(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -1579,6 +1727,36 @@ fn ln_swap_rejects_zero_amount_evidence() {
     receipt.swap_id = Some("swap-zero".to_string());
     receipt.direction = Some("ln-to-kaspa".to_string());
     receipt.refresh_hash();
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::InvalidSwapEvidence(_))
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_zero_ln_amount_evidence() {
+    let (mut evidence, receipt) = valid_ln_swap_fixture_for_test("swap-zero-ln-amount");
+    evidence.ln_amount_sat = 0;
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::InvalidSwapEvidence(_))
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_amount_alias_mismatch() {
+    let (mut evidence, receipt) = valid_ln_swap_fixture_for_test("swap-amount-mismatch");
+    evidence.amount = evidence.kaspa_amount_sompi + 1;
+    assert!(matches!(
+        validate_ln_swap(&evidence, &receipt),
+        Err(KurrentError::InvalidSwapEvidence(_))
+    ));
+}
+
+#[test]
+fn ln_swap_rejects_missing_recipient_spk_hash() {
+    let (mut evidence, receipt) = valid_ln_swap_fixture_for_test("swap-missing-recipient-spk");
+    evidence.recipient_spk_sha256.clear();
     assert!(matches!(
         validate_ln_swap(&evidence, &receipt),
         Err(KurrentError::InvalidSwapEvidence(_))
@@ -1745,6 +1923,21 @@ fn validate_and_accept_update_rejects_unsigned_state() {
         Err(KurrentError::InsufficientSignatures {
             required: 2,
             actual: 0
+        })
+    ));
+}
+
+#[test]
+fn validate_channel_update_rejects_single_signature_quorum() {
+    let t = template();
+    let mut config = channel_config();
+    config.access_manifest.required_signatures = 1;
+    let s0 = update(0, "state-0", t.hash());
+    assert!(matches!(
+        validate_channel_update(&config, &funding(), &s0, &t),
+        Err(KurrentError::InsufficientSignatures {
+            required: 2,
+            actual: 1
         })
     ));
 }
