@@ -53,11 +53,13 @@
 //! boundary between this crate's scope and the production
 //! protocol-specification work is visible to a reader:
 //!
-//! - **(i) Response-window state machine.** Half-open `[a, d)` interval,
-//!   DAA-score interpretation of maturity, and validation-view
-//!   semantics at the boundary. The protocol provides no state-number
-//!   priority after maturity; conflicting valid spends are resolved by
-//!   ordinary consensus acceptance.
+//! - **(i) Response-window state machine.** Half-open `[a, d)`
+//!   replacement interval, DAA-score interpretation of maturity, and
+//!   validation-view semantics at the boundary. A replacement accepted
+//!   at `d` is outside the response window; settlement maturity is
+//!   evaluated as `current_daa >= d`. The protocol provides no
+//!   state-number priority after maturity; conflicting valid spends are
+//!   resolved by ordinary consensus acceptance.
 //! - **(ii) Bounded-inclusion and fee-market assumption.** An explicit
 //!   fee reserve, anchor/child fee-bumping, congestion model,
 //!   censorship/inclusion assumption, and watchtower fee budget.
@@ -117,10 +119,12 @@
 //! protocol-specification work is visible to a reader:
 //!
 //! - **(i) Response-window state machine.** Window reset rule,
-//!   half-open `[a, d)` interval, and deterministic tie-breaker when a
-//!   replacement and a finalisation share the same DAA score. The local
-//!   harness does not commit to a specific reset semantic; the policy
-//!   field accepts a `response_window_daa` and applies it uniformly.
+//!   half-open `[a, d)` replacement interval, and boundary semantics:
+//!   a replacement accepted at `d` is outside the response window, and
+//!   settlement is mature once the observed DAA score is at least `d`.
+//!   The local harness does not commit to a specific reset semantic;
+//!   the policy field accepts a `response_window_daa` and applies it
+//!   uniformly.
 //! - **(ii) Accepted-ordering commitment stability.** Which selected-
 //!   parent reference fixes a candidate's acceptance DAA score, whether
 //!   that score can move under reorganisation, and when the commitment
@@ -267,6 +271,11 @@ pub enum KurrentError {
         expected: u64,
         actual: u64,
     },
+    InvalidSponsorInvariant {
+        sponsor_input_value: u64,
+        sponsor_change_value: u64,
+        fee: u64,
+    },
     ParticipantSetMismatch,
     UnauthorizedParticipant(String),
     InvalidParticipantPublicKey(String),
@@ -274,6 +283,11 @@ pub enum KurrentError {
     InsufficientSignatures {
         required: u16,
         actual: u16,
+    },
+    InvalidSignatureQuorum {
+        required: u16,
+        participant_count: u16,
+        minimum_required: u16,
     },
     WrongPreimage,
     WrongSettlementOutpoint {
@@ -485,6 +499,10 @@ pub struct SettlementEligibilityDecision {
     pub displaced_by: Option<String>,
     pub accepted_order_index: u64,
     pub accepted_daa_score: u64,
+    /// First DAA score at which this candidate may finalise in the
+    /// current validation view. Replacement evidence must be accepted at
+    /// a score strictly below this value; observed scores greater than
+    /// or equal to this value are mature.
     pub eligible_after_daa: u64,
     pub observed_daa_score: u64,
 }
@@ -1380,16 +1398,15 @@ pub fn validate_channel_update(
     if public_key_participants != participants {
         return Err(KurrentError::ParticipantSetMismatch);
     }
-    if config.access_manifest.required_signatures < 2 {
-        return Err(KurrentError::InsufficientSignatures {
-            required: 2,
-            actual: config.access_manifest.required_signatures,
-        });
-    }
-    if config.access_manifest.required_signatures as usize > participants.len() {
-        return Err(KurrentError::InsufficientSignatures {
-            required: config.access_manifest.required_signatures,
-            actual: participants.len() as u16,
+    let required_signatures = config.access_manifest.required_signatures;
+    let participant_count = participants.len() as u16;
+    if required_signatures < MIN_REQUIRED_SIGNATURES
+        || required_signatures as usize > participants.len()
+    {
+        return Err(KurrentError::InvalidSignatureQuorum {
+            required: required_signatures,
+            participant_count,
+            minimum_required: MIN_REQUIRED_SIGNATURES,
         });
     }
 
@@ -1610,7 +1627,7 @@ pub fn evaluate_settlement_eligibility(
 
     let mut decisions = Vec::with_capacity(ordered.len());
     for (index, candidate) in ordered.iter().enumerate() {
-        let eligible_after_daa = candidate
+        let finalisation_daa = candidate
             .evidence
             .daa_score
             .checked_add(response_window_daa)
@@ -1622,7 +1639,7 @@ pub fn evaluate_settlement_eligibility(
             })?;
         let displacement = ordered[index + 1..].iter().find(|higher| {
             higher.update.header.state_number > candidate.update.header.state_number
-                && higher.evidence.daa_score < eligible_after_daa
+                && higher.evidence.daa_score < finalisation_daa
         });
 
         let (status, displaced_by) = if let Some(higher) = displacement {
@@ -1630,7 +1647,7 @@ pub fn evaluate_settlement_eligibility(
                 SettlementEligibilityStatus::Displaced,
                 Some(higher.evidence.candidate_txid.clone()),
             )
-        } else if current_daa > eligible_after_daa {
+        } else if current_daa >= finalisation_daa {
             (SettlementEligibilityStatus::EligibleToFinalise, None)
         } else if index == 0 {
             (SettlementEligibilityStatus::Provisional, None)
@@ -1645,7 +1662,7 @@ pub fn evaluate_settlement_eligibility(
             displaced_by,
             accepted_order_index: candidate.evidence.accepted_order_index,
             accepted_daa_score: candidate.evidence.daa_score,
-            eligible_after_daa,
+            eligible_after_daa: finalisation_daa,
             observed_daa_score: current_daa,
         });
     }
@@ -2360,6 +2377,7 @@ pub const MAX_STATE_NUMBER: u64 = (1u64 << 63) - 1;
 pub const MAX_SCRIPT_AMOUNT: u64 = (1u64 << 63) - 1;
 pub const MIN_RESPONSE_WINDOW_DAA: u64 = 1;
 pub const MAX_RESPONSE_WINDOW_DAA: u64 = u32::MAX as u64;
+pub const MIN_REQUIRED_SIGNATURES: u16 = 2;
 pub const DEFAULT_REORG_TOLERANCE_DAA: u32 = 1;
 pub const MAX_BLAKE2B_KEY_BYTES: usize = 64;
 
@@ -3103,7 +3121,9 @@ impl BoundedShape {
 /// sponsor_change_value + fee` for a branch. The covenant enforces
 /// this so a sponsor cannot launder channel funds into the fee
 /// market. Returns `Ok(())` when the values are consistent,
-/// `Err(KurrentError::ConservationFailure)` otherwise.
+/// `Err(KurrentError::InvalidSponsorInvariant)` for malformed sponsor
+/// shape or zero-fee sponsor policy failures, and
+/// `Err(KurrentError::ConservationFailure)` for arithmetic imbalance.
 ///
 /// `sponsor_input_value = 0` is allowed (no-sponsor case) and
 /// requires `sponsor_change_value = 0` and `fee = 0`.
@@ -3114,17 +3134,19 @@ pub fn check_sponsor_invariant(
 ) -> Result<()> {
     if sponsor_input_value == 0 {
         if sponsor_change_value != 0 || fee != 0 {
-            return Err(KurrentError::ConservationFailure {
-                expected: sponsor_input_value,
-                actual: sponsor_change_value.saturating_add(fee),
+            return Err(KurrentError::InvalidSponsorInvariant {
+                sponsor_input_value,
+                sponsor_change_value,
+                fee,
             });
         }
         return Ok(());
     }
     if fee == 0 {
-        return Err(KurrentError::ConservationFailure {
-            expected: sponsor_input_value,
-            actual: sponsor_change_value,
+        return Err(KurrentError::InvalidSponsorInvariant {
+            sponsor_input_value,
+            sponsor_change_value,
+            fee,
         });
     }
     let total = sponsor_change_value
