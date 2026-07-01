@@ -69,6 +69,12 @@ struct LiveKaspaContext<'a> {
     output_dir: &'a Path,
 }
 
+struct LnSwapSecret {
+    preimage: Vec<u8>,
+    payment_hash: String,
+    amount_sat: u64,
+}
+
 #[derive(Clone)]
 struct ExpectedLaneEvent {
     kind: &'static str,
@@ -524,6 +530,7 @@ async fn run(output_dir: &Path) -> Result<(), String> {
     };
     let eligibility_policy = SettlementEligibilityPolicy {
         response_window_daa: 3,
+        reorg_tolerance_daa: 0,
     };
     let eligibility_monitor_start_block = rpc
         .get_sink()
@@ -797,16 +804,29 @@ async fn run(output_dir: &Path) -> Result<(), String> {
         &factory_report,
     )?;
 
-    let ln_preimage = read_ln_preimage(output_dir)?;
-    let ln_to_kaspa_report =
-        run_live_hashlock_flow("ln-to-kaspa", &live_context, &ln_preimage, &alice_spk).await?;
+    let ln_to_kaspa_secret = read_ln_swap_secret(output_dir, "ln-to-kaspa")?;
+    let ln_to_kaspa_report = run_live_hashlock_flow(
+        "ln-to-kaspa",
+        &live_context,
+        &ln_to_kaspa_secret,
+        "alice",
+        &alice_spk,
+    )
+    .await?;
     write_json(
         output_dir,
         "kurrent-live-ln-to-kaspa-evidence.json",
         &ln_to_kaspa_report,
     )?;
-    let kaspa_to_ln_report =
-        run_live_hashlock_flow("kaspa-to-ln", &live_context, &ln_preimage, &bob_spk).await?;
+    let kaspa_to_ln_secret = read_ln_swap_secret(output_dir, "kaspa-to-ln")?;
+    let kaspa_to_ln_report = run_live_hashlock_flow(
+        "kaspa-to-ln",
+        &live_context,
+        &kaspa_to_ln_secret,
+        "bob",
+        &bob_spk,
+    )
+    .await?;
     write_json(
         output_dir,
         "kurrent-live-kaspa-to-ln-evidence.json",
@@ -2445,9 +2465,11 @@ async fn run_live_factory_flow(
 async fn run_live_hashlock_flow(
     label: &str,
     ctx: &LiveKaspaContext<'_>,
-    preimage: &[u8],
+    secret: &LnSwapSecret,
+    recipient_label: &str,
     recipient_spk: &ScriptPublicKey,
 ) -> Result<Value, String> {
+    let preimage = secret.preimage.as_slice();
     let (funding_tx, funding_value, redeem_script) = fund_plain_p2sh(
         ctx,
         SETTLEMENT_FEE,
@@ -2482,19 +2504,27 @@ async fn run_live_hashlock_flow(
     let txid = submit_and_mine(ctx.rpc, ctx.miner_address, &tx).await?;
     let safe_label = label.replace('-', "_");
     let settlement_value = funding_value - SETTLEMENT_FEE;
-    let model_validation = validate_live_hashlock_model(
-        label,
+    let funding_outpoint = format!("{funding_txid}:0");
+    let settlement_outpoint = format!("{txid}:0");
+    let model_validation = validate_live_hashlock_model(LiveHashlockModelInput {
+        direction: label,
         preimage,
-        &format!("{funding_txid}:0"),
-        &format!("{txid}:0"),
-        settlement_value,
-        &redeem_script,
-    )?;
+        funding_outpoint: &funding_outpoint,
+        settlement_outpoint: &settlement_outpoint,
+        ln_amount_sat: secret.amount_sat,
+        amount: settlement_value,
+        recipient: recipient_label,
+        recipient_spk,
+        redeem_script: &redeem_script,
+    })?;
+    let recipient_spk_sha256 = sha256_hex(&spk_bytes(recipient_spk));
 
     Ok(json!({
         "status": "passed",
         "network_profile": "kaspa-simnet-toccata",
         "flow": label,
+        "ln_payment_hash": secret.payment_hash.clone(),
+        "ln_amount_sat": secret.amount_sat,
         "preimage_sha256": sha256_hex(preimage),
         "funding": {
             "txid": funding_txid.to_string(),
@@ -2505,6 +2535,9 @@ async fn run_live_hashlock_flow(
         "settlement": {
             "txid": txid.to_string(),
             "output_value": settlement_value,
+            "kaspa_amount_sompi": settlement_value,
+            "recipient": recipient_label,
+            "recipient_spk_sha256": recipient_spk_sha256,
             "raw_tx": write_raw_tx(ctx.output_dir, &format!("kurrent-live-{safe_label}-settlement-tx.hex"), &tx)?,
             "witness": write_bytes_hex(ctx.output_dir, &format!("kurrent-live-{safe_label}-settlement-witness.hex"), &witness)?,
             "redeem_script": write_bytes_hex(ctx.output_dir, &format!("kurrent-live-{safe_label}-redeem-script.hex"), &redeem_script)?,
@@ -2697,14 +2730,30 @@ fn validate_live_factory_model(
     }))
 }
 
-fn validate_live_hashlock_model(
-    direction: &str,
-    preimage: &[u8],
-    funding_outpoint: &str,
-    settlement_outpoint: &str,
+struct LiveHashlockModelInput<'a> {
+    direction: &'a str,
+    preimage: &'a [u8],
+    funding_outpoint: &'a str,
+    settlement_outpoint: &'a str,
+    ln_amount_sat: u64,
     amount: u64,
-    redeem_script: &[u8],
-) -> Result<Value, String> {
+    recipient: &'a str,
+    recipient_spk: &'a ScriptPublicKey,
+    redeem_script: &'a [u8],
+}
+
+fn validate_live_hashlock_model(input: LiveHashlockModelInput<'_>) -> Result<Value, String> {
+    let LiveHashlockModelInput {
+        direction,
+        preimage,
+        funding_outpoint,
+        settlement_outpoint,
+        ln_amount_sat,
+        amount,
+        recipient,
+        recipient_spk,
+        redeem_script,
+    } = input;
     let payment_hash = sha256_hex(preimage);
     let script_hash = sha256_hex(redeem_script);
     let swap_id = format!("swap-{direction}-live");
@@ -2718,12 +2767,11 @@ fn validate_live_hashlock_model(
         preimage_hash: payment_hash,
         kaspa_funding_outpoint: funding_outpoint.to_string(),
         kaspa_settlement_outpoint: settlement_outpoint.to_string(),
+        ln_amount_sat,
+        kaspa_amount_sompi: amount,
         amount,
-        recipient: match direction {
-            "ln-to-kaspa" => "alice".to_string(),
-            "kaspa-to-ln" => "bob".to_string(),
-            _ => direction.to_string(),
-        },
+        recipient: recipient.to_string(),
+        recipient_spk_sha256: sha256_hex(&spk_bytes(recipient_spk)),
         script_hash: script_hash.clone(),
         evidence_file_hashes: BTreeMap::new(),
     };
@@ -2937,7 +2985,7 @@ async fn signed_sponsored_lane_marker_tx(
 
 fn settlement_candidate_marker_payload(role: &str, state: &StateUpdate, lane_id: &str) -> Value {
     json!({
-        "domain": "KURRENT_SETTLEMENT_CANDIDATE_MARKER_V1",
+        "domain": kurrent::DOMAIN_SETTLEMENT_CANDIDATE_MARKER,
         "role": role,
         "network_profile": state.header.network_profile.clone(),
         "funding_outpoint": state.header.funding_outpoint.clone(),
@@ -2956,7 +3004,7 @@ fn fee_sponsored_candidate_marker_payload(
     template: &SettlementTemplate,
 ) -> Value {
     json!({
-        "domain": "KURRENT_FEE_SPONSORED_CANDIDATE_MARKER_V1",
+        "domain": kurrent::DOMAIN_FEE_SPONSORED_CANDIDATE_MARKER,
         "role": role,
         "network_profile": state.header.network_profile.clone(),
         "funding_outpoint": state.header.funding_outpoint.clone(),
@@ -3062,16 +3110,41 @@ fn append_exact_outputs_script(
     Ok(builder.drain())
 }
 
-fn read_ln_preimage(output_dir: &Path) -> Result<Vec<u8>, String> {
+fn read_ln_swap_secret(output_dir: &Path, direction: &str) -> Result<LnSwapSecret, String> {
     let path = output_dir.join("ln-devnet-evidence.json");
     let bytes = fs::read(&path).map_err(|e| format!("failed to read {}: {e}", path.display()))?;
     let value: Value = serde_json::from_slice(&bytes)
         .map_err(|e| format!("failed to parse {}: {e}", path.display()))?;
-    let preimage = value
-        .pointer("/invoice/preimage")
+    let swap = value
+        .pointer(&format!("/swaps/{direction}"))
+        .ok_or_else(|| format!("LN evidence does not contain /swaps/{direction}"))?;
+    let preimage_hex = swap
+        .get("preimage")
         .and_then(Value::as_str)
-        .ok_or_else(|| "LN evidence does not contain /invoice/preimage".to_string())?;
-    hex::decode(preimage).map_err(|e| format!("failed to decode LN preimage: {e}"))
+        .ok_or_else(|| format!("LN {direction} evidence does not contain preimage"))?;
+    let preimage = hex::decode(preimage_hex)
+        .map_err(|e| format!("failed to decode LN {direction} preimage: {e}"))?;
+    let payment_hash = swap
+        .get("payment_hash")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("LN {direction} evidence does not contain payment_hash"))?
+        .to_string();
+    let actual_hash = sha256_hex(&preimage);
+    if actual_hash != payment_hash {
+        return Err(format!(
+            "LN {direction} preimage hash mismatch: expected {payment_hash}, actual {actual_hash}"
+        ));
+    }
+    let amount_sat = swap
+        .get("amount_sat")
+        .and_then(Value::as_u64)
+        .filter(|amount| *amount > 0)
+        .ok_or_else(|| format!("LN {direction} evidence does not contain positive amount_sat"))?;
+    Ok(LnSwapSecret {
+        preimage,
+        payment_hash,
+        amount_sat,
+    })
 }
 
 async fn submit_and_mine(
@@ -4512,25 +4585,44 @@ fn verify_hashlock_semantics(
 ) -> Result<(), String> {
     let ln = read_json(&output_dir.join("ln-devnet-evidence.json"))?;
     require_status(&ln, "LN devnet evidence")?;
-    let preimage = hex::decode(required_str(&ln, "/invoice/preimage")?)
-        .map_err(|e| format!("LN invoice preimage is not valid hex: {e}"))?;
-    let payment_hash = required_str(&ln, "/invoice/payment_hash")?;
-    require_eq(
-        sha256_hex(&preimage),
-        payment_hash.as_str(),
-        "LN preimage hashes to payment hash",
-    )?;
+    let mut seen_ln_payment_hashes = BTreeSet::new();
 
     for (label, file_name) in [
         ("ln-to-kaspa", "kurrent-live-ln-to-kaspa-evidence.json"),
         ("kaspa-to-ln", "kurrent-live-kaspa-to-ln-evidence.json"),
     ] {
+        let ln_swap = required_value(&ln, &format!("/swaps/{label}"))?;
+        let preimage = hex::decode(required_str(&ln_swap, "/preimage")?)
+            .map_err(|e| format!("LN {label} preimage is not valid hex: {e}"))?;
+        let payment_hash = required_str(&ln_swap, "/payment_hash")?;
+        let ln_amount_sat = required_u64(&ln_swap, "/amount_sat")?;
+        require_eq(
+            sha256_hex(&preimage),
+            payment_hash.as_str(),
+            &format!("LN {label} preimage hashes to payment hash"),
+        )?;
+        if !seen_ln_payment_hashes.insert(payment_hash.clone()) {
+            return Err(format!(
+                "LN payment hash {payment_hash} is reused across hashlock directions"
+            ));
+        }
+
         let report = read_json(&output_dir.join(file_name))?;
         require_status(&report, label)?;
         require_eq(
             required_str(&report, "/preimage_sha256")?,
             payment_hash.as_str(),
             &format!("{label} preimage binding"),
+        )?;
+        require_eq(
+            required_str(&report, "/ln_payment_hash")?,
+            payment_hash.as_str(),
+            &format!("{label} report LN payment hash"),
+        )?;
+        require_u64_eq(
+            required_u64(&report, "/ln_amount_sat")?,
+            ln_amount_sat,
+            &format!("{label} report LN amount"),
         )?;
         let funding_tx = transaction_from_record(&report, "/funding/raw_tx", verified_hex_records)?;
         *decoded_transactions += 1;
@@ -4565,12 +4657,15 @@ fn verify_hashlock_semantics(
             1,
             &format!("{label} settlement output count"),
         )?;
+        let settlement_value = required_u64(&report, "/settlement/output_value")?;
         require_output_value(
             &settlement_tx,
             0,
-            required_u64(&report, "/settlement/output_value")?,
+            settlement_value,
             &format!("{label} settlement output value"),
         )?;
+        let settlement_spk_sha256 =
+            sha256_hex(&spk_bytes(&settlement_tx.outputs[0].script_public_key));
         for pointer in ["/settlement/witness", "/settlement/redeem_script"] {
             verify_hex_record_hash(&required_value(&report, pointer)?, verified_hex_records)?;
         }
@@ -4578,10 +4673,35 @@ fn verify_hashlock_semantics(
             &required_value(&report, "/model_validation")?,
             &format!("{label} model validation"),
         )?;
+        let swap_evidence: LnSwapEvidence =
+            required_typed(&report, "/model_validation/swap_evidence")?;
+        let receipt: ChannelReceipt = required_typed(&report, "/model_validation/receipt")?;
+        validate_ln_swap(&swap_evidence, &receipt)
+            .map_err(|err| format!("{label} typed swap validation failed: {err:?}"))?;
         require_eq(
-            required_str(&report, "/model_validation/swap_evidence/ln_payment_hash")?,
+            swap_evidence.ln_payment_hash.as_str(),
             payment_hash.as_str(),
             &format!("{label} model payment hash"),
+        )?;
+        require_u64_eq(
+            swap_evidence.ln_amount_sat,
+            ln_amount_sat,
+            &format!("{label} model LN amount"),
+        )?;
+        require_u64_eq(
+            swap_evidence.kaspa_amount_sompi,
+            settlement_value,
+            &format!("{label} model Kaspa amount"),
+        )?;
+        require_u64_eq(
+            swap_evidence.amount,
+            settlement_value,
+            &format!("{label} legacy amount alias"),
+        )?;
+        require_eq(
+            swap_evidence.recipient_spk_sha256.as_str(),
+            settlement_spk_sha256.as_str(),
+            &format!("{label} recipient output script hash"),
         )?;
         require_eq(
             required_str(
@@ -4608,7 +4728,7 @@ fn verify_hashlock_semantics(
     checks.push(json!({
         "id": "hashlock_transactions",
         "status": "passed",
-        "details": "both hashlock directions decode, consume the LN preimage hash, spend their recorded funding outputs, and match typed swap receipt bindings"
+        "details": "both hashlock directions decode, consume distinct LN payment hashes, spend their recorded funding outputs, and bind LN amount, Kaspa amount, recipient output script, and typed swap receipt data"
     }));
     Ok(())
 }
@@ -4833,6 +4953,14 @@ fn require_json_hash(
 
 fn require_eq(actual: impl AsRef<str>, expected: &str, label: &str) -> Result<(), String> {
     let actual = actual.as_ref();
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(format!("{label}: expected {expected}, actual {actual}"))
+    }
+}
+
+fn require_u64_eq(actual: u64, expected: u64, label: &str) -> Result<(), String> {
     if actual == expected {
         Ok(())
     } else {
@@ -5118,7 +5246,7 @@ mod tests {
     #[test]
     fn settlement_marker_payload_hash_detects_tampering() {
         let payload = json!({
-            "domain": "KURRENT_SETTLEMENT_CANDIDATE_MARKER_V1",
+            "domain": kurrent::DOMAIN_SETTLEMENT_CANDIDATE_MARKER,
             "role": "lower_candidate",
             "state_number": 1_u64,
         });

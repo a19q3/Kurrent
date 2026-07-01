@@ -1536,21 +1536,28 @@ fn summarise_ln_devnet(lines: &mut Vec<String>, value: &Value) {
         pointer_str(value, "/bob/identity_pubkey"),
         32,
     );
-    push_short(
-        lines,
-        "invoice payment hash",
-        pointer_str(value, "/invoice/payment_hash"),
-        40,
-    );
-    push_short(
-        lines,
-        "invoice preimage",
-        pointer_str(value, "/invoice/preimage"),
-        40,
-    );
-    // Note the LN invoice payment hash is the same secret that binds both
-    // Kaspa-side hashlock covenants (ln-to-kaspa and kaspa-to-ln).
-    lines.push("atomic peg: this LN payment hash binds both Kaspa swap directions".to_string());
+    for direction in ["ln-to-kaspa", "kaspa-to-ln"] {
+        lines.push(format!("{direction} LN invoice:"));
+        push_short(
+            lines,
+            "payment hash",
+            pointer_str(value, &format!("/swaps/{direction}/payment_hash")),
+            40,
+        );
+        push_short(
+            lines,
+            "preimage",
+            pointer_str(value, &format!("/swaps/{direction}/preimage")),
+            40,
+        );
+        push_u64(
+            lines,
+            "amount sat",
+            value.pointer(&format!("/swaps/{direction}/amount_sat")),
+        );
+    }
+    lines
+        .push("atomic peg: each Kaspa swap direction binds to its own LN payment hash".to_string());
 }
 
 fn summarise_live_state(lines: &mut Vec<String>, value: &Value) {
@@ -1792,10 +1799,24 @@ fn summarise_hashlock(lines: &mut Vec<String>, value: &Value) {
             ));
         }
     }
+    push_u64(
+        lines,
+        "LN amount sat",
+        value.pointer("/model_validation/swap_evidence/ln_amount_sat"),
+    );
     push_kas(
         lines,
-        "swap amount",
-        value.pointer("/model_validation/swap_evidence/amount"),
+        "Kaspa amount",
+        value.pointer("/model_validation/swap_evidence/kaspa_amount_sompi"),
+    );
+    push_short(
+        lines,
+        "recipient spk hash",
+        pointer_str(
+            value,
+            "/model_validation/swap_evidence/recipient_spk_sha256",
+        ),
+        40,
     );
     push_short(
         lines,

@@ -82,6 +82,12 @@ fn blake2b_256_keyed_separates_payloads() {
     assert_ne!(a, b);
 }
 
+#[test]
+fn blake2b_256_keyed_rejects_oversize_domain_tag() {
+    let tag = "x".repeat(MAX_BLAKE2B_KEY_BYTES + 1);
+    assert!(try_blake2b_256_keyed(&tag, b"payload").is_err());
+}
+
 // --------------------------------------------------------------------------
 // State number range
 // --------------------------------------------------------------------------
@@ -192,6 +198,7 @@ fn scope_id_changes_with_delta() {
 fn policy_v1_validates() {
     let policy = PolicyEncoding::v1();
     assert_eq!(policy.settlement_shape_id, 1);
+    assert_eq!(policy.reorg_tolerance_daa, DEFAULT_REORG_TOLERANCE_DAA);
     assert!(policy.validate_v1().is_ok());
 }
 
@@ -239,6 +246,22 @@ fn policy_v1_hash_changes_with_coop_close_flag() {
     assert_ne!(p1.compute_policy_hash(), p2.compute_policy_hash());
 }
 
+#[test]
+fn policy_v1_hash_changes_with_reorg_tolerance() {
+    let mut p1 = PolicyEncoding::v1();
+    p1.reorg_tolerance_daa = 1;
+    let mut p2 = PolicyEncoding::v1();
+    p2.reorg_tolerance_daa = 2;
+    assert_ne!(p1.compute_policy_hash(), p2.compute_policy_hash());
+}
+
+#[test]
+fn policy_v1_rejects_zero_reorg_tolerance() {
+    let mut p = PolicyEncoding::v1();
+    p.reorg_tolerance_daa = 0;
+    assert!(p.validate_v1().is_err());
+}
+
 // --------------------------------------------------------------------------
 // State root
 // --------------------------------------------------------------------------
@@ -258,10 +281,12 @@ fn state_root_canonical_payload_is_fixed_width() {
     let s = sample_state_root_input();
     let p = s.canonical_payload();
     // The sample uses 32-byte scripts, so each encodeSPK is 2 + 8 + 32 = 42.
-    // Total: 1 (mask) + 1 (slot A) + 42 (encodeSPK_A) + 8 (le64 v_A)
+    // Total: 1 (mask) + 2 (programme version)
+    //      + 1 (slot A) + 42 (encodeSPK_A) + 8 (le64 v_A)
     //      + 1 (slot B) + 42 (encodeSPK_B) + 8 (le64 v_B)
-    assert_eq!(p.len(), 1 + 1 + 42 + 8 + 1 + 42 + 8);
+    assert_eq!(p.len(), 1 + 2 + 1 + 42 + 8 + 1 + 42 + 8);
     assert_eq!(p[0], SettlementMask::Both.byte());
+    assert_eq!(&p[1..3], &PROGRAMME_VERSION_V1.to_le_bytes());
 }
 
 #[test]
@@ -279,6 +304,11 @@ fn settlement_mask_is_derived_from_non_zero_outputs() {
         SettlementMask::BOnly
     );
     assert!(SettlementMask::from_values(0, 0, 0).is_err());
+}
+
+#[test]
+fn settlement_mask_rejects_script_amount_overflow_boundary() {
+    assert!(SettlementMask::from_values(MAX_SCRIPT_AMOUNT + 1, 0, MAX_SCRIPT_AMOUNT + 1).is_err());
 }
 
 #[test]
@@ -683,12 +713,25 @@ mod reference_musig2 {
         let mut keys = [pk_a, pk_b];
         keys.sort();
         let l = h_agg(&[&keys[0], &keys[1]]);
-        let a1_bytes = h_agg(&[&l, &keys[0]]);
-        let a2_bytes = h_agg(&[&l, &keys[1]]);
-        // Reject the (negligible-probability) n-boundary case the way
-        // BIP-327 §"Computing aggregate pubkey" does.
-        let a1 = Scalar::from_be_bytes(a1_bytes).unwrap_or(Scalar::ONE);
-        let a2 = Scalar::from_be_bytes(a2_bytes).unwrap_or(Scalar::ONE);
+        let coefficient = |pk: &[u8; 32]| -> Scalar {
+            let mut counter = 0u32;
+            loop {
+                let counter_bytes = counter.to_le_bytes();
+                let bytes = if counter == 0 {
+                    h_agg(&[&l, pk])
+                } else {
+                    h_agg(&[&l, pk, &counter_bytes])
+                };
+                if let Ok(scalar) = Scalar::from_be_bytes(bytes) {
+                    if scalar != Scalar::ZERO {
+                        return scalar;
+                    }
+                }
+                counter += 1;
+            }
+        };
+        let a1 = coefficient(&keys[0]);
+        let a2 = coefficient(&keys[1]);
         let secp = Secp256k1::new();
         let xa = XOnlyPublicKey::from_slice(&keys[0]).unwrap();
         let xb = XOnlyPublicKey::from_slice(&keys[1]).unwrap();

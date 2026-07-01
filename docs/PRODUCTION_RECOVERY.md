@@ -1,6 +1,6 @@
 # Production Recovery
 
-Status: passed
+Status: drafted (runbook-level, not production gate status)
 
 This runbook records incident and recovery procedure for the production gate.
 It does not assert unattended or mainnet production readiness.
