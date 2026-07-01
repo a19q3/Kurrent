@@ -157,6 +157,9 @@ cargo test
 ./scripts/verify-evidence.sh
 ```
 
+`prepare-devnet-tools` uses the normal Git proxy environment by default. If a
+local stale proxy must be bypassed, run it with `KURRENT_BYPASS_GIT_PROXY=1`.
+
 For a human-readable end-to-end local-devnet run suitable for presentation or review:
 
 ```sh

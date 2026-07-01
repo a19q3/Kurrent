@@ -519,16 +519,57 @@ fn sponsor_invariant_holds_for_paid_fee() {
 }
 
 #[test]
+fn sponsor_invariant_rejects_no_sponsor_shape() {
+    assert!(matches!(
+        check_sponsor_invariant(0, 1, 0),
+        Err(KurrentError::InvalidSponsorInvariant {
+            sponsor_input_value: 0,
+            sponsor_change_value: 1,
+            fee: 0
+        })
+    ));
+    assert!(matches!(
+        check_sponsor_invariant(0, 0, 1),
+        Err(KurrentError::InvalidSponsorInvariant {
+            sponsor_input_value: 0,
+            sponsor_change_value: 0,
+            fee: 1
+        })
+    ));
+}
+
+#[test]
+fn sponsor_invariant_rejects_nonzero_sponsor_without_fee() {
+    assert!(matches!(
+        check_sponsor_invariant(100, 100, 0),
+        Err(KurrentError::InvalidSponsorInvariant {
+            sponsor_input_value: 100,
+            sponsor_change_value: 100,
+            fee: 0
+        })
+    ));
+}
+
+#[test]
 fn sponsor_invariant_rejects_mismatch() {
     // sponsor_input > sponsor_change + fee → launder attempt.
-    assert!(check_sponsor_invariant(100, 50, 30).is_err());
+    assert!(matches!(
+        check_sponsor_invariant(100, 50, 30),
+        Err(KurrentError::ConservationFailure { .. })
+    ));
     // sponsor_input < sponsor_change + fee → sponsor paying themselves.
-    assert!(check_sponsor_invariant(70, 50, 30).is_err());
+    assert!(matches!(
+        check_sponsor_invariant(70, 50, 30),
+        Err(KurrentError::ConservationFailure { .. })
+    ));
 }
 
 #[test]
 fn sponsor_invariant_rejects_overflow() {
-    assert!(check_sponsor_invariant(u64::MAX, u64::MAX, 1).is_err());
+    assert!(matches!(
+        check_sponsor_invariant(u64::MAX, u64::MAX, 1),
+        Err(KurrentError::ConservationFailure { .. })
+    ));
 }
 
 #[test]

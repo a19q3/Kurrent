@@ -48,6 +48,7 @@ const LN_SWAP_AMOUNT_SAT: u64 = 1_000;
 const SYNTHETIC_HARNESS_FIXTURE_CLASS: &str = "synthetic_harness_fixture";
 const KASPA_SEQ_COMMIT_LANE_PROOF_COMMIT: &str = "2787953e";
 const KASPA_RPC_COVENANT_OUTPUT_FIX_COMMIT: &str = "9fdbaf1b";
+const KURRENT_BYPASS_GIT_PROXY_ENV: &str = "KURRENT_BYPASS_GIT_PROXY";
 
 fn main() -> ExitCode {
     match run() {
@@ -356,20 +357,33 @@ fn git_stdout(repo: &Path, args: &[&str]) -> Option<String> {
 
 fn git_network_command() -> Command {
     let mut cmd = Command::new("git");
-    for var in [
-        "http_proxy",
-        "https_proxy",
-        "HTTP_PROXY",
-        "HTTPS_PROXY",
-        "ALL_PROXY",
-    ] {
-        cmd.env_remove(var);
+    if git_proxy_bypass_enabled() {
+        for var in [
+            "http_proxy",
+            "https_proxy",
+            "HTTP_PROXY",
+            "HTTPS_PROXY",
+            "ALL_PROXY",
+        ] {
+            cmd.env_remove(var);
+        }
+        cmd.arg("-c")
+            .arg("http.proxy=")
+            .arg("-c")
+            .arg("https.proxy=");
     }
-    cmd.arg("-c")
-        .arg("http.proxy=")
-        .arg("-c")
-        .arg("https.proxy=");
     cmd
+}
+
+fn git_proxy_bypass_enabled() -> bool {
+    env::var(KURRENT_BYPASS_GIT_PROXY_ENV)
+        .map(|value| {
+            matches!(
+                value.as_str(),
+                "1" | "true" | "TRUE" | "yes" | "YES" | "on" | "ON"
+            )
+        })
+        .unwrap_or(false)
 }
 
 fn git_is_ancestor(repo: &Path, ancestor: &str) -> bool {

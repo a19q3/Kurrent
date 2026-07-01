@@ -683,10 +683,10 @@ fn response_window_substrate_is_daa_score_not_blue_score() {
     // values here so that the substrate choice is observable from the
     // decision:
     //
-    // - daa_score = 100, response_window_daa = 5 → eligible_after = 105
+    // - daa_score = 100, response_window_daa = 5 -> eligible_after = 105
     // - current_daa = 103 → Provisional (this is what we expect)
     // - If the model had used blue_score = 50 instead:
-    //   eligible_after_blue = 55 → 103 >= 55 → EligibleToFinalise (wrong)
+    //   eligible_after_blue = 55 -> 103 >= 55 -> EligibleToFinalise (wrong)
     //
     // Asserting Provisional pins the substrate choice: if a future
     // refactor accidentally consults blue_score for timing, this test
@@ -752,7 +752,7 @@ fn settlement_eligibility_rejects_response_window_above_sequence_range() {
 }
 
 #[test]
-fn settlement_eligibility_deadline_boundary_is_not_final() {
+fn settlement_eligibility_deadline_boundary_is_final() {
     let t = template();
     let lower = candidate(update(1, "state-1", t.hash()), "candidate-lower", 10, 100);
     let decisions = evaluate_settlement_eligibility(
@@ -766,8 +766,9 @@ fn settlement_eligibility_deadline_boundary_is_not_final() {
     .unwrap();
     assert_eq!(
         decisions[0].status,
-        SettlementEligibilityStatus::Provisional
+        SettlementEligibilityStatus::EligibleToFinalise
     );
+    assert_eq!(decisions[0].eligible_after_daa, 105);
 }
 
 #[test]
@@ -1935,9 +1936,26 @@ fn validate_channel_update_rejects_single_signature_quorum() {
     let s0 = update(0, "state-0", t.hash());
     assert!(matches!(
         validate_channel_update(&config, &funding(), &s0, &t),
-        Err(KurrentError::InsufficientSignatures {
-            required: 2,
-            actual: 1
+        Err(KurrentError::InvalidSignatureQuorum {
+            required: 1,
+            participant_count: 2,
+            minimum_required: MIN_REQUIRED_SIGNATURES
+        })
+    ));
+}
+
+#[test]
+fn validate_channel_update_rejects_quorum_above_participant_count() {
+    let t = template();
+    let mut config = channel_config();
+    config.access_manifest.required_signatures = 3;
+    let s0 = update(0, "state-0", t.hash());
+    assert!(matches!(
+        validate_channel_update(&config, &funding(), &s0, &t),
+        Err(KurrentError::InvalidSignatureQuorum {
+            required: 3,
+            participant_count: 2,
+            minimum_required: MIN_REQUIRED_SIGNATURES
         })
     ));
 }
